@@ -49,7 +49,7 @@
         const ticksFreq = 10;
 
         for (let i = 0; i < data.length; i = i + ticksFreq) {
-          const fontSize = 18;
+          const fontSize = 14;
 
           this.context.fillStyle = '#000000';
           this.context.font = fontSize + 'px sans-serif';
