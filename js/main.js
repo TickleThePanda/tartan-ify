@@ -59,6 +59,45 @@
     }
   }
 
+  class SpectraRenderer {
+    constructor(canvas) {
+      this.canvas = canvas;
+      this.context = canvas.getContext('2d');
+    }
+
+    render(fft) {
+			this.context.fillStyle = "rgb(200, 200, 200)";
+			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+			this.context.lineWidth = 2;
+			this.context.strokeStyle = "rgb(0, 0, 0)";
+
+			this.context.beginPath();
+
+      const bufferLength = fft.length;
+
+			const sliceWidth = this.canvas.width * 1.0 / bufferLength;
+			let x = 0;
+
+			for (let i = 0; i < bufferLength; i++) {
+
+				const v = fft[i] / 128.0;
+				const y = v * this.canvas.height / 2;
+
+				if (i === 0) {
+					this.context.moveTo(x, y);
+				} else {
+					this.context.lineTo(x, y);
+				}
+
+				x += sliceWidth;
+			}
+
+			this.context.lineTo(this.canvas.width, this.canvas.height / 2);
+			this.context.stroke();  
+    }
+  }
+
   window.addEventListener('load', () => {
 
     const canvas = 
@@ -73,6 +112,7 @@
     });
 
     const renderer = new MusicSimilarityRenderer(canvas);
+		const spectraRenderer = new SpectraRenderer(document.getElementById('spectra'));
 
     const form = document.getElementById('music-form');
     const fileInput = document.getElementById('music-file');
@@ -123,7 +163,7 @@
       const analyser = ctx.createAnalyser();
 
       analyser.fttSize = Math.pow(2, 11);
-      analyser.smoothingTimeConstant = 0.8;
+      analyser.smoothingTimeConstant = 0.5;
       analyser.connect(ctx.destination);
 
       const bufferSrc = new AudioBufferSourceNode(ctx, {
@@ -144,6 +184,8 @@
 
         document.getElementById('song-progress').innerHTML 
           = Math.round((new Date() - startTime) / interval) + 's';
+
+				spectraRenderer.render(fft);
 
       }, interval);
 

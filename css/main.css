@@ -48,8 +48,30 @@ table {
 }
 
 .full-width {
-  width: 100vw;
-  height: 100vw;
   display: block;
 }
 
+body {
+  max-width: 100%;
+  display: grid;
+  grid-template-areas: "v v"
+                       "f s"
+                       "e .";
+}
+
+#similarity-graph {
+  max-width: 100%;
+  grid-area: v;
+}
+
+#form-group {
+  grid-area: f;
+}
+
+#spectra {
+  grid-area: s;
+}
+
+#music-app-events {
+  grid-area: e;
+}
