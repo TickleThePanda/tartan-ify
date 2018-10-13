@@ -48,11 +48,17 @@ table {
 }
 
 body {
+  box-sizing: border-box;
+
   width: 100%;
   display: grid;
   grid-template-areas: "v v"
                        "f s"
                        "e .";
+
+  padding-left: 18px;
+  padding-right: 18px;
+  grid-gap: 18px;
 }
 
 #similarity-graph {

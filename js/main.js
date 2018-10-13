@@ -35,9 +35,9 @@
         for (let i = 0; i < data.length; i++) {
           for (let j = 0; j < data[i].length; j++) {
 
-            const n = 255 - Math.floor(data[i][j].diff / max * 255);
+            const h = 180 + 130 - data[i][j].diff / max * 130;
 
-            this.context.fillStyle = `rgb(${n}, ${n}, ${n})`;
+            this.context.fillStyle = `hsl(${h}, 66%, 50%)`;
 
             const startX = offset + (i * width);
             const startY = offset + (j * width);
@@ -71,9 +71,12 @@
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
+    setColor(color) {
+      this.context.strokeStyle = color;
+    }
+
     render(fft) {
       this.context.lineWidth = 2;
-      this.context.strokeStyle = "rgb(0, 0, 0)";
 
       this.context.beginPath();
 
@@ -105,12 +108,12 @@
 
     const canvas = 
         document.getElementById('similarity-graph');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerWidth;
+    canvas.width = window.innerWidth - 36;
+    canvas.height = window.innerWidth - 36;
 
     window.addEventListener('resise', function() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerWidth;
+      canvas.width = window.innerWidth - 36;
+      canvas.height = window.innerWidth - 36;
     });
 
     const renderer = new MusicSimilarityRenderer(canvas);
@@ -210,7 +213,9 @@
         const fft = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(fft);
         spectraRenderer.clear();
+        spectraRenderer.setColor('#000000');
         spectraRenderer.render(fft);
+        spectraRenderer.setColor('#888888');
         spectraRenderer.render(last);
 
       })();
