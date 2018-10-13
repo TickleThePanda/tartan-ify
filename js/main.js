@@ -132,14 +132,20 @@
 
       bufferSrc.connect(analyser);
 
+      const startTime = new Date();
+
+      const interval = 1000;
+
       intervalId = setInterval(function() {
         const fft = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(fft);
 
-        console.log(fft);
-
         fftAnalysisWorker.postMessage(fft);
-      }, 1000);
+
+        document.getElementById('song-progress').innerHTML 
+          = Math.round((new Date() - startTime) / interval) + 's';
+
+      }, interval);
 
       bufferSrc.onended = () => {
         clearInterval(intervalId);
