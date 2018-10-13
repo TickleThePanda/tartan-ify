@@ -29,12 +29,13 @@
         const width = (this.canvas.width - 50) / data.length;
 
         const max = [].concat.apply([], data)
+            .map(i => i.diff)
             .reduce((a, b) => Math.max(a, b));
 
         for (let i = 0; i < data.length; i++) {
           for (let j = 0; j < data[i].length; j++) {
 
-            const n = 255 - Math.floor(data[i][j] / max * 255);
+            const n = 255 - Math.floor(data[i][j].diff / max * 255);
 
             this.context.fillStyle = `rgb(${n}, ${n}, ${n})`;
 
@@ -65,36 +66,38 @@
       this.context = canvas.getContext('2d');
     }
 
+    clear() {
+      this.context.fillStyle = "rgb(255, 255, 255)";
+      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
     render(fft) {
-			this.context.fillStyle = "rgb(200, 200, 200)";
-			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.context.lineWidth = 2;
+      this.context.strokeStyle = "rgb(0, 0, 0)";
 
-			this.context.lineWidth = 2;
-			this.context.strokeStyle = "rgb(0, 0, 0)";
-
-			this.context.beginPath();
+      this.context.beginPath();
 
       const bufferLength = fft.length;
 
-			const sliceWidth = this.canvas.width * 1.0 / bufferLength;
-			let x = 0;
+      const sliceWidth = this.canvas.width * 1.0 / bufferLength;
+      let x = 0;
 
-			for (let i = 0; i < bufferLength; i++) {
+      for (let i = 0; i < bufferLength; i++) {
 
-				const v = fft[i] / 128.0;
-				const y = v * this.canvas.height / 2;
+        const v = fft[i] / 128.0;
+        const y = v * this.canvas.height / 2;
 
-				if (i === 0) {
-					this.context.moveTo(x, y);
-				} else {
-					this.context.lineTo(x, y);
-				}
+        if (i === 0) {
+          this.context.moveTo(x, y);
+        } else {
+          this.context.lineTo(x, y);
+        }
 
-				x += sliceWidth;
-			}
+        x += sliceWidth;
+      }
 
-			this.context.lineTo(this.canvas.width, this.canvas.height / 2);
-			this.context.stroke();  
+      this.context.lineTo(this.canvas.width, this.canvas.height / 2);
+      this.context.stroke();  
     }
   }
 
@@ -102,7 +105,6 @@
 
     const canvas = 
         document.getElementById('similarity-graph');
-    console.log(innerWidth);
     canvas.width = window.innerWidth;
     canvas.height = window.innerWidth;
 
@@ -112,7 +114,7 @@
     });
 
     const renderer = new MusicSimilarityRenderer(canvas);
-		const spectraRenderer = new SpectraRenderer(document.getElementById('spectra'));
+    const spectraRenderer = new SpectraRenderer(document.getElementById('spectra'));
 
     const form = document.getElementById('music-form');
     const fileInput = document.getElementById('music-file');
@@ -124,9 +126,11 @@
     const fftAnalysisWorker = new Worker('/js/worker.js');
 
     let results = [];
+    let last = {};
 
     fftAnalysisWorker.onmessage = event => {
       results = event.data;
+      renderer.render(results);
     };
 
     form.addEventListener('submit', submit);
@@ -144,7 +148,6 @@
       events.log('info', 'You selected \"' + file.name + "\"");
 
       processData(file)
-        .then(console.log);
 
     }
 
@@ -157,20 +160,27 @@
       const encBuf = await loadDataFromFile(file);
 
       const audBuf = await ctx.decodeAudioData(encBuf);
-      
-      console.log(audBuf);
-
-      const analyser = ctx.createAnalyser();
-
-      analyser.fttSize = Math.pow(2, 11);
-      analyser.smoothingTimeConstant = 0.5;
-      analyser.connect(ctx.destination);
 
       const bufferSrc = new AudioBufferSourceNode(ctx, {
         buffer: audBuf
       });
 
-      bufferSrc.connect(analyser);
+      let analyser;
+
+      swapForNewAnalyser();
+
+      function swapForNewAnalyser() {
+
+        let a = ctx.createAnalyser();
+        a.fttSize = Math.pow(2, 10);
+        a.smoothingTimeConstant = 0.99;
+
+        analyser = a;
+
+        bufferSrc.connect(analyser);
+      }
+
+      bufferSrc.connect(ctx.destination);
 
       const startTime = new Date();
 
@@ -180,18 +190,30 @@
         const fft = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(fft);
 
+        last = fft;
+
         fftAnalysisWorker.postMessage(fft);
 
         document.getElementById('song-progress').innerHTML 
           = Math.round((new Date() - startTime) / interval) + 's';
 
-				spectraRenderer.render(fft);
+        swapForNewAnalyser();
 
       }, interval);
 
       bufferSrc.onended = () => {
         clearInterval(intervalId);
       }
+    
+      (function spectraLoop() {
+        window.requestAnimationFrame(spectraLoop);
+        const fft = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(fft);
+        spectraRenderer.clear();
+        spectraRenderer.render(fft);
+        spectraRenderer.render(last);
+
+      })();
 
       bufferSrc.start();
     }
@@ -214,14 +236,7 @@
 
     }
 
-    (function animationLoop() {
-      window.requestAnimationFrame(animationLoop);
-      renderer.render(results);
-    })();
-
-
   });
-
 
 })();
 

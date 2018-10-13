@@ -47,12 +47,8 @@ table {
 	border-spacing: 0;
 }
 
-.full-width {
-  display: block;
-}
-
 body {
-  max-width: 100%;
+  width: 100%;
   display: grid;
   grid-template-areas: "v v"
                        "f s"
@@ -60,7 +56,7 @@ body {
 }
 
 #similarity-graph {
-  max-width: 100%;
+  width: 100%;
   grid-area: v;
 }
 
@@ -75,3 +71,4 @@ body {
 #music-app-events {
   grid-area: e;
 }
+
