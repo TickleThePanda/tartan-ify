@@ -47,13 +47,18 @@ table {
 	border-spacing: 0;
 }
 
+html, body, input, button {
+  font-size: 18px;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
 body {
   box-sizing: border-box;
 
   width: 100%;
   display: grid;
   grid-template-areas: "v v"
-                       "f s"
+                       "s s"
                        "e .";
 
   padding-left: 18px;
@@ -67,7 +72,21 @@ body {
 }
 
 #form-group {
-  grid-area: f;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#form-group input, #form-group button {
+  display: block;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+
+  border: initial;
+  padding: initial;
+  background-color: initial;
 }
 
 #spectra {
@@ -76,5 +95,12 @@ body {
 
 #music-app-events {
   grid-area: e;
+}
+
+#song-progress {
+  grid-area: v;
+
+  position: relative;
+  top: 18px;
 }
 

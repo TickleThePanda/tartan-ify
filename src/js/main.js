@@ -37,7 +37,7 @@
 
             const h = 180 + 130 - data[i][j].diff / max * 130;
 
-            this.context.fillStyle = `hsl(${h}, 66%, 50%)`;
+            this.context.fillStyle = `hsl(${h}, 100%, 70%)`;
 
             const startX = offset + (i * width);
             const startY = offset + (j * width);
@@ -76,7 +76,7 @@
     }
 
     render(fft) {
-      this.context.lineWidth = 2;
+      this.context.lineWidth = 1;
 
       this.context.beginPath();
 
@@ -88,7 +88,7 @@
       for (let i = 0; i < bufferLength; i++) {
 
         const v = fft[i] / 128.0;
-        const y = v * this.canvas.height / 2;
+        const y = this.canvas.height - v * this.canvas.height / 2;
 
         if (i === 0) {
           this.context.moveTo(x, y);
@@ -106,8 +106,9 @@
 
   window.addEventListener('load', () => {
 
-    const canvas = 
-        document.getElementById('similarity-graph');
+    const canvas = document.getElementById('similarity-graph');
+    const canvasSpectra = document.getElementById('spectra');
+
     canvas.width = window.innerWidth - 36;
     canvas.height = window.innerWidth - 36;
 
@@ -116,8 +117,16 @@
       canvas.height = window.innerWidth - 36;
     });
 
+    canvasSpectra.width = window.innerWidth - 36;
+    canvasSpectra.height = window.innerWidth / 5;
+
+    window.addEventListener('resise', function() {
+      canvasSpectra.width = window.innerWidth - 36;
+      canvasSpectra.height = window.innerWidth / 6;
+    });
+
     const renderer = new MusicSimilarityRenderer(canvas);
-    const spectraRenderer = new SpectraRenderer(document.getElementById('spectra'));
+    const spectraRenderer = new SpectraRenderer(canvasSpectra);
 
     const form = document.getElementById('music-form');
     const fileInput = document.getElementById('music-file');
@@ -213,10 +222,10 @@
         const fft = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(fft);
         spectraRenderer.clear();
-        spectraRenderer.setColor('#000000');
-        spectraRenderer.render(fft);
-        spectraRenderer.setColor('#888888');
+        spectraRenderer.setColor('hsl(180, 100%, 35%)');
         spectraRenderer.render(last);
+        spectraRenderer.setColor('hsl(310, 100%, 40%)');
+        spectraRenderer.render(fft);
 
       })();
 

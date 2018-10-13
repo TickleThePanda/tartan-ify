@@ -3,11 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <script src="/js/main.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
     <link rel="stylesheet" href="/css/main.css">
   </head>
   <body>
     <form id="music-form"></form>
     <canvas id="similarity-graph" class="full-width"></canvas>
+    <canvas id="spectra"></canvas>
     <div  id="form-group" class="form-group">
       <input type="file" id="music-file" name="music-file" form="music-form" />
       <button type="submit" id="process-music-file" name="process-music-file" form="music-form">
@@ -15,7 +17,6 @@
       </button>
       <button type="reset" form="music-form">Reset Form</button>
     </div>
-    <canvas id="spectra"></canvas>
     <div id="song-progress"></div>
     <div id="music-app-events"></div>
   </body>
