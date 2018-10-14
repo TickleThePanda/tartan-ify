@@ -39,7 +39,7 @@
         x += sliceWidth;
       }
 
-      this.context.lineTo(this.canvas.width, this.canvas.height / 2);
+      this.context.lineTo(this.canvas.width, this.canvas.height);
       this.context.stroke();  
     }
   }
