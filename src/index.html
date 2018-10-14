@@ -7,16 +7,18 @@
     <link rel="stylesheet" href="/css/main.css">
   </head>
   <body>
-    <form id="music-form"></form>
-    <canvas id="similarity-graph" class="full-width"></canvas>
-    <canvas id="spectra"></canvas>
-    <div  id="form-group" class="form-group">
-      <input type="file" id="music-file" name="music-file" form="music-form" />
-      <button type="submit" id="process-music-file" name="process-music-file" form="music-form">
-        Process Music File
+    <form id="music-form" class="form form--modal">
+      <label class="form__button form__button--active" id="file-upload-label" for="music-file">
+        Upload a song
+      </label>
+      <input class="form__file-upload-hidden-button" type="file" id="music-file" name="music-file" />
+      <button class="form__button" type="submit" id="form-submit" name="process-music-file">
+        Tartanify <span id="file-name"></span>
       </button>
-      <button type="reset" form="music-form">Reset Form</button>
-    </div>
+      <div id="form-errors" class="form__error"></div>
+    </form>
+    <canvas id="similarity-graph"></canvas>
+    <canvas id="spectra"></canvas>
     <div id="song-progress"></div>
     <div id="music-app-events"></div>
   </body>

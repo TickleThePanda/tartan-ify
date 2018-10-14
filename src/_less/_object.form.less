@@ -1,0 +1,66 @@
+
+.form {
+  display: flex;
+
+	flex-direction: column;
+
+	width: 300px;
+}
+
+.form__hidden {
+  display: none;
+}
+
+.form--modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.form__button {
+  display: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+
+  border: initial;
+  padding: initial;
+  background-color: initial;
+
+	border: 4.5px hsl(230, 66%, 65%)solid;
+	background-color: hsl(310, 66%, 65%);
+	padding: 18px;
+	margin: 9px;
+
+	color: #000;
+
+	text-align: center;
+}
+
+.form__button--active {
+	display: block;
+}
+
+.form__file-upload-hidden-button {
+	cursor: inherit;
+	display: block;
+	font-size: 0px;
+	filter: alpha(opacity=0);
+	height: 0;
+	width: 0;
+	opacity: 0;
+	position: absolute;
+	right: 0;
+	text-align: right;
+	top: 0;
+}
+
+.form__error {
+  margin: 9px;
+
+  height: 18px;
+
+  color: hsl(310, 100%, 50%);
+}
+

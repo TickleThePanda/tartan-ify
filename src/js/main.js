@@ -1,16 +1,4 @@
 (() => {
-  class Events {
-    constructor(output) {
-      this.output = output;
-    }
-
-    log(type, message) {
-      const element = document.createElement('div');
-      element.classList.add(type);
-      element.innerHTML = message;
-      this.output.appendChild(element);
-    }
-  }
 
   class MusicSimilarityRenderer {
     constructor(canvas) {
@@ -32,12 +20,28 @@
             .map(i => i.diff)
             .reduce((a, b) => Math.max(a, b));
 
+        const min = [].concat.apply([], data)
+            .map(i => i.diff)
+            .filter(i => i !== 0)
+            .reduce((a, b) => Math.min(a, b), Number.MAX_SAFE_INTEGER);
+
+        const range = max - min;
+
         for (let i = 0; i < data.length; i++) {
           for (let j = 0; j < data[i].length; j++) {
 
-            const h = 180 + 130 - data[i][j].diff / max * 130;
+            const v = data[i][j].diff;
 
-            this.context.fillStyle = `hsl(${h}, 100%, 70%)`;
+            if (v === 0) {
+              this.context.fillStyle = `#ffffff`;
+            } else {
+              const norm = (v - min) / range;
+
+              const h = 180 + 130 - norm * 130;
+
+              this.context.fillStyle = `hsl(${h}, 100%, 70%)`;
+            }
+
 
             const startX = offset + (i * width);
             const startY = offset + (j * width);
@@ -52,7 +56,7 @@
           const fontSize = 14;
 
           this.context.fillStyle = '#000000';
-          this.context.font = fontSize + 'px sans-serif';
+          this.context.font = fontSize + 'px "Source Code Sans"';
           this.context.fillText(i + "s", offset + i * width, 50 - 5);
           this.context.fillText(i + "s", 5, offset + fontSize + i * width, 50 - 5, 50);
         }
@@ -106,34 +110,44 @@
 
   window.addEventListener('load', () => {
 
+    const offscreenCanvas = document.createElement('canvas');
+
     const canvas = document.getElementById('similarity-graph');
     const canvasSpectra = document.getElementById('spectra');
 
     canvas.width = window.innerWidth - 36;
     canvas.height = window.innerWidth - 36;
 
-    window.addEventListener('resise', function() {
+    window.addEventListener('resize', function() {
       canvas.width = window.innerWidth - 36;
       canvas.height = window.innerWidth - 36;
     });
 
+    offscreenCanvas.width = window.innerWidth - 36;
+    offscreenCanvas.height = window.innerWidth - 36;
+
+    window.addEventListener('resize', function() {
+      offscreenCanvas.width = window.innerWidth - 36;
+      offscreenCanvas.height = window.innerWidth - 36;
+    });
+
+
     canvasSpectra.width = window.innerWidth - 36;
     canvasSpectra.height = window.innerWidth / 5;
 
-    window.addEventListener('resise', function() {
+    window.addEventListener('resize', function() {
       canvasSpectra.width = window.innerWidth - 36;
       canvasSpectra.height = window.innerWidth / 6;
     });
 
-    const renderer = new MusicSimilarityRenderer(canvas);
+    const renderer = new MusicSimilarityRenderer(offscreenCanvas);
     const spectraRenderer = new SpectraRenderer(canvasSpectra);
 
     const form = document.getElementById('music-form');
+    const fileUploadLabel = document.getElementById('file-upload-label');
     const fileInput = document.getElementById('music-file');
-
-    const appEventsElement = document.getElementById('music-app-events');
-
-    const events = new Events(appEventsElement);
+    const formErrors = document.getElementById('form-errors');
+    const submitButton = document.getElementById('form-submit');
 
     const fftAnalysisWorker = new Worker('/js/worker.js');
 
@@ -143,7 +157,23 @@
     fftAnalysisWorker.onmessage = event => {
       results = event.data;
       renderer.render(results);
+
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(offscreenCanvas, 0, 0)
     };
+
+    fileInput.addEventListener('change', e => {
+      const file = fileInput.files[0];
+      if (!file || !file.type.startsWith('audio')) {
+        formErrors.innerHTML = 'Please select an audio file';
+        return;
+      }
+
+      formErrors.innerHTML = '';
+      fileUploadLabel.classList.remove('form__button--active');
+      submitButton.classList.add('form__button--active');
+    });
 
     form.addEventListener('submit', submit);
 
@@ -153,14 +183,13 @@
       const file = fileInput.files[0];
 
       if (!file || !file.type.startsWith('audio')) {
-        events.log('error', 'Please select an audio file.');
+        formErrors.innerHTML = 'Please select an audio file.';
         return;
       }
 
-      events.log('info', 'You selected \"' + file.name + "\"");
-
       processData(file)
 
+      form.classList.add('form__hidden');
     }
 
     let intervalId = null;
