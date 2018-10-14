@@ -49,22 +49,6 @@
     const canvas = document.getElementById('similarity-graph');
     const canvasSpectra = document.getElementById('spectra');
 
-    canvas.width = window.innerWidth - 18 * 2;
-    canvas.height = window.innerWidth - 18 * 2;
-
-    window.addEventListener('resize', function() {
-      canvas.width = window.innerWidth - 18 * 2;
-      canvas.height = window.innerWidth - 18 * 2;
-    });
-
-    canvasSpectra.width = window.innerWidth - 18 * 2;
-    canvasSpectra.height = window.innerWidth / 5;
-
-    window.addEventListener('resize', function() {
-      canvasSpectra.width = window.innerWidth - 18 * 2;
-      canvasSpectra.height = window.innerWidth / 6;
-    });
-
     const spectraRenderer = new SpectraRenderer(canvasSpectra);
 
     const form = document.getElementById('music-form');
@@ -75,6 +59,24 @@
 
     const fftAnalysisWorker = new Worker('/js/worker.js');
     const rendererWorker = new Worker('/js/renderer.js');
+
+    canvas.width = window.innerWidth - 18 * 2;
+    canvas.height = window.innerWidth - 18 * 2;
+
+    window.addEventListener('resize', function() {
+      canvas.width = window.innerWidth - 18 * 2;
+      canvas.height = window.innerWidth - 18 * 2;
+
+      fftAnalysisWorker.postMessage('trigger');
+    });
+
+    canvasSpectra.width = window.innerWidth - 18 * 2;
+    canvasSpectra.height = window.innerWidth / 5;
+
+    window.addEventListener('resize', function() {
+      canvasSpectra.width = window.innerWidth - 18 * 2;
+      canvasSpectra.height = window.innerWidth / 6;
+    });
 
     let results = [];
     let last = {};
