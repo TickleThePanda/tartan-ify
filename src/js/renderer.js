@@ -35,8 +35,6 @@ class MusicSimilarityRenderer {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     if (data.length > 0) {
-      const offset = 50;
-
       const max = data
           .reduce((a, b) => Math.max(a, b));
 
@@ -47,7 +45,7 @@ class MusicSimilarityRenderer {
 
 			const width = Math.sqrt(data.length);
 
-      const pixelWidth = (this.canvas.width - 50) / width;
+      const pixelWidth = this.canvas.width / width;
 
       const buffer = new Uint8ClampedArray(width * width * 4);
 
@@ -85,18 +83,7 @@ class MusicSimilarityRenderer {
       const bmp = await createImageBitmap(image, 0, 0, width, width);
 
       this.context.imageSmoothingEnabled = false;
-			this.context.drawImage(bmp, 50, 50, this.canvas.width - 50, this.canvas.width - 50);
-
-      const ticksFreq = 10;
-
-      for (let i = 0; i < data.length; i = i + ticksFreq) {
-        const fontSize = 14;
-
-        this.context.fillStyle = '#000000';
-        this.context.font = fontSize + 'px "Source Code Sans"';
-        this.context.fillText(i + "s", offset + i * pixelWidth, 50 - 5);
-        this.context.fillText(i + "s", 5, offset + fontSize + i * pixelWidth, 50 - 5, 50);
-      }
+			this.context.drawImage(bmp, 0, 0, this.canvas.width, this.canvas.width);
 
     }
   }
