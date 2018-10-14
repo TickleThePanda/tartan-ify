@@ -2,13 +2,12 @@ const results = [];
 const ffts = [];
 
 onmessage = function(event) {
-  if (event.data instanceof String) {
-    if (event.data === 'trigger') {
-      const buffer = convertResultsToArray().buffer;
+  if (event.data === 'trigger') {
+    console.log("triggering");
+    const buffer = convertResultsToArray().buffer;
 
-      postMessage(buffer, [buffer]);
+    postMessage(buffer, [buffer]);
       
-    }
   } else {
     const fft = new Uint8Array(event.data);
    
