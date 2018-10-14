@@ -83,10 +83,11 @@
       results = event.data;
 
       rendererWorker.postMessage({
-        results: results,
         width: canvas.width,
         height: canvas.height
       });
+
+      rendererWorker.postMessage(results, [results]);
     };
 
     rendererWorker.onmessage = event => {
@@ -163,9 +164,11 @@
         const fft = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(fft);
 
-        last = fft;
+        const buffer = fft.buffer;
 
-        fftAnalysisWorker.postMessage(fft);
+        last = new Uint8Array(buffer.slice(0));
+
+        fftAnalysisWorker.postMessage(buffer, [buffer]);
 
         document.getElementById('song-progress').innerHTML 
           = Math.round((new Date() - startTime) / interval) + 's';

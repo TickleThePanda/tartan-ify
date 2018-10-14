@@ -1,42 +1,27 @@
-const results = [];
 const ffts = [];
 
-let lastLength = 0;
-
 onmessage = function(event) {
-  const fft = event.data;
-
-  const thisLength = lastLength;
-
+  const fft = new Uint8Array(event.data);
+ 
   ffts.push(fft);
 
-  lastLength += 1;
+  const results = new Uint8Array(ffts.length * ffts.length);
 
-  const currentFft = fft;
-
-  results[thisLength] = [];
   for (let i = 0; i < ffts.length; i++) {
-    let diff = 0;
-    let amp = 0;
-    const left = currentFft;
-    const right = ffts[i];
-    for (let k = 0; k < fft.length; k++) {
-      diff += Math.abs(left[k] - right[k]);
-      amp += left[k] - right[k];
+    for (let j = 0; j < ffts.length; j++) {
+      let diff = 0;
+      const left = ffts[i];
+      const right = ffts[j];
+      for (let k = 0; k < fft.length; k++) {
+        diff = diff + Math.abs(left[k] - right[k]);
+      }
+      results[j * ffts.length + i] = Math.sqrt(diff);
     }
-
-    results[thisLength][i] = {
-      diff: Math.sqrt(diff),
-      amp: amp
-    };
-
-    results[i][thisLength] = {
-      diff: Math.sqrt(diff),
-      amp: amp
-    };
   }
 
-  postMessage(results);
+  const buffer = results.buffer;
+
+  postMessage(buffer, [buffer]);
 
 }
 
