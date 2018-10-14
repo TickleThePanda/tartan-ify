@@ -15,21 +15,17 @@ html, body, input, button {
 }
 
 body {
-  box-sizing: border-box;
-
-  width: 100%;
   display: grid;
-  grid-template-areas: "v v"
+  grid-template-areas: "p p"
+                       "v v"
                        "s s"
                        "e .";
 
-  padding-left: var(--body-font-size);
-  padding-right: var(--body-font-size);
+  padding: 18px;
   grid-gap: 18px;
 }
 
 #similarity-graph {
-  width: 100%;
   grid-area: v;
 }
 
@@ -42,11 +38,6 @@ body {
 }
 
 #song-progress {
-  grid-area: v;
-
-  max-width: 0px;
-
-  position: relative;
-  top: 18px;
+  grid-area: p;
 }
 

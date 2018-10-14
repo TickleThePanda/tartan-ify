@@ -49,19 +49,19 @@
     const canvas = document.getElementById('similarity-graph');
     const canvasSpectra = document.getElementById('spectra');
 
-    canvas.width = window.innerWidth - 36;
-    canvas.height = window.innerWidth - 36;
+    canvas.width = window.innerWidth - 18 * 2;
+    canvas.height = window.innerWidth - 18 * 2;
 
     window.addEventListener('resize', function() {
-      canvas.width = window.innerWidth - 36;
-      canvas.height = window.innerWidth - 36;
+      canvas.width = window.innerWidth - 18 * 2;
+      canvas.height = window.innerWidth - 18 * 2;
     });
 
-    canvasSpectra.width = window.innerWidth - 36;
+    canvasSpectra.width = window.innerWidth - 18 * 2;
     canvasSpectra.height = window.innerWidth / 5;
 
     window.addEventListener('resize', function() {
-      canvasSpectra.width = window.innerWidth - 36;
+      canvasSpectra.width = window.innerWidth - 18 * 2;
       canvasSpectra.height = window.innerWidth / 6;
     });
 
