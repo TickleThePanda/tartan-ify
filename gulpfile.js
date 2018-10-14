@@ -17,12 +17,17 @@ gulp.task('js', function() {
     .pipe(gulp.dest('_site/js/'));
 });
 
-gulp.task('default', gulp.parallel('html', 'css', 'js'));
+gulp.task('images', function() {
+  return gulp.src('src/images/**.png')
+    .pipe(gulp.dest('_site/images/'));
+});
+
+gulp.task('default', gulp.parallel('html', 'css', 'js', 'images'));
 
 gulp.task('watch', function() {
   gulp.watch('src/**/*.html', gulp.series('html'));
   gulp.watch('src/js/**/*.js', gulp.series('js'));
   gulp.watch('src/_less/**/*.less', gulp.series('css'));
-
+  gulp.watch('src/images/**/*.png)', gulp.series('images'));
 });
 
