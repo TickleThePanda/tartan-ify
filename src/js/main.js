@@ -1,69 +1,5 @@
 (() => {
 
-  class MusicSimilarityRenderer {
-    constructor(canvas) {
-      this.canvas = canvas;
-      this.context = canvas.getContext('2d');
-    }
-
-    render(data) {
-
-      this.context.fillStyle = '#000000';
-      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-      if (data.length > 0) {
-        const offset = 50;
-
-        const width = (this.canvas.width - 50) / data.length;
-
-        const max = [].concat.apply([], data)
-            .map(i => i.diff)
-            .reduce((a, b) => Math.max(a, b));
-
-        const min = [].concat.apply([], data)
-            .map(i => i.diff)
-            .filter(i => i !== 0)
-            .reduce((a, b) => Math.min(a, b), Number.MAX_SAFE_INTEGER);
-
-        const range = max - min;
-
-        for (let i = 0; i < data.length; i++) {
-          for (let j = 0; j < data[i].length; j++) {
-
-            const v = data[i][j].diff;
-
-            if (v === 0) {
-              this.context.fillStyle = `#ffffff`;
-            } else {
-              const norm = (v - min) / range;
-
-              const h = 180 + 130 - norm * 130;
-
-              this.context.fillStyle = `hsl(${h}, 100%, 70%)`;
-            }
-
-
-            const startX = offset + (i * width);
-            const startY = offset + (j * width);
-
-            this.context.fillRect(startX, startY, width, width);
-          }
-        }
-
-        const ticksFreq = 10;
-
-        for (let i = 0; i < data.length; i = i + ticksFreq) {
-          const fontSize = 14;
-
-          this.context.fillStyle = '#000000';
-          this.context.font = fontSize + 'px "Source Code Sans"';
-          this.context.fillText(i + "s", offset + i * width, 50 - 5);
-          this.context.fillText(i + "s", 5, offset + fontSize + i * width, 50 - 5, 50);
-        }
-      }
-    }
-  }
-
   class SpectraRenderer {
     constructor(canvas) {
       this.canvas = canvas;
@@ -110,8 +46,6 @@
 
   window.addEventListener('load', () => {
 
-    const offscreenCanvas = document.createElement('canvas');
-
     const canvas = document.getElementById('similarity-graph');
     const canvasSpectra = document.getElementById('spectra');
 
@@ -123,15 +57,6 @@
       canvas.height = window.innerWidth - 36;
     });
 
-    offscreenCanvas.width = window.innerWidth - 36;
-    offscreenCanvas.height = window.innerWidth - 36;
-
-    window.addEventListener('resize', function() {
-      offscreenCanvas.width = window.innerWidth - 36;
-      offscreenCanvas.height = window.innerWidth - 36;
-    });
-
-
     canvasSpectra.width = window.innerWidth - 36;
     canvasSpectra.height = window.innerWidth / 5;
 
@@ -140,7 +65,6 @@
       canvasSpectra.height = window.innerWidth / 6;
     });
 
-    const renderer = new MusicSimilarityRenderer(offscreenCanvas);
     const spectraRenderer = new SpectraRenderer(canvasSpectra);
 
     const form = document.getElementById('music-form');
@@ -150,17 +74,25 @@
     const submitButton = document.getElementById('form-submit');
 
     const fftAnalysisWorker = new Worker('/js/worker.js');
+    const rendererWorker = new Worker('/js/renderer.js');
 
     let results = [];
     let last = {};
 
     fftAnalysisWorker.onmessage = event => {
       results = event.data;
-      renderer.render(results);
 
+      rendererWorker.postMessage({
+        results: results,
+        width: canvas.width,
+        height: canvas.height
+      });
+    };
+
+    rendererWorker.onmessage = event => {
       const context = canvas.getContext('2d');
       context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(offscreenCanvas, 0, 0)
+      context.drawImage(event.data, 0, 0);
     };
 
     fileInput.addEventListener('change', e => {
