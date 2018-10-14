@@ -98,7 +98,7 @@ onmessage = function(message) {
 
     const buffer = message.data;
 
-    const data = new Uint8Array(buffer);
+    const data = new Uint32Array(buffer);
 
     const canvas = new OffscreenCanvas(width, height);
 

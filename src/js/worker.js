@@ -41,7 +41,7 @@ onmessage = function(event) {
 
 function convertResultsToArray() {
   
-  const data = new Uint8Array(ffts.length * ffts.length);
+  const data = new Uint32Array(ffts.length * ffts.length);
 
   for (let i = 0; i < ffts.length; i++) {
     for (let j = 0; j < ffts.length; j++) {
