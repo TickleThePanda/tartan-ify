@@ -125,18 +125,25 @@
     fftAnalysisWorker.onmessage = event => {
       results = event.data;
 
-      rendererWorker.postMessage({
-        width: canvas.width,
-        height: canvas.height
-      });
-
       rendererWorker.postMessage(results, [results]);
     };
 
-    rendererWorker.onmessage = event => {
+    rendererWorker.onmessage = async event => {
+      const array = new Uint8ClampedArray(event.data);
+
+      const wFromRenderer = Math.sqrt(array.length / 4);
+
       const context = canvas.getContext('2d');
+
+			const image = context.createImageData(wFromRenderer, wFromRenderer);
+			
+			image.data.set(array);
+
+      const bmp = await createImageBitmap(image, 0, 0, wFromRenderer, wFromRenderer);
+
+      context.imageSmoothingEnabled = false;
       context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(event.data, 0, 0);
+			context.drawImage(bmp, 0, 0, canvas.width, canvas.width);
     };
 
     fileInput.addEventListener('change', e => {

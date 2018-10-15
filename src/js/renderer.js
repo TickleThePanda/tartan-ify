@@ -24,15 +24,8 @@ function hslToRgb(h, s, l){
 }
 
 class MusicSimilarityRenderer {
-  constructor(canvas) {
-    this.canvas = canvas;
-    this.context = canvas.getContext('2d');
-  }
-
-  async render(data) {
-
-    this.context.fillStyle = '#000000';
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  
+  render(data) {
 
     if (data.length > 0) {
       const max = data
@@ -45,9 +38,7 @@ class MusicSimilarityRenderer {
 
 			const width = Math.sqrt(data.length);
 
-      const pixelWidth = this.canvas.width / width;
-
-      const buffer = new Uint8ClampedArray(width * width * 4);
+      const array = new Uint8ClampedArray(width * width * 4);
 
       for (let i = 0; i < width; i++) {
         for (let j = 0; j < width; j++) {
@@ -68,23 +59,15 @@ class MusicSimilarityRenderer {
             rgb[2] = 255;
           }
 
-          buffer[pos    ] = rgb[0];
-          buffer[pos + 1] = rgb[1];
-          buffer[pos + 2] = rgb[2];
-          buffer[pos + 3] = 255;
+          array[pos    ] = rgb[0];
+          array[pos + 1] = rgb[1];
+          array[pos + 2] = rgb[2];
+          array[pos + 3] = 255;
 
         }
       }
 
-			const image = this.context.createImageData(width, width);
-			
-			image.data.set(buffer);
-
-      const bmp = await createImageBitmap(image, 0, 0, width, width);
-
-      this.context.imageSmoothingEnabled = false;
-			this.context.drawImage(bmp, 0, 0, this.canvas.width, this.canvas.width);
-
+      return array;
     }
   }
 }
@@ -94,24 +77,16 @@ let height = 0;
 
 onmessage = function(message) {
 
-  if (message.data instanceof ArrayBuffer) {
+  const buffer = message.data;
 
-    const buffer = message.data;
+  const data = new Uint32Array(buffer);
 
-    const data = new Uint32Array(buffer);
+  const renderer = new MusicSimilarityRenderer(width, height);
 
-    const canvas = new OffscreenCanvas(width, height);
+  const render = renderer.render(data);
 
-    const renderer = new MusicSimilarityRenderer(canvas);
+  const outBuffer = render.buffer;
 
-    renderer.render(data)
-      .then(() => {
-        const image = canvas.transferToImageBitmap();
-        postMessage(image, [image]);
-      });
-  } else {
-    width = message.data.width;
-    height = message.data.height;
-  }
+  postMessage(outBuffer, [outBuffer]);
 }
 
