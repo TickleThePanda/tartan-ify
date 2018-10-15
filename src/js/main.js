@@ -148,7 +148,7 @@
 
     fileInput.addEventListener('change', e => {
       const file = fileInput.files[0];
-      if (!file || !file.type.startsWith('audio')) {
+      if (!file || !isAudio(file)) {
         formErrors.innerHTML = 'Please select an audio file';
         return;
       }
@@ -165,7 +165,7 @@
 
       const file = fileInput.files[0];
 
-      if (!file || !file.type.startsWith('audio')) {
+      if (!file || !isAudio(file)) {
         formErrors.innerHTML = 'Please select an audio file.';
         return;
       }
@@ -175,6 +175,10 @@
       form.classList.add('hidden');
       visualiser.classList.remove('hidden');
       canvasSizeManager.triggerResize();
+    }
+
+    function isAudio(file) {
+      return file.type === '' || file.type.startsWith('audio');
     }
 
     let intervalId = null;
