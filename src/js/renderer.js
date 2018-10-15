@@ -130,8 +130,8 @@ onmessage = function(message) {
 
   if (!(message.data instanceof ArrayBuffer)) {
 
-    const colorDiffRgb = colorTextToRgb(message.data.colors.diff); 
-    const colorSimilarRgb = colorTextToRgb(message.data.colors.similar);
+    const colorDiffRgb = colorTextToRgb(message.data.diff); 
+    const colorSimilarRgb = colorTextToRgb(message.data.similar);
 
     colors.diff = rgbToHsl(
       colorDiffRgb[0],

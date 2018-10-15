@@ -112,9 +112,9 @@
     const rendererWorker = new Worker('/js/renderer.js');
 
     const colors = {
-        diff: getComputedStyle(visualiser).getPropertyValue('--color-diff'),
-        similar: getComputedStyle(visualiser).getPropertyValue('--color-similar')
-      };
+      diff: getComputedStyle(visualiser).getPropertyValue('--color-diff'),
+      similar: getComputedStyle(visualiser).getPropertyValue('--color-similar')
+    };
 
     const canvasSizeManager = new CanvasSizeManager();
 
