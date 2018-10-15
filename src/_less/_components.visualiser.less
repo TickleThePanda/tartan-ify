@@ -3,8 +3,8 @@
 @constrained-percentage: (@shorter-side / @longer-side);
 @constrained-full-size: (@constrained-percentage * 100vmax);
 
-@unconstrained-size: calc(100vmin - 2 * 18px);
-@constrained-size: calc(@constrained-full-size - 5 * 18px);
+@unconstrained-size: calc(100vmin - 2 * 1rem);
+@constrained-size: calc(@constrained-full-size - 5 * 1rem);
 
 .visualiser {
 
@@ -13,9 +13,9 @@
   width: 100vw;
   height: 100vh;
 
-  padding: 18px;
+  padding: 1rem;
   margin: auto;
-  grid-gap: 18px;
+  grid-gap: 1rem;
 
   grid-template-areas: "p"
                        "v"
@@ -107,7 +107,7 @@
 }
 
 .visualiser__key {
-  margin-inline-end: 9px;
+  margin-inline-end: 0.5rem;
 }
 
 .visualiser__key--last {
@@ -118,9 +118,9 @@
   display: inline-block;
   content: "";
 
-  height: 5px;
-  width: 5px;
-  margin: 4px;
+  height: 0.25rem;
+  width: 0.25rem;
+  margin: 0.25rem;
 
   border: 1px solid #444;
 }
