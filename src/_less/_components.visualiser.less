@@ -1,12 +1,20 @@
 .visualiser {
 
+  @longer-side: 30;
+  @shorter-side: 25;
+  @constrained-percentage: (@shorter-side / @longer-side);
+  @constrained-full-size: (@constrained-percentage * 100vmax);
+
   @unconstrained-size: calc(100vmin - 2 * 18px);
-  @constrained-size: calc(80vmax - 5 * 18px);
+  @constrained-size: calc(@constrained-full-size - 5 * 18px);
 
   display: grid;
 
   width: 100vw;
   height: 100vh;
+
+  padding: 18px;
+  grid-gap: 18px;
 
   grid-template-areas: "p"
                        "v"
@@ -16,33 +24,24 @@
     grid-template-areas: "p v s";
   }
 
-  grid-template-rows: min-content @unconstrained-size 20vmin;
+  grid-template-rows: min-content @unconstrained-size;
 
-  padding: 18px;
-  grid-gap: 18px;
-
-  @media (min-aspect-ratio: ~"5/6") {
-
-    border: 1px solid red;
+  @media (min-aspect-ratio: @shorter-side/@longer-side) {
 
     grid-template-rows: min-content @constrained-size;
     grid-template-columns: @constrained-size;
   }
   
-  @media (min-aspect-ratio: ~"6/6") {
-
-    border: 1px solid blue;
+  @media (min-aspect-ratio: 1/1) {
 
     grid-template-columns: min-content @constrained-size;
     grid-template-rows: @constrained-size;
   }
 
-  @media (min-aspect-ratio: ~"6/5") {
-
-    border: none;
+  @media (min-aspect-ratio: @longer-side/@shorter-side) {
 
     grid-template-rows: auto;
-    grid-template-columns: min-content @unconstrained-size 20vmin;
+    grid-template-columns: min-content @unconstrained-size;
   }
 }
 
@@ -57,6 +56,16 @@
   grid-area: s;
   width: 100%;
   height: 100%;
+
+
+  @media (orientation: portrait) {
+    max-height: 20vmin;
+  }
+
+  @media (orientation: landscape) {
+    max-width: 20vmin;
+  }
+
   overflow: hidden;
 }
 

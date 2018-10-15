@@ -3,7 +3,9 @@ const less = require('gulp-less');
 
 gulp.task('css', function() {
   return gulp.src('src/_less/**/[^_]*.less')
-    .pipe(less())
+    .pipe(less({
+      math: 'strict'
+    }))
     .pipe(gulp.dest('_site/css/'));
 });
 
