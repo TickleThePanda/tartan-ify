@@ -200,8 +200,10 @@
       swapForNewAnalyser();
 
       function swapForNewAnalyser() {
+        const old = analyser;
+        bufferSrc.disconnect(analyser);
 
-        let a = ctx.createAnalyser();
+        const a = ctx.createAnalyser();
         a.fttSize = Math.pow(2, 10);
         a.smoothingTimeConstant = 0.99;
 
