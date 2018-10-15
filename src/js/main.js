@@ -111,8 +111,7 @@
     const fftAnalysisWorker = new Worker('/js/worker.js');
     const rendererWorker = new Worker('/js/renderer.js');
 
-    const colors = 
-      colors: {
+    const colors = {
         diff: getComputedStyle(visualiser).getPropertyValue('--color-diff'),
         similar: getComputedStyle(visualiser).getPropertyValue('--color-similar')
       };
