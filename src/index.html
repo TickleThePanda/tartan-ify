@@ -34,10 +34,18 @@
       </button>
       <div id="form-errors" class="form__error"></div>
     </form>
-    <div class="visualiser">
+    <div id="visualiser" class="visualiser hidden">
       <canvas class="visualiser__main" id="similarity-graph"></canvas>
       <canvas class="visualiser__sub" id="spectra"></canvas>
-      <div class="visualiser__info" id="song-progress"></div>
+      <div class="visualiser__info">
+        <div class="visualiser__song-progress" id="song-progress">
+        </div>
+        <div class="visualiser__keys">
+          <div class="visualiser__key visualiser__key--similar">Similar</div>
+          <div class="visualiser__key visualiser__key--different visualiser__key--last">Different</div>
+        </div>
+      </div>
     </div>
   </body>
 </html>
+

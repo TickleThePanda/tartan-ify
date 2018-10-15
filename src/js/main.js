@@ -87,10 +87,16 @@
       });
       resizeCanvas(canvas);
     }
+
+    triggerResize() {
+      this.canvases.map(c => c.canvas)
+        .forEach(resizeCanvas);
+    }
   }
 
   window.addEventListener('load', () => {
 
+    const visualiser = document.getElementById('visualiser');
     const canvas = document.getElementById('similarity-graph');
     const canvasSpectra = document.getElementById('spectra');
 
@@ -159,7 +165,9 @@
 
       processData(file)
 
-      form.classList.add('form__hidden');
+      form.classList.add('hidden');
+      visualiser.classList.remove('hidden');
+      canvasSizeManager.triggerResize();
     }
 
     let intervalId = null;
