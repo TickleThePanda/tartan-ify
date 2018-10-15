@@ -3,7 +3,6 @@ const ffts = [];
 
 onmessage = function(event) {
   if (event.data === 'trigger') {
-    console.log("triggering");
     const buffer = convertResultsToArray().buffer;
 
     postMessage(buffer, [buffer]);
