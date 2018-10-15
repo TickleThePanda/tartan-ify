@@ -111,9 +111,13 @@
     const fftAnalysisWorker = new Worker('/js/worker.js');
     const rendererWorker = new Worker('/js/renderer.js');
 
+    const computedStyle = getComputedStyle(visualiser);
+
     const colors = {
-      diff: getComputedStyle(visualiser).getPropertyValue('--color-diff'),
-      similar: getComputedStyle(visualiser).getPropertyValue('--color-similar')
+      diff: computedStyle.getPropertyValue('--color-diff'),
+      similar: computedStyle.getPropertyValue('--color-similar'),
+      primary: computedStyle.getPropertyValue('--palette-primary'),
+      secondary: computedStyle.getPropertyValue('--palette-secondary')
     };
 
     const canvasSizeManager = new CanvasSizeManager();
@@ -251,9 +255,9 @@
         const fft = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(fft);
         spectraRenderer.clear();
-        spectraRenderer.setColor(colors.similar);
+        spectraRenderer.setColor(colors.secondary);
         spectraRenderer.render(last);
-        spectraRenderer.setColor(colors.diff);
+        spectraRenderer.setColor(colors.primary);
         spectraRenderer.render(fft);
 
       })();
