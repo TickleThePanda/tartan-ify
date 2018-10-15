@@ -1,44 +1,15 @@
 @import '_settings.fonts.less';
 
+@import '_generic.variables.less';
+
 @import '_generic.reset.less';
 
-@import '_object.form.less';
+@import '_generic.shared.less';
 
-:root {
-  --body-font: @body-font;
-  --body-font-size: @body-font-size;
-}
+@import '_objects.form.less';
 
-html, body, input, button {
-  font-size: var(--body-font-size);
-  font-family: var(--body-font);
-}
+@import '_components.visualiser.less';
 
-body {
-  display: grid;
-  grid-template-areas: "p p"
-                       "v v"
-                       "s s"
-                       "e .";
+@import '_utilities.viewport-exact.less';
 
-  padding: 18px;
-  grid-gap: 18px;
-}
-
-#similarity-graph {
-  grid-area: v;
-}
-
-#spectra {
-  grid-area: s;
-}
-
-#music-app-events {
-  grid-area: e;
-}
-
-#song-progress {
-  grid-area: p;
-  height: 18px;
-}
 

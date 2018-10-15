@@ -23,7 +23,7 @@
     <meta name="twitter:image" content="https://tartan-ify.ticklethepanda.co.uk/images/hero-image.png" />
     <meta name="twitter:url" value="https://tartan-ify.ticklethepanda.co.uk/" />
   </head>
-  <body>
+  <body class="viewport-exact">
     <form id="music-form" class="form form--modal">
       <label class="form__button form__button--active" id="file-upload-label" for="music-file">
         Choose some music
@@ -34,9 +34,10 @@
       </button>
       <div id="form-errors" class="form__error"></div>
     </form>
-    <canvas id="similarity-graph"></canvas>
-    <canvas id="spectra"></canvas>
-    <div id="song-progress"></div>
-    <div id="music-app-events"></div>
+    <div class="visualiser">
+      <canvas class="visualiser__main" id="similarity-graph"></canvas>
+      <canvas class="visualiser__sub" id="spectra"></canvas>
+      <div class="visualiser__info" id="song-progress"></div>
+    </div>
   </body>
 </html>

@@ -44,6 +44,35 @@
     }
   }
 
+  function resizeCanvas(canvas) {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+  }
+
+  class CanvasSizeManager {
+    constructor() {
+      const canvases = [];
+      this.canvases = canvases;
+
+      window.addEventListener('resize', function() {
+        canvases.forEach(c => {
+          resizeCanvas(c.canvas);
+          if (c.callback) {
+            c.callback();
+          }
+        });
+      });
+    }
+
+    add(canvas, callback) {
+      this.canvases.push({
+        canvas: canvas,
+        callback: callback
+      });
+      resizeCanvas(canvas);
+    }
+  }
+
   window.addEventListener('load', () => {
 
     const canvas = document.getElementById('similarity-graph');
@@ -60,23 +89,13 @@
     const fftAnalysisWorker = new Worker('/js/worker.js');
     const rendererWorker = new Worker('/js/renderer.js');
 
-    canvas.width = window.innerWidth - 18 * 2;
-    canvas.height = window.innerWidth - 18 * 2;
+    const canvasSizeManager = new CanvasSizeManager();
 
-    window.addEventListener('resize', function() {
-      canvas.width = window.innerWidth - 18 * 2;
-      canvas.height = window.innerWidth - 18 * 2;
-
-      fftAnalysisWorker.postMessage('trigger');
+    canvasSizeManager.add(canvas, function() {
+      fftAnalysisWorker.postMessage('trigger'); 
     });
 
-    canvasSpectra.width = window.innerWidth - 18 * 2;
-    canvasSpectra.height = window.innerWidth / 5;
-
-    window.addEventListener('resize', function() {
-      canvasSpectra.width = window.innerWidth - 18 * 2;
-      canvasSpectra.height = window.innerWidth / 6;
-    });
+    canvasSizeManager.add(canvasSpectra);
 
     let results = [];
     let last = {};
