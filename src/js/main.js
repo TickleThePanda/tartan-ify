@@ -16,31 +16,47 @@
     }
 
     render(fft) {
-      this.context.lineWidth = 1;
+      const context = this.context;
+      const canvas = this.canvas;
 
-      this.context.beginPath();
+      context.lineWidth = 1;
+
+      context.beginPath();
 
       const bufferLength = fft.length;
 
-      const sliceWidth = this.canvas.width * 1.0 / bufferLength;
-      let x = 0;
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+
+      const visDirection = canvasWidth > canvasHeight ? 'h' : 'v';
+
+      const visWidth = visDirection === 'h' ? canvasWidth : canvasHeight;
+      const visHeight = visDirection === 'h' ? canvasHeight : canvasWidth;
+
+      function lineTo(visX, visY) {
+        if (visDirection === 'h') {
+          context.lineTo(visX, visY);
+        } else {
+          context.lineTo(visY, visWidth - visX);
+        }
+      }
+
+
+      const sliceWidth = visWidth * 1.0 / bufferLength;
+      let visX = 0;
 
       for (let i = 0; i < bufferLength; i++) {
 
         const v = fft[i] / 128.0;
-        const y = this.canvas.height - v * this.canvas.height / 2;
+        const visY = visHeight - v * visHeight / 2;
 
-        if (i === 0) {
-          this.context.moveTo(x, y);
-        } else {
-          this.context.lineTo(x, y);
-        }
+        lineTo(visX, visY);
 
-        x += sliceWidth;
+        visX += sliceWidth;
       }
 
-      this.context.lineTo(this.canvas.width, this.canvas.height);
-      this.context.stroke();  
+      lineTo(visWidth, visHeight);
+      context.stroke();  
     }
   }
 
