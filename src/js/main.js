@@ -7,7 +7,7 @@
     }
 
     clear() {
-      this.context.fillStyle = "rgb(255, 255, 255)";
+      this.context.fillStyle = "#ffffff";
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
@@ -111,6 +111,12 @@
     const fftAnalysisWorker = new Worker('/js/worker.js');
     const rendererWorker = new Worker('/js/renderer.js');
 
+    const colors = 
+      colors: {
+        diff: getComputedStyle(visualiser).getPropertyValue('--color-diff'),
+        similar: getComputedStyle(visualiser).getPropertyValue('--color-similar')
+      };
+
     const canvasSizeManager = new CanvasSizeManager();
 
     canvasSizeManager.add(canvas, function() {
@@ -121,6 +127,8 @@
 
     let results = [];
     let last = {};
+
+    rendererWorker.postMessage(colors);
 
     fftAnalysisWorker.onmessage = event => {
       results = event.data;
@@ -135,15 +143,15 @@
 
       const context = canvas.getContext('2d');
 
-			const image = context.createImageData(wFromRenderer, wFromRenderer);
-			
-			image.data.set(array);
+      const image = context.createImageData(wFromRenderer, wFromRenderer);
+      
+      image.data.set(array);
 
       const bmp = await createImageBitmap(image, 0, 0, wFromRenderer, wFromRenderer);
 
       context.imageSmoothingEnabled = false;
       context.clearRect(0, 0, canvas.width, canvas.height);
-			context.drawImage(bmp, 0, 0, canvas.width, canvas.width);
+      context.drawImage(bmp, 0, 0, canvas.width, canvas.width);
     };
 
     fileInput.addEventListener('change', e => {
@@ -244,9 +252,9 @@
         const fft = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(fft);
         spectraRenderer.clear();
-        spectraRenderer.setColor('hsl(180, 100%, 35%)');
+        spectraRenderer.setColor(colors.similar);
         spectraRenderer.render(last);
-        spectraRenderer.setColor('hsl(310, 100%, 40%)');
+        spectraRenderer.setColor(colors.diff);
         spectraRenderer.render(fft);
 
       })();
