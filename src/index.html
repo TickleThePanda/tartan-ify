@@ -25,11 +25,15 @@
   </head>
   <body class="viewport-exact">
     <form id="music-form" class="form form--modal">
-      <label class="form__button form__button--active" id="file-upload-label" for="music-file">
+      <label class="form__button" id="file-upload-label" for="music-file">
+        <input class="form__file-upload-hidden-button" type="file" id="music-file" name="music-file" />
         Choose some music
       </label>
-      <input class="form__file-upload-hidden-button" type="file" id="music-file" name="music-file" />
-      <button class="form__button" type="submit" id="form-submit" name="process-music-file">
+      <label class="form__label" for="analysis-interval">
+        Interval (ms)
+        <input class="form__input-number" id="analysis-interval" name="analysis-interval" value="1000" />
+      </label>
+      <button class="form__button form__button--submit" type="submit" id="form-submit" name="process-music-file">
         Tartan-ify
       </button>
       <div id="form-errors" class="form__error"></div>

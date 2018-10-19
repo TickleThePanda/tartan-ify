@@ -7,6 +7,14 @@
 	width: 300px;
 }
 
+.form__section {
+  display: none;
+}
+
+.form__section--active {
+  display: block;
+}
+
 .form--modal {
   position: absolute;
   top: 50%;
@@ -14,15 +22,26 @@
   transform: translate(-50%, -50%);
 }
 
+.form__label {
+  margin: 0.5rem;
+}
+
+.form__input-number {
+  margin-top: 0.25rem;
+  padding: 0.25rem;
+  width: 100%;
+}
+
 .form__button {
-  display: none;
+  display: block;
+
   -moz-appearance: none;
   -webkit-appearance: none;
   appearance: none;
 
 	border: 0.25rem var(--palette-secondary) solid;
 	background-color: var(--palette-primary);
-	padding: 1rem;
+	padding: 0.5rem;
 	margin: 0.5rem;
 
 	color: #000;
@@ -30,8 +49,8 @@
 	text-align: center;
 }
 
-.form__button--active {
-	display: block;
+.form__button--submit {
+	padding: 1rem;
 }
 
 .form__file-upload-hidden-button {

@@ -94,6 +94,68 @@
     }
   }
 
+  function isAudio(file) {
+    return file.type === '' || file.type.startsWith('audio');
+  }
+
+  class AnalysisFormManager {
+    constructor(formElement) {
+      this.formElement = formElement;
+
+      this.fileInput = document.getElementById('music-file');
+      this.intervalInput = document.getElementById('analysis-interval');
+      this.formErrors = document.getElementById('form-errors');
+      this.submitButton = document.getElementById('form-submit');
+
+      this.fileInput.addEventListener('change', e => {
+        const file = this.fileInput.files[0];
+        if (!file || !isAudio(file)) {
+          this.formErrors.innerHTML = 'Please select an audio file';
+        } else {
+          this.formErrors.innerHTML = '';
+        }
+
+      });
+
+      this.listeners = [];
+
+      const fileInput = this.fileInput;
+      const listeners = this.listeners;
+      const formErrors = this.formErrors;
+      const intervalInput = this.intervalInput;
+
+      this.formElement.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const file = fileInput.files[0];
+
+        if (!file || !isAudio(file)) {
+          formErrors.innerHTML = 'Please select an audio file.';
+          return;
+        }
+
+        if (isNaN(parseInt(intervalInput.value))) {
+          formErrors.innerHTML = 'Please give a valid whole number for Interval';
+          return;
+        }
+
+        listeners.forEach(l => l({
+          file: file,
+          interval: intervalInput.value
+        }));
+
+      });
+    }
+
+    hide() {
+      this.formElement.classList.add('hidden');
+    }
+
+    registerSubmitSuccessListener(listener) {
+      this.listeners.push(listener);
+    }
+  }
+
   window.addEventListener('load', () => {
 
     const visualiser = document.getElementById('visualiser');
@@ -102,11 +164,9 @@
 
     const spectraRenderer = new SpectraRenderer(canvasSpectra);
 
-    const form = document.getElementById('music-form');
-    const fileUploadLabel = document.getElementById('file-upload-label');
-    const fileInput = document.getElementById('music-file');
-    const formErrors = document.getElementById('form-errors');
-    const submitButton = document.getElementById('form-submit');
+    const formManager = new AnalysisFormManager(
+            document.getElementById('music-form')
+    );
 
     const fftAnalysisWorker = new Worker('/js/worker.js');
     const rendererWorker = new Worker('/js/renderer.js');
@@ -157,45 +217,20 @@
       context.drawImage(bmp, 0, 0, canvas.width, canvas.width);
     };
 
-    fileInput.addEventListener('change', e => {
-      const file = fileInput.files[0];
-      if (!file || !isAudio(file)) {
-        formErrors.innerHTML = 'Please select an audio file';
-        return;
-      }
+    formManager.registerSubmitSuccessListener(submit);
 
-      formErrors.innerHTML = '';
-      fileUploadLabel.classList.remove('form__button--active');
-      submitButton.classList.add('form__button--active');
-    });
+    function submit(result) {
 
-    form.addEventListener('submit', submit);
+      processData(result.file, result.interval)
 
-    function submit(e) {
-      e.preventDefault();
-
-      const file = fileInput.files[0];
-
-      if (!file || !isAudio(file)) {
-        formErrors.innerHTML = 'Please select an audio file.';
-        return;
-      }
-
-      processData(file)
-
-      form.classList.add('hidden');
+      formManager.hide();
       visualiser.classList.remove('hidden');
       canvasSizeManager.triggerResize();
     }
 
-    function isAudio(file) {
-      return file.type === '' || file.type.startsWith('audio');
-    }
-
     let intervalId = null;
 
-
-    async function processData(file) {
+    async function processData(file, interval) {
       const ctx = new AudioContext();
 
       const encBuf = await loadDataFromFile(file);
@@ -216,7 +251,7 @@
 
         const a = ctx.createAnalyser();
         a.fttSize = Math.pow(2, 10);
-        a.smoothingTimeConstant = 0.99;
+        a.smoothingTimeConstant = 0.999;
 
         analyser = a;
 
@@ -226,8 +261,6 @@
       bufferSrc.connect(ctx.destination);
 
       const startTime = new Date();
-
-      const interval = 1000;
 
       intervalId = setInterval(function() {
         const fft = new Uint8Array(analyser.frequencyBinCount);
@@ -240,7 +273,7 @@
         fftAnalysisWorker.postMessage(buffer, [buffer]);
 
         document.getElementById('song-progress').innerHTML 
-          = Math.round((new Date() - startTime) / interval) + 's';
+          = Math.round((new Date() - startTime) / 1000) + 's';
 
         swapForNewAnalyser();
 
