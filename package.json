@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently --kill-others \"npm run watch\" \"npm run serve\"",
     "watch": "gulp && gulp watch",
-    "serve": "http-server ./_site"
+    "serve": "http-server ./_site -c-1"
   },
   "repository": {
     "type": "git",

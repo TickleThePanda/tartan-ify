@@ -147,7 +147,7 @@ onmessage = function(message) {
 
     const buffer = message.data;
 
-    const data = new Uint32Array(buffer);
+    const data = new Float32Array(buffer);
 
     const renderer = new MusicSimilarityRenderer(colors);
 
