@@ -96,6 +96,53 @@
     }
   }
 
+  class VisualisationPainter {
+    constructor(canvas, image, interval) {
+      this.canvas = canvas;
+      this.context = canvas.getContext('2d');
+      this.image = image;
+      this.interval = interval;
+    }
+
+    start() {
+
+      const image = this.image;
+      const canvas = this.canvas;
+      const context = this.context;
+      const interval = this.interval;
+
+      const startTime = new Date();
+
+      let elapsedIntervals = 0;
+
+      (function loop() {
+        window.requestAnimationFrame(function() {
+
+          elapsedIntervals = Math.floor((new Date() - startTime) / interval);
+
+          draw();
+
+          if (elapsedIntervals < image.width) {
+            loop();
+          }
+          
+        });
+      })();
+
+      window.addEventListener('resize', function() {
+        window.requestAnimationFrame(function() {
+          draw();
+        });
+      });
+
+      function draw() {
+        context.imageSmoothingEnabled = false;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, elapsedIntervals, elapsedIntervals, 0, 0, canvas.width, canvas.width);
+      }
+    }
+
+  }
 
   window.addEventListener('load', () => {
 
@@ -170,25 +217,8 @@
 
       bufferSrc.start();
 
-      const startTime = new Date();
+      new VisualisationPainter(canvas, bmp, interval).start();
 
-      const intervalId = setInterval(function() {
-
-        window.requestAnimationFrame(function() {
-
-          const elapsedIntervals = Math.floor((new Date() - startTime) / interval);
-
-          context.imageSmoothingEnabled = false;
-          context.clearRect(0, 0, canvas.width, canvas.height);
-          context.drawImage(bmp, 0, 0, elapsedIntervals, elapsedIntervals, 0, 0, canvas.width, canvas.width);
-
-          if (elapsedIntervals >= bmp.width) {
-            clearInterval(intervalId);
-          }
-
-        });
-
-      }, interval);
 
     }
 
