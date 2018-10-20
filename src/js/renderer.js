@@ -56,6 +56,8 @@ class MusicSimilarityRenderer {
   
   render(data) {
 
+    data = data.map(v => Math.sqrt(v));
+
     if (data.length > 0) {
 
       const hE = this.colorSimilar[0];

@@ -99,6 +99,8 @@
 
   window.addEventListener('load', () => {
 
+    const loadingStatus = document.getElementById('loading-status');
+
     const visualiser = document.getElementById('visualiser');
     const canvas = document.getElementById('similarity-graph');
     const context = canvas.getContext('2d');
@@ -137,9 +139,15 @@
     let intervalId = null;
 
     async function processData(file, interval) {
+
+      loadingStatus.classList.remove('hidden');
+      loadingStatus.innerHTML = 'Loading data from file';
+
       const ctx = new AudioContext();
 
       const encBuf = await loadDataFromFile(file);
+
+      loadingStatus.innerHTML = 'Decoding audio data';
 
       const audioData = await ctx.decodeAudioData(encBuf);
 
@@ -148,12 +156,19 @@
       });
       bufferSrc.connect(ctx.destination);
 
+      loadingStatus.innerHTML = 'Calculating frequency data';
+
       const fftsForIntervals = await calculateFftsForIntervals(audioData, interval);
+
+      loadingStatus.innerHTML = 'Calculating differences';
 
       const diffs = await calculateFftDiffs(fftsForIntervals);
 
+      loadingStatus.innerHTML = 'Rendering visualisation';
+
       const bmp = await renderImageFromDiffs(diffs);
-      context.imageSmoothingEnabled = false;
+
+      loadingStatus.classList.add('hidden');
 
       bufferSrc.start();
 
@@ -165,6 +180,7 @@
 
           const elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
 
+          context.imageSmoothingEnabled = false;
           context.clearRect(0, 0, canvas.width, canvas.height);
           context.drawImage(bmp, 0, 0, elapsedSeconds, elapsedSeconds, 0, 0, canvas.width, canvas.width);
 
