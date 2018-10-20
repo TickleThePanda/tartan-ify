@@ -136,8 +136,6 @@
       canvasSizeManager.triggerResize();
     }
 
-    let intervalId = null;
-
     async function processData(file, interval) {
 
       loadingStatus.classList.remove('hidden');
@@ -178,13 +176,13 @@
 
         window.requestAnimationFrame(function() {
 
-          const elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
+          const elapsedIntervals = Math.floor((new Date() - startTime) / interval);
 
           context.imageSmoothingEnabled = false;
           context.clearRect(0, 0, canvas.width, canvas.height);
-          context.drawImage(bmp, 0, 0, elapsedSeconds, elapsedSeconds, 0, 0, canvas.width, canvas.width);
+          context.drawImage(bmp, 0, 0, elapsedIntervals, elapsedIntervals, 0, 0, canvas.width, canvas.width);
 
-          if (elapsedSeconds >= bmp.width) {
+          if (elapsedIntervals >= bmp.width) {
             clearInterval(intervalId);
           }
 
