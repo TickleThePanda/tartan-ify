@@ -1,11 +1,3 @@
-@longer-side: 30;
-@shorter-side: 25;
-@constrained-percentage: (@shorter-side / @longer-side);
-@constrained-full-size: (@constrained-percentage * 100vmax);
-
-@unconstrained-size: calc(100vmin - 2 * 1rem);
-@constrained-size: calc(@constrained-full-size - 5 * 1rem);
-
 .visualiser {
 
   display: grid;
@@ -18,33 +10,16 @@
   grid-gap: 1rem;
 
   grid-template-areas: "p"
-                       "v"
-                       "s";
+                       "v";
 
-  grid-tempalte-columns: 1fr;
-  grid-template-rows: max-content @unconstrained-size 1fr;
+  grid-template-columns: 1fr;
+  grid-template-rows: max-content calc(100vmin - 4 * 1rem);
 
-  @media (min-aspect-ratio: @shorter-side/@longer-side) {
-    grid-template-areas: "p v"
-                         ". s";
-
-    grid-template-rows: @constrained-size;
-    grid-template-columns: max-content @constrained-size;
-  }
-  
   @media (orientation: landscape) {
 
-    grid-template-areas: "p ."
-                         "v s";
-    grid-template-columns: @constrained-size;
-    grid-template-rows: max-content @constrained-size;
-  }
-
-  @media (min-aspect-ratio: @longer-side/@shorter-side) {
-
-    grid-template-areas: "p v s";
+    grid-template-areas: "p v";
     grid-template-rows: 1fr;
-    grid-template-columns: max-content @unconstrained-size 1fr;
+    grid-template-columns: max-content calc(100vmin - 4 * 1rem);
   }
 }
 
@@ -80,21 +55,7 @@
   writing-mode: horizontal-lr;
 }
 
-@media (min-aspect-ratio: @shorter-side/@longer-side) {
-  .visualiser__info {
-    writing-mode: vertical-lr;
-    transform: rotate(180deg);
-  }
-}
-
 @media (orientation: landscape) {
-  .visualiser__info {
-    writing-mode: lr;
-    transform: initial;
-  }
-}
-
-@media (min-aspect-ratio: @longer-side/@shorter-side) {
   .visualiser__info {
     writing-mode: vertical-lr;
     transform: rotate(180deg);
