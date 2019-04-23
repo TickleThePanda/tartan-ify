@@ -12,8 +12,15 @@ onmessage = function(message) {
       let diff = 0;
       const left = ffts[i];
       const right = ffts[j];
+
+      const leftSum = left
+          .reduce((a, b) => a + b);
+
+      const rightSum = right
+          .reduce((a, b) => a + b);
+
       for (let k = 0; k < left.length; k++) {
-        diff += Math.pow(left[k] - right[k], 2);
+        diff += Math.abs(left[k] / leftSum - right[k] / rightSum);
       }
 
       const v = diff;
