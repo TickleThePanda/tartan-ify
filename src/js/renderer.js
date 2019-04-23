@@ -49,18 +49,16 @@ function rgbToHsl(r, g, b) {
 
 function scale(data) {
 
-    const sqrtData = data.map(v => Math.sqrt(v));
-
-    const max = sqrtData
+    const max = data
           .reduce((a, b) => Math.max(a, b));
 
-    const min = sqrtData
+    const min = data
           .filter(a => a != 0)
           .reduce((a, b) => Math.min(a, b), Number.MAX_SAFE_INTEGER);
 
     const range = max - min;
 
-    return sqrtData.map(v => (v - min) / range);
+    return data.map(v => (v - min) / range);
 
 }
 
