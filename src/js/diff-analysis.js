@@ -20,7 +20,11 @@ onmessage = function(message) {
           .reduce((a, b) => a + b);
 
       for (let k = 0; k < left.length; k++) {
-        diff += Math.abs(left[k] / leftSum - right[k] / rightSum);
+
+        const leftNorm = leftSum === 0 ? 0 : left[k] / leftSum;
+        const rightNorm = rightSum === 0 ? 0 : right[k] / rightSum;
+
+        diff += Math.abs(leftNorm - rightNorm);
       }
 
       const v = diff;
