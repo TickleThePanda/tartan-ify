@@ -113,7 +113,6 @@
 
       const startTime = new Date();
 
-      let intervalsToShow = 0;
       let elapsedIntervals = 0;
 
       (function loop() {
@@ -121,20 +120,11 @@
 
           elapsedIntervals = Math.floor((new Date() - startTime) / interval);
 
-          const wholeImageControl = document.getElementById('show-whole-image');
-
-          if (wholeImageControl.checked) {
-             intervalsToShow = image.width;
-          } else {
-             intervalsToShow = elapsedIntervals;
-          }
-
           draw();
 
           if (elapsedIntervals < image.width) {
             loop();
           }
-          
         });
       })();
 
@@ -147,7 +137,29 @@
       function draw() {
         context.imageSmoothingEnabled = false;
         context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(image, 0, 0, intervalsToShow, intervalsToShow, 0, 0, canvas.width, canvas.width);
+
+        const wholeImageControl = document.getElementById('show-whole-image');
+
+        if (wholeImageControl.checked) {
+          context.drawImage(image, 0, 0, image.width, image.width, 0, 0, canvas.width, canvas.width);
+
+          const progress = elapsedIntervals;
+          const pixelSize = canvas.width / image.width;
+          const progressOnCanvas = pixelSize * elapsedIntervals - pixelSize / 2;
+
+          const path = new Path2D();
+
+          path.moveTo(0, progressOnCanvas);
+          path.lineTo(progressOnCanvas, progressOnCanvas);
+          path.lineTo(progressOnCanvas, 0);
+
+          context.lineWidth = pixelSize;
+          context.strokeStyle = 'black';
+          context.stroke(path);
+
+        } else {
+          context.drawImage(image, 0, 0, elapsedIntervals, elapsedIntervals, 0, 0, canvas.width, canvas.width);
+        }
       }
     }
 
