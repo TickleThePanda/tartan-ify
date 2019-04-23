@@ -103,7 +103,7 @@ class MusicSimilarityRenderer {
 
           const rgb = hslToRgb(h, s, l);
 
-          if (v === 0) {
+          if (i === j) {
             rgb[0] = 255;
             rgb[1] = 255;
             rgb[2] = 255;
