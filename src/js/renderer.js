@@ -47,6 +47,23 @@ function rgbToHsl(r, g, b) {
   return [ h, s, l ];
 }
 
+function scale(data) {
+
+    const sqrtData = data.map(v => Math.sqrt(v));
+
+    const max = sqrtData
+          .reduce((a, b) => Math.max(a, b));
+
+    const min = sqrtData
+          .filter(a => a != 0)
+          .reduce((a, b) => Math.min(a, b), Number.MAX_SAFE_INTEGER);
+
+    const range = max - min;
+
+    return sqrtData.map(v => (v - min) / range);
+
+}
+
 class MusicSimilarityRenderer {
 
   constructor(colors) {
@@ -56,9 +73,9 @@ class MusicSimilarityRenderer {
   
   render(data) {
 
-    data = data.map(v => Math.sqrt(v));
-
     if (data.length > 0) {
+
+      const scaled = scale(data);
 
       const hE = this.colorSimilar[0];
       const hS = this.colorDiff[0];
@@ -69,31 +86,20 @@ class MusicSimilarityRenderer {
       const lE = this.colorSimilar[2];
       const lS = this.colorDiff[2];
 
-      const max = data
-          .reduce((a, b) => Math.max(a, b));
-
-      const min = data
-          .filter(a => a != 0)
-          .reduce((a, b) => Math.min(a, b), Number.MAX_SAFE_INTEGER);
-
-      const range = max - min;
-
-      const width = Math.sqrt(data.length);
+      const width = Math.sqrt(scaled.length);
 
       const array = new Uint8ClampedArray(width * width * 4);
 
       for (let i = 0; i < width; i++) {
         for (let j = 0; j < width; j++) {
 
-          const v = data[j * width + i];
+          const v = scaled[i * width + j];
 
-          const pos = (j * width + i) * 4;
+          const pos = (i * width + j) * 4;
           
-          const norm = (v - min) / range;
-
-          const h = hE + norm * (hS - hE);
-          const s = sE + norm * (sS - sE);
-          const l = lE + norm * (lS - lE);
+          const h = hE + v * (hS - hE);
+          const s = sE + v * (sS - sE);
+          const l = lE + v * (lS - lE);
 
           const rgb = hslToRgb(h, s, l);
 
