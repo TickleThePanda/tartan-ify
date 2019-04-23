@@ -113,12 +113,21 @@
 
       const startTime = new Date();
 
+      let intervalsToShow = 0;
       let elapsedIntervals = 0;
 
       (function loop() {
         window.requestAnimationFrame(function() {
 
           elapsedIntervals = Math.floor((new Date() - startTime) / interval);
+
+          const wholeImageControl = document.getElementById('show-whole-image');
+
+          if (wholeImageControl.checked) {
+             intervalsToShow = image.width;
+          } else {
+             intervalsToShow = elapsedIntervals;
+          }
 
           draw();
 
@@ -138,7 +147,7 @@
       function draw() {
         context.imageSmoothingEnabled = false;
         context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(image, 0, 0, elapsedIntervals, elapsedIntervals, 0, 0, canvas.width, canvas.width);
+        context.drawImage(image, 0, 0, intervalsToShow, intervalsToShow, 0, 0, canvas.width, canvas.width);
       }
     }
 
