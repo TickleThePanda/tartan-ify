@@ -139,6 +139,7 @@
         context.clearRect(0, 0, canvas.width, canvas.height);
 
         const wholeImageControl = document.getElementById('show-whole-image');
+        const cursorControl = document.getElementById('show-cursor');
 
         if (wholeImageControl.checked) {
           context.drawImage(image, 0, 0, image.width, image.width, 0, 0, canvas.width, canvas.width);
@@ -147,15 +148,16 @@
           const pixelSize = canvas.width / image.width;
           const progressOnCanvas = pixelSize * elapsedIntervals - pixelSize / 2;
 
-          const path = new Path2D();
+          if (cursorControl.checked) {
+            const path = new Path2D();
 
-          path.moveTo(0, progressOnCanvas);
-          path.lineTo(progressOnCanvas, progressOnCanvas);
-          path.lineTo(progressOnCanvas, 0);
-
-          context.lineWidth = pixelSize;
-          context.strokeStyle = 'black';
-          context.stroke(path);
+            path.moveTo(0, progressOnCanvas);
+            path.lineTo(progressOnCanvas, progressOnCanvas);
+            path.lineTo(progressOnCanvas, 0);
+            context.lineWidth = pixelSize;
+            context.strokeStyle = 'black';
+            context.stroke(path);
+          }
 
         } else {
           context.drawImage(image, 0, 0, elapsedIntervals, elapsedIntervals, 0, 0, canvas.width, canvas.width);
@@ -255,7 +257,7 @@
           const wFromRenderer = Math.sqrt(array.length / 4);
 
           const image = context.createImageData(wFromRenderer, wFromRenderer);
-          
+
           image.data.set(array);
 
           const bmp = await createImageBitmap(image, 0, 0, wFromRenderer, wFromRenderer);
@@ -287,7 +289,7 @@
     }
 
     async function calculateFftsForIntervals(audioData, interval) {
-      
+
       return new Promise(function(resolve, reject) {
         const fftWorker = new Worker('/js/fft.js');
 
@@ -301,18 +303,18 @@
           resolve(message.data.map(f => new Float32Array(f)));
           fftWorker.terminate();
         }
-        
+
         fftWorker.postMessage({
           sampleRate: audioData.sampleRate,
           interval: interval,
           buffers: buffers
         }, buffers);
-        
+
       });
-    
+
     }
 
-    
+
 
     function loadDataFromFile(file) {
       return new Promise(function(resolve, reject) {
@@ -335,4 +337,3 @@
   });
 
 })();
-
