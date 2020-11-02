@@ -9,7 +9,8 @@
   margin: auto;
   grid-gap: 1rem;
 
-  grid-template-areas: "p" "v";
+  grid-template-areas: "p"
+                       "v";
 
   grid-template-columns: calc(100vmin - 4 * 1rem);
   grid-template-rows: max-content calc(100vmin - 4 * 1rem);
@@ -24,17 +25,45 @@
 }
 
 .visualiser__main {
+  display: grid;
+  grid-template-areas: "_  hx"
+                       "vx v ";
+  grid-template-rows: auto 1fr;
+  grid-template-columns: auto 1fr;
+  grid-area: v;
+  overflow: hidden;
+}
+
+.visualiser__horizontal-axis {
+  font-size: 0.8em;
+  grid-area: hx;
+  text-align: center;
+  padding-block-end: 0.35em;
+  border-block-end: 1px solid #444;
+  margin-block-end: 0.35em;
+  max-height: 100%;
+}
+
+.visualiser__vertical-axis {
+  font-size: 0.8em;
+  grid-area: vx;
+  writing-mode: vertical-lr;
+  text-align: center;
+
+  padding-block-end: 0.35em;
+  border-block-end: 1px solid #444;
+  margin-block-end: 0.35em;
+}
+
+.visualiser__plot {
   grid-area: v;
   width: 100%;
-  height: 100%;
-  overflow: hidden;
 }
 
 .visualiser__info {
   grid-area: p;
   display: flex;
   justify-content: space-between;
-
 }
 
 .visualiser__keys {

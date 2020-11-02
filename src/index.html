@@ -61,8 +61,16 @@
         <div id="form-errors" class="form__error"></div>
       </form>
     </div>
-    <div id="visualiser" class="visualiser hidden">
-      <canvas class="visualiser__main" id="similarity-graph"></canvas>
+    <div id="visualiser" class="page visualiser hidden">
+      <div class="visualiser__main">
+        <div class="visualiser__horizontal-axis">
+          Time
+        </div>
+        <div class="visualiser__vertical-axis">
+          Time
+        </div>
+        <canvas class="visualiser__plot" id="similarity-graph"></canvas>
+      </div>
       <div class="visualiser__info">
         <div class="visualiser__keys">
           <div class="visualiser__key">Similar</div>

@@ -2,7 +2,7 @@
 
   function resizeCanvas(canvas) {
     canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
+    canvas.height = canvas.clientWidth;
   }
 
   class CanvasSizeManager {
