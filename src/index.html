@@ -47,8 +47,9 @@
       </div>
       <form class="form">
         <label class="form__button" id="file-upload-label" for="music-file">
-          <input class="form__file-upload-hidden-button" type="file" id="music-file" name="music-file" />
+          <input class="form__file-upload-hidden-button js-file-upload-input" type="file" id="music-file" name="music-file" />
           Choose some music
+          <span class="form__file-upload-name js-file-upload-name" data-for="music-file"></span>
         </label>
         <label class="form__label" for="analysis-interval">
           Interval (ms)
