@@ -64,24 +64,30 @@
     <div id="visualiser" class="page visualiser hidden">
       <div class="visualiser__main">
         <div class="visualiser__horizontal-axis">
-          Time
+          Chunk of song
         </div>
         <div class="visualiser__vertical-axis">
-          Time
+          Chunk of song
         </div>
         <canvas class="visualiser__plot" id="similarity-graph"></canvas>
       </div>
       <div class="visualiser__info">
-        <div class="visualiser__keys">
-          <div class="visualiser__key">Similar</div>
-          <div class="visualiser__key visualiser__key--range"></div>
-          <div class="visualiser__key visualiser__key--last">Different</div>
-        </div>
         <div class="visualiser__controls">
           <input type="checkbox" id="show-whole-image">
           <label for="show-whole-image">Show whole image</label>
           <input type="checkbox" id="show-cursor" checked>
           <label for="show-cursor">Show cursor</label>
+        </div>
+        <div class="visualiser__legend">
+          <div class="visualiser__legend-item">
+            <div class="visualiser__legend-item-name">Chunk sound similarity</div>
+            <div class="visualiser__legend-item-key">
+              <div class="visualiser__legend-item-key-name">Similar</div>
+              <div class="visualiser__legend-item-key-gradient"></div>
+              <div class="visualiser__legend-item-key-name">Different</div>
+            </div>
+
+          </div>
         </div>
       </div>
     </div>

@@ -7,7 +7,6 @@
 
   padding: 1rem;
   margin: auto;
-  grid-gap: 1rem;
 
   grid-template-areas: "p"
                        "v";
@@ -61,31 +60,40 @@
 }
 
 .visualiser__info {
+  font-size: 0.8em;
   grid-area: p;
+  display: grid;
+}
+
+.visualiser__controls {
+  margin-left: auto;
+}
+
+.visualiser__legend {
+  display: grid
+}
+
+.visualiser__legend-item-name {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.visualiser__legend-item-key {
   display: flex;
-  justify-content: space-between;
+  margin-top: 0.25em;
 }
 
-.visualiser__keys {
-  display: flex;
+.visualiser__legend-item-key-name {
+  margin-inline-end: 0.25rem;
 }
 
-.visualiser__key {
-  margin-inline-end: 0.5rem;
-}
-
-.visualiser__key--last {
-  margin-inline-end: 0;
-}
-
-.visualiser__key {
-}
-
-.visualiser__key--range {
+.visualiser__legend-item-key-gradient {
   content: "";
 
-  height: 1rem;
-  width: 3rem;
+  height: 1em;
+  width: 3em;
+
+  margin-inline-end: 0.25rem;
 
   border: 1px solid #444;
 
