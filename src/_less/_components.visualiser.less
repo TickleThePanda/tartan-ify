@@ -49,22 +49,17 @@
   margin-inline-end: 0;
 }
 
-.visualiser__key::before {
-  display: inline-block;
+.visualiser__key {
+}
+
+.visualiser__key--range {
   content: "";
 
-  height: 0.25rem;
-  width: 0.25rem;
-  margin: 0.25rem;
+  height: 1rem;
+  width: 3rem;
 
   border: 1px solid #444;
-}
 
-.visualiser__key--similar::before {
-  background-color: var(--color-similar);
-}
+  background: linear-gradient(to right, var(--color-similar), var(--color-diff));
 
-.visualiser__key--different::before {
-  background-color: var(--color-diff);
 }
-
