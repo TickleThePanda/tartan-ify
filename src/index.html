@@ -24,20 +24,42 @@
     <meta name="twitter:url" value="https://tartan-ify.ticklethepanda.co.uk/" />
   </head>
   <body class="viewport-exact">
-    <form id="music-form" class="form modal">
-      <label class="form__button" id="file-upload-label" for="music-file">
-        <input class="form__file-upload-hidden-button" type="file" id="music-file" name="music-file" />
-        Choose some music
-      </label>
-      <label class="form__label" for="analysis-interval">
-        Interval (ms)
-        <input class="form__input-number" id="analysis-interval" name="analysis-interval" value="1000" />
-      </label>
-      <button class="form__button form__button--submit" type="submit" id="form-submit" name="process-music-file">
-        Tartan-ify
-      </button>
-      <div id="form-errors" class="form__error"></div>
-    </form>
+    <div id="music-form" class="page modal">
+      <div class="description">
+        <h1>Tartan-ify</h1>
+
+        <p>Tartan-ify generates visualisations that shows, in a piece
+        of music, where the similarities and differences are.
+
+        <h2>How it works</h2>
+        <p>Tartan-ify splits the music up into chunks, takes every chunk and
+        compares it against every other chunk. Every comparison is then shown
+        on a grid with time on both axes, and the colour showing the similarity.
+        <p>To do the comparison, we first do spectrum analysis on each chunk,
+        using a <a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform">
+        Fast Fourier Transform</a>. Then we calculate the sum of the difference
+        between this chunk and keep a matrix of the comparisons between each.
+
+        <h2>How to use the tool</h2>
+        <p>To use this tool, select a piece of music then select the
+        chunk interval that you want in milliseconds (using the BPM can be useful
+        here), then click <em>Tartan-ify</em> to start the visualisation.
+      </div>
+      <form class="form">
+        <label class="form__button" id="file-upload-label" for="music-file">
+          <input class="form__file-upload-hidden-button" type="file" id="music-file" name="music-file" />
+          Choose some music
+        </label>
+        <label class="form__label" for="analysis-interval">
+          Interval (ms)
+          <input class="form__input-number" id="analysis-interval" name="analysis-interval" value="1000" />
+        </label>
+        <button class="form__button form__button--submit" type="submit" id="form-submit" name="process-music-file">
+          Tartan-ify
+        </button>
+        <div id="form-errors" class="form__error"></div>
+      </form>
+    </div>
     <div id="visualiser" class="visualiser hidden">
       <canvas class="visualiser__main" id="similarity-graph"></canvas>
       <div class="visualiser__info">
@@ -53,6 +75,6 @@
         </div>
       </div>
     </div>
-    <div id="loading-status" class="hidden modal"></div>
+    <div id="loading-status" class="page modal hidden"></div>
   </body>
 </html>
