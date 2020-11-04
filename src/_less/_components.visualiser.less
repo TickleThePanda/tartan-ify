@@ -24,34 +24,69 @@
 }
 
 .visualiser__main {
+  font-size: 0.8em;
+
   display: grid;
-  grid-template-areas: "_  hx"
-                       "vx v ";
-  grid-template-rows: auto 1fr;
-  grid-template-columns: auto 1fr;
+  grid-template-rows: [hx-start vx-start] auto [hx-end v-start] 1fr [v-end vx-end];
+  grid-template-columns: [vx-start hx-start] auto [vx-end v-start] 1fr [v-end hx-end];
   grid-area: v;
   overflow: hidden;
 }
 
-.visualiser__horizontal-axis {
-  font-size: 0.8em;
-  grid-area: hx;
+.visualiser__axis {
   text-align: center;
-  padding-block-end: 0.35em;
+  padding-block-end: 0.35rem;
   border-block-end: 1px solid #444;
-  margin-block-end: 0.35em;
-  max-height: 100%;
+  margin-inline-start: 1.15rem;
 }
 
-.visualiser__vertical-axis {
-  font-size: 0.8em;
+.visualiser__axis--horizontal {
+  grid-area: hx;
+  max-height: 100%;
+  position: relative;
+}
+
+.visualiser__axis--vertical {
   grid-area: vx;
   writing-mode: vertical-lr;
-  text-align: center;
+  position: relative;
+}
 
-  padding-block-end: 0.35em;
-  border-block-end: 1px solid #444;
-  margin-block-end: 0.35em;
+.visualiser__axis-zero {
+  content: '0';
+  display: block;
+  position: absolute;
+}
+.visualiser__axis-zero--horizontal {
+  inset-block-start: 0.2rem;
+  inset-inline-start: -0.5ch;
+}
+.visualiser__axis-zero--vertical {
+  inset-inline-start: calc(1ch + 0.1rem);
+  inset-block-start: -0.5em;
+  writing-mode: horizontal-tb;
+}
+
+.visualiser__axis-zero::before {
+  content: "";
+  display: block;
+  position: absolute;
+}
+
+.visualiser__axis-zero--horizontal::before {
+  height: 0.2em;
+  width: 1px;
+  background-color: #444;
+  left: calc(50%);
+  bottom: -0.2em;
+}
+
+.visualiser__axis-zero--vertical::before {
+  width: 0.2em;
+  background-color: #444;
+  height: 1px;
+  top: calc(50%);
+  right: -0.3em;
 }
 
 .visualiser__plot {

@@ -32,13 +32,14 @@
         of music, where the similarities and differences are.
 
         <h2>How it works</h2>
-        <p>Tartan-ify splits the music up into chunks, takes every chunk and
-        compares it against every other chunk. Every comparison is then shown
-        on a grid with time on both axes, and the colour showing the similarity.
-        <p>To do the comparison, we first do spectrum analysis on each chunk,
-        using a <a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform">
-        Fast Fourier Transform</a>. Then we calculate the sum of the difference
-        between this chunk and keep a matrix of the comparisons between each.
+        <p>Tartan-ify splits the music up into chunks. Every chunk of the song
+        is compared against every other chunk. Each of these chunk comparisons
+        is shown in a matrix, with the time of the song on each axis, with the
+        colour of the block showing the similarity between the two chunks.
+        <p>Tartan-ify does the comparison by analysing the spectrum of each
+        chunk, using a <a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform">
+        Fast Fourier Transform</a>, and then taking the sum of the difference
+        in power of each frequency between the chunks.
 
         <h2>How to use the tool</h2>
         <p>To use this tool, select a piece of music then select the
@@ -63,10 +64,12 @@
     </div>
     <div id="visualiser" class="page visualiser hidden">
       <div class="visualiser__main">
-        <div class="visualiser__horizontal-axis">
+        <div class="visualiser__axis visualiser__axis--horizontal">
+          <div class="visualiser__axis-zero visualiser__axis-zero--horizontal">0</div>
           Chunk of song
         </div>
-        <div class="visualiser__vertical-axis">
+        <div class="visualiser__axis visualiser__axis--vertical">
+          <div class="visualiser__axis-zero visualiser__axis-zero--vertical">0</div>
           Chunk of song
         </div>
         <canvas class="visualiser__plot" id="similarity-graph"></canvas>
@@ -80,7 +83,7 @@
         </div>
         <div class="visualiser__legend">
           <div class="visualiser__legend-item">
-            <div class="visualiser__legend-item-name">Chunk sound similarity</div>
+            <div class="visualiser__legend-item-name">Chunk similarity</div>
             <div class="visualiser__legend-item-key">
               <div class="visualiser__legend-item-key-name">Similar</div>
               <div class="visualiser__legend-item-key-gradient"></div>
