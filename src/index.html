@@ -63,17 +63,6 @@
       </form>
     </div>
     <div id="visualiser" class="page visualiser hidden">
-      <div class="visualiser__main">
-        <div class="visualiser__axis visualiser__axis--horizontal">
-          <div class="visualiser__axis-zero visualiser__axis-zero--horizontal">0</div>
-          Chunk of song
-        </div>
-        <div class="visualiser__axis visualiser__axis--vertical">
-          <div class="visualiser__axis-zero visualiser__axis-zero--vertical">0</div>
-          Chunk of song
-        </div>
-        <canvas class="visualiser__plot" id="similarity-graph"></canvas>
-      </div>
       <div class="visualiser__info">
         <div class="visualiser__controls">
           <input type="checkbox" id="show-whole-image">
@@ -81,17 +70,27 @@
           <input type="checkbox" id="show-cursor" checked>
           <label for="show-cursor">Show cursor</label>
         </div>
-        <div class="visualiser__legend">
-          <div class="visualiser__legend-item">
-            <div class="visualiser__legend-item-name">Chunk similarity</div>
-            <div class="visualiser__legend-item-key">
-              <div class="visualiser__legend-item-key-name">Similar</div>
-              <div class="visualiser__legend-item-key-gradient"></div>
-              <div class="visualiser__legend-item-key-name">Different</div>
-            </div>
-
+      </div>
+      <div class="visualiser__legend">
+        <div class="visualiser__legend-item">
+          <div class="visualiser__legend-item-name">Chunk similarity</div>
+          <div class="visualiser__legend-item-key">
+            <div class="visualiser__legend-item-key-name">Similar</div>
+            <div class="visualiser__legend-item-key-gradient"></div>
+            <div class="visualiser__legend-item-key-name">Different</div>
           </div>
         </div>
+      </div>
+      <div class="visualiser__main">
+        <div class="visualiser__axis visualiser__axis--horizontal">
+          <div class="visualiser__axis-zero visualiser__axis-zero--horizontal">0</div>
+          <div class="visualiser__axis-text visualiser__axis-text--horizontal">Chunk of song</div>
+        </div>
+        <div class="visualiser__axis visualiser__axis--vertical">
+          <div class="visualiser__axis-zero visualiser__axis-zero--vertical">0</div>
+          <div class="visualiser__axis-text visualiser__axis-text--vertical">Chunk of song</div>
+        </div>
+        <canvas class="visualiser__plot" id="similarity-graph"></canvas>
       </div>
     </div>
     <div id="loading-status" class="page modal hidden"></div>

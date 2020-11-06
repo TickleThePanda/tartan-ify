@@ -9,14 +9,15 @@
   margin: auto;
 
   grid-template-areas: "p"
+                       "l"
                        "v";
 
   grid-template-columns: calc(100vmin - 4 * 1rem);
-  grid-template-rows: max-content calc(100vmin - 4 * 1rem);
+  grid-template-rows: max-content max-content calc(100vmin - 4 * 1rem);
 
   @media(portrait) {
     grid-template-columns: auto 100vmin auto;
-    grid-template-rows: max-content 100vmin;
+    grid-template-rows: max-content max-content 100vmin;
   }
 
   justify-content: center;
@@ -24,12 +25,11 @@
 }
 
 .visualiser__main {
-  font-size: 0.8em;
+  font-size: 0.8rem;
 
   display: grid;
   grid-template-rows: [hx-start vx-start] auto [hx-end v-start] 1fr [v-end vx-end];
   grid-template-columns: [vx-start hx-start] auto [vx-end v-start] 1fr [v-end hx-end];
-  grid-area: v;
   overflow: hidden;
 }
 
@@ -105,7 +105,8 @@
 }
 
 .visualiser__legend {
-  display: grid
+  font-size: 0.8rem;
+  display: grid;
 }
 
 .visualiser__legend-item-name {
