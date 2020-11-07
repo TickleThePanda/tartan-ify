@@ -130,7 +130,6 @@ function colorTextToRgb(text) {
   return [r, g, b];
 }
 
-
 onmessage = function({
   data: {
     colors: {

@@ -247,7 +247,7 @@
 
     async function renderImageFromDiffs(ffts) {
       return new Promise(function(resolve, reject) {
-        const rendererWorker = new Worker('/js/renderer.js');
+        const rendererWorker = new Worker('/js/worker--renderer.js');
 
         rendererWorker.onmessage = async event => {
           const array = new Uint8ClampedArray(event.data);
@@ -281,7 +281,7 @@
 
     async function calculateFftDiffs(ffts) {
       return new Promise(function(resolve, reject) {
-        const diffAnalyserWorker = new Worker('/js/diff-analysis.js');
+        const diffAnalyserWorker = new Worker('/js/worker--diff-analysis.js');
 
         const buffers = ffts.map(f => f.buffer);
 
@@ -298,7 +298,7 @@
     async function calculateFftsForIntervals(audioData, interval) {
 
       return new Promise(function(resolve, reject) {
-        const fftWorker = new Worker('/js/fft.js');
+        const fftWorker = new Worker('/js/worker--fft.js');
 
         const buffers = [];
 
@@ -340,25 +340,6 @@
       });
 
     }
-
-    function addFileUploadHandler() {
-      const inputs = document.querySelectorAll('.js-file-upload-input');
-      for (let input of inputs) {
-        const inputId = input.id;
-        const fileNameLabel = Array.from(document.querySelectorAll('.js-file-upload-name')).find(e => e.dataset["for"] === inputId);
-        console.log(input, fileNameLabel);
-        input.addEventListener('change', (e) => {
-          const file = input.files[0];
-          if (file !== undefined) {
-            fileNameLabel.innerHTML = file.name;
-          }
-        })
-      }
-
-    }
-
-    addFileUploadHandler();
-
 
   });
 

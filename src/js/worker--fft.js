@@ -1,4 +1,4 @@
-importScripts('fft-library.js');
+importScripts('lib--fft.js');
 
 function getMergedChannels(buffers) {
   const channels = buffers.map(b => new Float32Array(b));
@@ -13,7 +13,7 @@ function getMergedChannels(buffers) {
     }
     combined[i] = sum / channels.length;
   }
-  
+
   return combined;
 }
 
@@ -27,7 +27,7 @@ onmessage = function(message) {
 
   const combined = getMergedChannels(buffers);
   const totalSamples = combined.length;
-  
+
   let startSample = 0;
 
   const temp = new Float32Array(length / 2);
@@ -74,4 +74,3 @@ onmessage = function(message) {
   postMessage(fftBuffers, fftBuffers);
 
 }
-
