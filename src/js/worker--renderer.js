@@ -1,3 +1,23 @@
+const circularTween = (function() {
+  // degrees => radians
+  var dtor = function(d) { return d * Math.PI / 180; };
+  // radians => degrees
+  var rtod = function(r) { return r * 180 / Math.PI; };
+
+  return function(start, stop) {
+    start = dtor(start);
+    stop = dtor(stop);
+    var delta = Math.atan2(Math.sin(stop - start), Math.cos(stop - start));
+    return function tween(i) {
+      return (rtod(start + delta * i) + 360) % 360;
+    };
+  };
+})();
+
+function linearTween(start, stop) {
+  return function tween(i) { return (stop-start) * i + start; };
+};
+
 function hslToRgb(h, s, l){
   var r, g, b;
 
@@ -50,15 +70,17 @@ function rgbToHsl(r, g, b) {
 function scale(data) {
 
     const max = data
-          .reduce((a, b) => Math.max(a, b));
+          .filter(m => m !== -1)
+          .reduce((a, b) => Math.max(a, b), Number.MIN_SAFE_INTEGER);
 
     const min = data
-          .filter(a => a != 0)
+          .filter(m => m !== -1)
           .reduce((a, b) => Math.min(a, b), Number.MAX_SAFE_INTEGER);
 
     const range = max - min;
 
-    return data.map(v => (v - min) / range);
+    return data
+      .map(v => v === -1 ? -1 : (v - min) / range);
 
 }
 
@@ -77,12 +99,15 @@ class MusicSimilarityRenderer {
 
       const hE = this.colorSimilar[0];
       const hS = this.colorDiff[0];
+      const hf = circularTween(hE, hS);
 
       const sE = this.colorSimilar[1];
       const sS = this.colorDiff[1];
+      const sf = linearTween(sE, sS);
 
       const lE = this.colorSimilar[2];
       const lS = this.colorDiff[2];
+      const lf = linearTween(lE, lS);
 
       const width = Math.sqrt(scaled.length);
 
@@ -95,21 +120,19 @@ class MusicSimilarityRenderer {
 
           const pos = (i * width + j) * 4;
 
-          const h = hE + v * (hS - hE);
-          const s = sE + v * (sS - sE);
-          const l = lE + v * (lS - lE);
-
-          const rgb = hslToRgb(h, s, l);
+          let [r,g,b] = hslToRgb(
+            hf(v),
+            sf(v),
+            lf(v)
+          );
 
           if (i === j) {
-            rgb[0] = 255;
-            rgb[1] = 255;
-            rgb[2] = 255;
+            r = g = b = 255;
           }
 
-          array[pos    ] = rgb[0];
-          array[pos + 1] = rgb[1];
-          array[pos + 2] = rgb[2];
+          array[pos    ] = r;
+          array[pos + 1] = g;
+          array[pos + 2] = b;
           array[pos + 3] = 255;
 
         }

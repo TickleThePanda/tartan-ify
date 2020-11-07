@@ -10,21 +10,25 @@ onmessage = function(message) {
   for (let i = 0; i < ffts.length; i++) {
     for (let j = i; j < ffts.length; j++) {
       let diff = 0;
-      const left = ffts[i];
-      const right = ffts[j];
+      if (i === j) {
+        diff = -1;
+      } else {
+        const left = ffts[i];
+        const right = ffts[j];
 
-      const leftSum = left
-          .reduce((a, b) => a + b);
+        const leftSum = left
+            .reduce((a, b) => a + b);
 
-      const rightSum = right
-          .reduce((a, b) => a + b);
+        const rightSum = right
+            .reduce((a, b) => a + b);
 
-      for (let k = 0; k < left.length; k++) {
+        for (let k = 0; k < left.length; k++) {
 
-        const leftNorm = leftSum === 0 ? 0 : left[k] / leftSum;
-        const rightNorm = rightSum === 0 ? 0 : right[k] / rightSum;
+          const leftNorm = leftSum === 0 ? 0 : left[k] / leftSum;
+          const rightNorm = rightSum === 0 ? 0 : right[k] / rightSum;
 
-        diff += Math.abs(leftNorm - rightNorm);
+          diff += Math.abs(leftNorm - rightNorm);
+        }
       }
 
       const v = diff;
@@ -42,7 +46,7 @@ onmessage = function(message) {
 }
 
 function convertResultsToArray(results) {
-  
+
   const data = new Float32Array(results.length * results.length);
 
   for (let i = 0; i < results.length; i++) {
@@ -50,6 +54,6 @@ function convertResultsToArray(results) {
       data[j * results.length + i] = results[i][j];
     }
   }
-  
+
   return data;
 }
