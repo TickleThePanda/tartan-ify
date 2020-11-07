@@ -68,7 +68,7 @@ class MusicSimilarityRenderer {
     this.colorDiff = colors.diff;
     this.colorSimilar = colors.similar;
   }
-  
+
   render(data) {
 
     if (data.length > 0) {
@@ -94,7 +94,7 @@ class MusicSimilarityRenderer {
           const v = scaled[i * width + j];
 
           const pos = (i * width + j) * 4;
-          
+
           const h = hE + v * (hS - hE);
           const s = sE + v * (sS - sE);
           const l = lE + v * (lS - lE);
@@ -130,40 +130,42 @@ function colorTextToRgb(text) {
   return [r, g, b];
 }
 
-let colors = {};
 
-onmessage = function(message) {
-
-  if (!(message.data instanceof ArrayBuffer)) {
-
-    const colorDiffRgb = colorTextToRgb(message.data.diff); 
-    const colorSimilarRgb = colorTextToRgb(message.data.similar);
-
-    colors.diff = rgbToHsl(
-      colorDiffRgb[0],
-      colorDiffRgb[1],
-      colorDiffRgb[2]
-    );
-    colors.similar = rgbToHsl(
-      colorSimilarRgb[0],
-      colorSimilarRgb[1],
-      colorSimilarRgb[2]
-    );
-  } else {
-
-    const buffer = message.data;
-
-    const data = new Float32Array(buffer);
-
-    const renderer = new MusicSimilarityRenderer(colors);
-
-    const render = renderer.render(data);
-
-    const outBuffer = render.buffer;
-
-    postMessage(outBuffer, [outBuffer]);
-
+onmessage = function({
+  data: {
+    colors: {
+      diff,
+      similar
+    },
+    buffer
   }
+}) {
+
+  let colors = [];
+
+  const colorDiffRgb = colorTextToRgb(diff);
+  const colorSimilarRgb = colorTextToRgb(similar);
+
+  colors.diff = rgbToHsl(
+    colorDiffRgb[0],
+    colorDiffRgb[1],
+    colorDiffRgb[2]
+  );
+  colors.similar = rgbToHsl(
+    colorSimilarRgb[0],
+    colorSimilarRgb[1],
+    colorSimilarRgb[2]
+  );
+
+  const data = new Float32Array(buffer);
+
+  const renderer = new MusicSimilarityRenderer(colors);
+
+  const render = renderer.render(data);
+
+  const outBuffer = render.buffer;
+
+  postMessage(outBuffer, [outBuffer]);
+
 
 }
-

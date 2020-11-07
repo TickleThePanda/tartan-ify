@@ -249,8 +249,6 @@
       return new Promise(function(resolve, reject) {
         const rendererWorker = new Worker('/js/renderer.js');
 
-        rendererWorker.postMessage(colors);
-
         rendererWorker.onmessage = async event => {
           const array = new Uint8ClampedArray(event.data);
 
@@ -262,12 +260,21 @@
 
           const bmp = await createImageBitmap(image, 0, 0, wFromRenderer, wFromRenderer);
 
+          rendererWorker.terminate();
+
           resolve(bmp);
         };
 
         const buffer = ffts.buffer;
 
-        rendererWorker.postMessage(buffer, [buffer]);
+        console.log(colors);
+
+        rendererWorker.postMessage({
+            buffer,
+            colors
+          },
+          [buffer]
+        );
 
       });
     }
