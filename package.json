@@ -15,9 +15,13 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-almost": "^1.0.1",
     "concurrently": "^4.1.0",
     "gulp": "^4.0.1",
     "gulp-less": "^4.0.1",
-    "http-server": "^0.11.1"
+    "gulp-mocha": "^7.0.2",
+    "http-server": "^0.11.1",
+    "mocha": "^8.2.1"
   }
 }
