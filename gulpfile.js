@@ -36,11 +36,17 @@ gulp.task('images', function() {
     .pipe(gulp.dest('_site/images/'));
 });
 
-gulp.task('default', gulp.parallel('html', 'css', 'js', 'images'));
+gulp.task('audio', function() {
+  return gulp.src('src/audio/*.*')
+    .pipe(gulp.dest('_site/audio/'));
+});
+
+gulp.task('default', gulp.parallel('html', 'css', 'js', 'images', 'audio'));
 
 gulp.task('watch', function() {
   gulp.watch('src/**/*.html', gulp.series('html'));
   gulp.watch('src/js/**/*.{js,mjs}', gulp.series('js'));
   gulp.watch('src/_less/**/*.less', gulp.series('css'));
   gulp.watch('src/images/**/*.png)', gulp.series('images'));
+  gulp.watch('src/audio/*.*', gulp.series('audio'));
 });

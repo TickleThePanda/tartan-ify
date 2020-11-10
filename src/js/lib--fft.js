@@ -1,9 +1,10 @@
-/* 
+/*
  * Free FFT and convolution (JavaScript)
- * 
+ *
  * Copyright (c) 2017 Project Nayuki. (MIT License)
+ * Modifications Copyrigth (c) 2019 Panda (Thomas) Attwood
  * https://www.nayuki.io/page/free-small-fft-in-multiple-languages
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
@@ -58,7 +59,7 @@ function calculateFrequencyData(input, freqs) {
   real.fill(0);
   real.set(bra);
   imag.fill(0);
-  
+
   // Cooley-Tukey decimation-in-time radix-2 FFT
   for (let size = 2; size <= length; size *= 2) {
     const halfsize = size / 2;
@@ -90,6 +91,3 @@ function calculateFrequencyData(input, freqs) {
     return y;
   }
 }
-
-
-

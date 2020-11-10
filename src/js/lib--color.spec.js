@@ -55,8 +55,4 @@ describe('lib--color', function() {
       });
     }
   });
-
-  describe('circularTween', function() {
-    it(`should `)
-  });
 })

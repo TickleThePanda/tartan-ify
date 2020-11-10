@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
 
     <script src="/js/app--main.mjs" type="module"></script>
-    <script src="/js/util--file-upload.js"></script>
 
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
     <link rel="stylesheet" href="/css/main.css">
@@ -48,11 +47,28 @@
         here), then click <em>Tartan-ify</em> to start the visualisation.
       </div>
       <form class="form">
-        <label class="form__button" id="file-upload-label" for="music-file">
-          <input class="form__file-upload-hidden-button js-file-upload-input" type="file" id="music-file" name="music-file" />
-          Choose some music
-          <span class="form__file-upload-name js-file-upload-name" data-for="music-file"></span>
-        </label>
+        <h2>Run the tool</h2>
+        <fieldset class="form__fieldset">
+          <legend class="form__fieldset-legend">
+            <h3>Select your music</h3>
+            <em class="js-last-selected-value form__option" data-for="music-file" data-for-names="example-options">Not yet selected</em>
+          </legend>
+          <div class="form__group-options">
+            <div class="form__info form__option">
+              <label class="form__button" id="file-upload-label" for="music-file">
+                <input class="form__file-upload-hidden-button" type="file" id="music-file" name="music-file" />
+                Select from your device
+              </label>
+            </div>
+            <div class="form__option--or">
+              or
+            </div>
+            <div class="form__info form__option">
+              <strong>From examples</strong>
+              <div class="js-example-toggle-options"></div>
+            </div>
+          </div>
+        </fieldset>
         <label class="form__label" for="analysis-interval">
           Chunk length (ms)
           <input class="form__input-number" id="analysis-interval" name="analysis-interval" value="1000" />

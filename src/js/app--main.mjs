@@ -4,7 +4,7 @@ import { VisualisationPainter } from './app--visualisation-painter.mjs';
 import { MusicAnalyser } from './app--music-analyser.mjs';
 import { ColorManager } from './app--color-manager.mjs';
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
 
   const loadingStatus = document.getElementById('loading-status');
   function updateLoadingStatus(m) {
@@ -16,7 +16,8 @@ window.addEventListener('load', () => {
   const context = canvas.getContext('2d');
 
   const formManager = new AnalysisFormManager(
-          document.getElementById('music-form')
+          document.getElementById('music-form'),
+          await loadAudioSelection()
   );
 
   const colorManager = new ColorManager(visualiser);
@@ -65,5 +66,9 @@ window.addEventListener('load', () => {
     new VisualisationPainter(canvas, context, bmp, interval).start();
   }
 
+  async function loadAudioSelection() {
+    const audioResponse = await fetch('/audio/audio.json');
+    return await audioResponse.json();
+  }
 
 });

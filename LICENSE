@@ -1,3 +1,10 @@
+Tartan-ify is licensed under the below MIT license apart from:
+ - src/js/lib--fft.js - Copyright (c) 2017 Project Nayuki (MIT License). See
+   the file header for full license text.
+ - src/audio/ - Audio files are public domain.
+
+---
+
 Copyright (c) 2018 Panda (Thomas) Attwood | TickleThePanda
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

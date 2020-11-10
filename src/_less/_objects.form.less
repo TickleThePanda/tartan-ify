@@ -1,12 +1,16 @@
 
+@border: 0.15rem var(--palette-secondary) solid;
+
 .form {
   display: flex;
 
   flex-direction: column;
 
-  max-width: 17em;
+  align-items: start;
+
   margin: auto;
-  margin-top: 1em;
+  margin-top: 1rem;
+  padding: 0.5rem;
 }
 
 .form__section {
@@ -19,13 +23,15 @@
 
 
 .form__label {
-  margin: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 .form__input-number {
   margin-top: 0.25rem;
   padding: 0.25rem;
   width: 100%;
+  border: @border;
+  border-radius: 0.25rem;
 }
 
 .form__button {
@@ -35,14 +41,19 @@
   -webkit-appearance: none;
   appearance: none;
 
-  border: 0.25rem var(--palette-secondary) solid;
+  border: @border;
+  border-radius: 0.2rem;
   background-color: var(--palette-primary);
   padding: 0.5rem;
-  margin: 0.5rem;
+  margin-top: 0.5rem;
 
   color: #000;
 
   text-align: center;
+
+  &:first-child {
+    margin-top: 0;
+  }
 }
 
 .form__button--submit {
@@ -63,10 +74,8 @@
   top: 0;
 }
 
-.form__file-upload-name {
+.form__info {
   display: block;
-  margin-top: 0.25rem;
-  font-style: italic;
 }
 
 .form__error {
@@ -74,5 +83,46 @@
 
   height: 1rem;
 
-  color: --palette-secondary;
+  color: var(--palette-secondary);
+}
+
+.form__fieldset {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border: @border;
+  border-radius: 0.2rem;
+  width: 100%;
+}
+
+.form__fieldset-legend {
+  border: @border;
+  border-radius: 0.2rem;
+  padding: 0.25rem;
+}
+
+.form__group-options {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.5rem;
+}
+
+.form__option--or {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  text-align: center;
+  font-weight: 700;
+  &::before, &&::after {
+    content: "";
+    display: block;
+    height: 1px;
+    background-color: var(--palette-secondary);
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+}
+
+.form__radio-item {
+  margin-top: 0.5rem;
 }
