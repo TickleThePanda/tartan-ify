@@ -1,5 +1,5 @@
 
-@border: 0.15rem var(--palette-secondary) solid;
+@border: 0.15rem var(--palette-primary-stroke) solid;
 
 .form {
   display: flex;
@@ -32,6 +32,8 @@
   width: 100%;
   border: @border;
   border-radius: 0.25rem;
+
+  color: var(--palette-secondary-stroke);
 }
 
 .form__button {
@@ -43,11 +45,14 @@
 
   border: @border;
   border-radius: 0.2rem;
-  background-color: var(--palette-primary);
+  background-color: var(--palette-secondary-background);
   padding: 0.5rem;
   margin-top: 0.5rem;
 
-  color: #000;
+  color: var(--palette-secondary-stroke);
+
+  transition-property: backround-color color;
+  transition-duration: 0.15s;
 
   text-align: center;
 
@@ -57,7 +62,8 @@
 }
 
 .form__button:hover {
-  background-color: var(--palette-primary--highlight);
+  background-color: var(--palette-primary-background);
+  color: var(--palette-primary-stroke);
 }
 
 
@@ -89,7 +95,7 @@
 
   height: 1rem;
 
-  color: var(--palette-secondary);
+  color: var(--palette-primary-stroke);
 }
 
 .form__fieldset {
@@ -123,7 +129,7 @@
     content: "";
     display: block;
     height: 1px;
-    background-color: var(--palette-secondary);
+    background-color: var(--palette-primary-stroke);
     margin-left: 1rem;
     margin-right: 1rem;
   }

@@ -1,9 +1,15 @@
 :root {
 
+  @primary-base: #eebbc3;
+  @secondary-base: #232946;
+
   --color-similar: #ff3251;
   --color-diff: #010147;
 
-  --palette-primary: #eebbc3;
-  --palette-primary--highlight: lighten(#eebbc3, 5%, relative);
-  --palette-secondary: #232946;
+  --palette-primary-stroke: @primary-base;
+  --palette-primary-stroke-hc: lighten(@primary-base, 10%, relative);
+  --palette-primary-background: @secondary-base;
+
+  --palette-secondary-stroke: @secondary-base;
+  --palette-secondary-background: @primary-base;
 }
