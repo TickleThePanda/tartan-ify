@@ -41,7 +41,12 @@ gulp.task('audio', function() {
     .pipe(gulp.dest('_site/audio/'));
 });
 
-gulp.task('default', gulp.parallel('html', 'css', 'js', 'images', 'audio'));
+gulp.task('headers', function() {
+  return gulp.src('src/_headers')
+    .pipe(gulp.dest('_site/_headers'));
+});
+
+gulp.task('default', gulp.parallel('html', 'css', 'js', 'images', 'audio', 'headers'));
 
 gulp.task('watch', function() {
   gulp.watch('src/**/*.html', gulp.series('html'));
