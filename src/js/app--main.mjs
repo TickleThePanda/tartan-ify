@@ -48,7 +48,14 @@ window.addEventListener('load', async () => {
     analyser.addStatusUpdateListener(updateLoadingStatus);
 
     const audioFileData = await loadFileData();
-    const {audio, image: imageData, bpm: realBpm} = await analyser.processData(audioFileData, bpmOption);
+    let audio, imageData, realBpm;
+    try {
+      ({ audio, image: imageData, bpm: realBpm } = await analyser.processData(audioFileData, bpmOption));
+    } catch (e) {
+      loadingStatus.innerHTML = `There was a problem generating the visualisation.<br>${e}`;
+      loadingStatus.classList.add('error');
+      return;
+    }
 
     loadingStatus.classList.add('hidden');
 

@@ -127,6 +127,7 @@ class AnalysisFormManager {
       const uploadedFile = formData.get('music-file');
       const exampleAudio = formData.get('example-options');
       const detectBpm = formData.get('detect-bpm');
+      const autodetectMultiplier = formData.get('detect-bpm-multiplier');
       const bpmText = formData.get('analysis-bpm');
       const dataScaleText = formData.get('scale');
       const minThresholdValue = formData.get('min-percentile');
@@ -156,8 +157,6 @@ class AnalysisFormManager {
         }
       }
 
-      const bpm = detectBpm !== 'detect-bpm' ? parseInt(bpmInput.value) : 'autodetect';
-
       const fileLoadFunction = fileUploaded
          ? async () => await loadFileData(uploadedFile)
          : async () => {
@@ -167,7 +166,11 @@ class AnalysisFormManager {
           };
 
       listeners.forEach(l => l({
-        bpm: bpm,
+        bpm: {
+          autodetect: detectBpm === 'detect-bpm',
+          autodetectMultiplier: parseFloat(autodetectMultiplier),
+          value: parseFloat(bpmInput.value)
+        },
         scale: dataScaleText,
         thresholds: {
           min: minThresholdValue / 100,

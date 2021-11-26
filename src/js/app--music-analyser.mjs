@@ -29,15 +29,15 @@ class MusicAnalyser {
     const sharedBuffers = convertToSharedBuffers(audioData);
     const sampleRate = audioData.sampleRate;
 
-    updateStatus('Calculating BPM')
+    updateStatus('Detecting BPM')
     const realBpm = await calculateBpm(sharedBuffers, bpm);
 
     const interval = 1000 / (realBpm / 60);
 
-    updateStatus('Calculating frequency data');
+    updateStatus('Analysing spectrum for chunks');
     const fftsForIntervals = await calculateFftsForIntervals(sharedBuffers, sampleRate, interval);
 
-    updateStatus('Calculating differences');
+    updateStatus('Calculating difference for chunks');
     const diffs = await calculateFftDiffs(fftsForIntervals);
 
     updateStatus('Rendering visualisation');
@@ -115,14 +115,14 @@ async function calculateFftsForIntervals(buffers, sampleRate, interval) {
 
 async function calculateBpm(buffers, bpm) {
 
-  if (bpm !== 'autodetect') {
-    return bpm;
+  if (!bpm.autodetect) {
+    return bpm.value;
   }
 
   const { tempo } = await new OneTimeTaskWorker('/js/worker--tempo.js')
     .run(buffers);
 
-  return tempo;
+  return tempo * bpm.autodetectMultiplier;
 
 }
 
@@ -157,7 +157,11 @@ class OneTimeTaskWorker {
       worker.onmessage = m => {
         resolve(m.data);
         worker.terminate();
-      }
+      };
+      worker.onerror = (event) => {
+        reject(event.message);
+        worker.terminate();
+      };
       worker.postMessage(message, transfer);
     });
   }

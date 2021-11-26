@@ -44,8 +44,12 @@
 
         <h2>How to use Tartan-ify</h2>
         <p>To use this tool, select a piece of music and then horizontal
-        <em>Tartan-ify</em>. The tool will detect the song's BPM and will
-        choose sensible defaults for the visualisation.
+        <em>Tartan-ify</em>. The tool will detect the song's BPM and use
+        this to split the song into chunks and will choose sensible
+        defaults for the visualisation.
+
+        <p>The smaller the chunks and the longer the song, the longer it will
+        take to generate the visualisation.
       </div>
       <form class="form">
         <h2>Run the tool</h2>
@@ -80,12 +84,31 @@
           </summary>
           <fieldset class="form__fieldset">
             <legend class="form__fieldset-legend">
-              <h3>BPM</h3>
+              <h3>Chunking</h3>
               <em class="js-last-selected-value form__option" data-for="detect-bpm" data-for-names="analysis-bpm">Not yet selected</em>
             </legend>
+            <p>This section defines how the song will be split into chunks. The
+            larger the BPM value, the smaller the chunks.
+            <p>Large chunks can allow you to see the large scale structures of a song, for
+            example, verse, chorus, bridge. Smaller can allow you to see smaller structures,
+            like repeated motifs or notes.
+            <p>Autodetect will try to find the BPM. You can specify a multipler to an
+            autodetected BPM - this can be useful, for example, to halve (0.5) or double (2)
+            the found BPM.
             <div>
               <input type="radio" id="detect-bpm" name="detect-bpm" value="detect-bpm" checked/>
               <label class="form__label form__label--checkbox" for="detect-bpm">Autodetect</label>
+              <label class="form__label" for="detect-bpm-multiplier">Autodetect multiplier</label>
+              <select id="detect-bpm-multiplier" name="detect-bpm-multiplier">
+                <option value="0.003125">0.003125x</option>
+                <option value="0.0625">0.0625x</option>
+                <option value="0.125">0.125x</option>
+                <option value="0.25">0.25x</option>
+                <option value="0.5">0.5x</option>
+                <option value="1" selected>1x</option>
+                <option value="2">2x</option>
+                <option value="4">4x</option>
+              </select>
             </div>
             <div class="form__option--or">
               or
@@ -102,7 +125,7 @@
             <h4>Scale</h3>
             <p>Which scale to use to visualise the data.
             <div>
-              <input type="radio" id="scale--log" name="scale" value="log" checked/>
+              <input type="radio" id="scale--log" name="scale" value="log"/>
               <label class="form__label form__label--checkbox" for="scale--log">Log</label>
             </div>
             <div>
@@ -110,7 +133,7 @@
               <label class="form__label form__label--checkbox form__label--checkbox" for="scale--sqrt">Square root</label>
             </div>
             <div>
-              <input type="radio" id="scale--linear" name="scale" value="linear"/>
+              <input type="radio" id="scale--linear" name="scale" value="linear" checked/>
               <label class="form__label form__label--checkbox" for="scale--linear">Linear</label>
             </div>
             <div>
