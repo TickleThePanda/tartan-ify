@@ -24,12 +24,13 @@
     <meta name="twitter:url" value="https://tartan-ify.ticklethepanda.co.uk/" />
   </head>
   <body class="viewport-exact">
-    <div id="music-form" class="page modal">
+    <div id="music-form" class="page">
       <div class="description">
         <h1>Tartan-ify</h1>
 
         <p>Tartan-ify generates visualisations that shows, in a piece
-        of music, where the similarities and differences are.
+        of music, where the similarities and differences are. <strong>All of
+        the processing happens in your browser.</strong>
 
         <h2>How it works</h2>
         <p>Tartan-ify splits the music up into chunks. Every chunk of the song
@@ -41,10 +42,10 @@
         Fast Fourier Transform</a>, and then taking the sum of the difference
         in power of each frequency between the chunks.
 
-        <h2>How to use the tool</h2>
-        <p>To use this tool, select a piece of music then select the
-        chunk interval that you want in milliseconds (using the BPM can be useful
-        here), then click <em>Tartan-ify</em> to start the visualisation.
+        <h2>How to use Tartan-ify</h2>
+        <p>To use this tool, select a piece of music and then horizontal
+        <em>Tartan-ify</em>. The tool will detect the song's BPM and will
+        choose sensible defaults for the visualisation.
       </div>
       <form class="form">
         <h2>Run the tool</h2>
@@ -69,27 +70,72 @@
             </div>
           </div>
         </fieldset>
-        <fieldset class="form__fieldset">
-          <legend class="form__fieldset-legend">
-            <h3>BPM</h3>
-            <em class="js-last-selected-value form__option" data-for="detect-bpm" data-for-names="analysis-bpm">Not yet selected</em>
-          </legend>
-          <div>
-            <input type="radio" id="detect-bpm" name="detect-bpm" value="detect-bpm"/>
-            <label class="form__label" for="detect-bpm">Autodetect</label>
-          </div>
-          <div class="form__option--or">
-            or
-          </div>
-          <label class="form__label" for="analysis-bpm">
-            Specify BPM
-            <input class="form__input-number" id="analysis-bpm" name="analysis-bpm" />
-          </label>
-          <button class="form__button form__button--submit" type="submit" id="form-submit" name="process-music-file">
-            Tartan-ify
-          </button>
-        </fieldset>
         <div id="form-errors" class="form__error"></div>
+        <button class="form__button form__button--submit" type="submit" id="form-submit" name="process-music-file">
+          Tartan-ify
+        </button>
+        <details>
+          <summary>
+            Advanced options
+          </summary>
+          <fieldset class="form__fieldset">
+            <legend class="form__fieldset-legend">
+              <h3>BPM</h3>
+              <em class="js-last-selected-value form__option" data-for="detect-bpm" data-for-names="analysis-bpm">Not yet selected</em>
+            </legend>
+            <div>
+              <input type="radio" id="detect-bpm" name="detect-bpm" value="detect-bpm" checked/>
+              <label class="form__label form__label--checkbox" for="detect-bpm">Autodetect</label>
+            </div>
+            <div class="form__option--or">
+              or
+            </div>
+            <label class="form__label" for="analysis-bpm">
+              Specify BPM
+              <input class="form__input-number" id="analysis-bpm" name="analysis-bpm" />
+            </label>
+          </fieldset>
+          <fieldset class="form__fieldset">
+            <legend class="form__fieldset-legend">
+              <h3>Scale</h3>
+            </legend>
+            <h4>Scale</h3>
+            <p>Which scale to use to visualise the data.
+            <div>
+              <input type="radio" id="scale--log" name="scale" value="log" checked/>
+              <label class="form__label form__label--checkbox" for="scale--log">Log</label>
+            </div>
+            <div>
+              <input type="radio" id="scale--sqrt" name="scale" value="sqrt"/>
+              <label class="form__label form__label--checkbox form__label--checkbox" for="scale--sqrt">Square root</label>
+            </div>
+            <div>
+              <input type="radio" id="scale--linear" name="scale" value="linear"/>
+              <label class="form__label form__label--checkbox" for="scale--linear">Linear</label>
+            </div>
+            <div>
+              <input type="radio" id="scale--squared" name="scale" value="squared"/>
+              <label class="form__label form__label--checkbox" for="scale--squared">Squared</label>
+            </div>
+            <div>
+              <input type="radio" id="scale--exponential" name="scale" value="exponential"/>
+              <label class="form__label form__label--checkbox" for="scale--exponential">Exponential</label>
+            </div>
+            <h4>Threshold</h4>
+            <p>
+              Setting a minimum and maximum percentile will fine-tune the range.
+              The range of different sounds or lots of silence can reduce the useful
+              range of colors of visualisation.
+            <div>
+              <label class="form__label" for="min-percentile">Min percentile</label>
+              <input type="number" id="min-percentile" name="min-percentile" value="0" min="0" max="100" step="0.1"/>
+            </div>
+            <div>
+              <label class="form__label" for="max-percentile">Max percentile</label>
+              <input type="number" id="max-percentile" name="max-percentile" value="50" min="0" max="100" step="0.1"/>
+            </div>
+          </fieldset>
+        </details>
       </form>
     </div>
     <div id="visualiser" class="page visualiser hidden">

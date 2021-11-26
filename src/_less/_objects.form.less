@@ -23,7 +23,16 @@
 
 
 .form__label {
+  display: block;
   margin-top: 0.5rem;
+
+  &--checkbox {
+    display: inline;
+  }
+}
+
+.form__range-output {
+  display: inline;
 }
 
 .form__input-number {
@@ -98,6 +107,10 @@
   color: var(--palette-primary-stroke);
 }
 
+.form__error:empty {
+  display: none;
+}
+
 .form__fieldset {
   margin-top: 0.5rem;
   padding: 0.5rem;
@@ -137,4 +150,8 @@
 
 .form__radio-item {
   margin-top: 0.5rem;
+}
+
+.form p {
+  max-width: 20em;
 }

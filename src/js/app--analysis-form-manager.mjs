@@ -2,6 +2,31 @@ function isAudio(file) {
   return file.type === '' || file.type.startsWith('audio');
 }
 
+function getInputHandler(form, input) {
+  const inputHandlers = {
+    file: (_, i) => ({
+      isSelected: () => i.value !== '' || i.files[0] !== undefined,
+      reset: () => i.value = null,
+      getNiceValue: () => i.files[0] !== undefined ? i.files[0].name : null,
+    }),
+    radio: (form, i) => ({
+      isSelected: () => i.checked,
+      reset: () => i.checked = false,
+      getNiceValue: () => form.querySelector('label[for="' + i.id + '"]').textContent,
+    }),
+    text: (_, i) => ({
+      isSelected: () => i.value !== '',
+      reset: () => i.value = null,
+      getNiceValue: () => i.value,
+    }),
+  }
+
+  return inputHandlers[input.type.toLowerCase()](form, input);
+
+}
+
+
+
 function addLastSelectedEvents() {
 
   const watchers = document.querySelectorAll('.js-last-selected-value');
@@ -21,36 +46,30 @@ function addLastSelectedEvents() {
 
     const inputs = [... directInputs, ...formGroupInputs];
 
+    const setWatcherValue = v => v !== null ? watcher.innerHTML = v : null;
+
     for (let input of inputs) {
+      const handler = getInputHandler(form, input);
 
-      const f = (e) => {
-        if (input.type.toLowerCase() === 'file') {
-          const file = input.files[0];
-          if (file !== undefined) {
-            watcher.innerHTML = file.name;
-          }
-        } else {
-          watcher.innerHTML = form.querySelector('label[for="' + input.id + '"]').textContent;
-        }
+      const handleChange = (e) => {
 
-        for (let inputToReset of inputs.filter(e => e !== input)) {
-          const type = inputToReset.type.toLowerCase();
-          switch (type) {
-            case 'file':
-              inputToReset.value = null;
-              break;
-            case 'radio':
-              inputToReset.checked = false;
-              break;
-            case 'text':
-              inputToReset.value = null;
-              break;
+        if (handler.isSelected()) {
+          setWatcherValue(handler.getNiceValue());
+
+          for (let inputToReset of inputs.filter(e => e !== input)) {
+            const inputToResetHandler = getInputHandler(form, inputToReset);
+
+            inputToResetHandler.reset();
           }
         }
       };
 
-      input.addEventListener('click', f);
-      input.addEventListener('change', f);
+      input.addEventListener('click', handleChange);
+      input.addEventListener('change', handleChange);
+
+      if (handler.isSelected()) {
+        setWatcherValue(handler.getNiceValue());
+      }
     }
 
   }
@@ -71,7 +90,7 @@ class AnalysisFormManager {
         `
         <div class="form__radio-item">
           <input type="radio" id="example-options_${example.slug}" name="example-options" value="${example.url}">
-          <label for="example-options_${example.slug}">${example.name}</label>
+          <label class="form__label form__label--checkbox" for="example-options_${example.slug}">${example.name}</label>
         </div>
         `;
     }
@@ -109,6 +128,14 @@ class AnalysisFormManager {
       const exampleAudio = formData.get('example-options');
       const detectBpm = formData.get('detect-bpm');
       const bpmText = formData.get('analysis-bpm');
+      const dataScaleText = formData.get('scale');
+      const minThresholdValue = formData.get('min-percentile');
+      const maxThresholdValue = formData.get('max-percentile');
+
+      if (minThresholdValue > maxThresholdValue) {
+        formErrors.innerHTML = 'Max percentile must be grester than min percentile';
+        return;
+      }
 
       if (detectBpm !== 'detect-bpm' && isNaN(parseInt(bpmText))) {
         formErrors.innerHTML = 'Please select autodetect or specify a valid whole number for BPM';
@@ -116,7 +143,7 @@ class AnalysisFormManager {
       }
 
       const fileUploaded = uploadedFile.size !== 0;
-      const exampleAudioSelected = exampleAudio !== undefined;
+      const exampleAudioSelected = exampleAudio !== null;
 
       if (!fileUploaded && !exampleAudioSelected) {
         formErrors.innerHTML = 'Please select an audio file.';
@@ -141,6 +168,11 @@ class AnalysisFormManager {
 
       listeners.forEach(l => l({
         bpm: bpm,
+        scale: dataScaleText,
+        thresholds: {
+          min: minThresholdValue / 100,
+          max: maxThresholdValue / 100
+        },
         loadFileData: fileLoadFunction
       }));
 

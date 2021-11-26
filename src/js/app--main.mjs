@@ -16,8 +16,8 @@ window.addEventListener('load', async () => {
   const context = canvas.getContext('2d');
 
   const formManager = new AnalysisFormManager(
-          document.getElementById('music-form'),
-          await loadAudioSelection()
+    document.getElementById('music-form'),
+    await loadAudioSelection()
   );
 
   const colorManager = new ColorManager(visualiser);
@@ -30,7 +30,7 @@ window.addEventListener('load', async () => {
   formManager.registerSubmitSuccessListener(analyse);
 
   async function analyse({
-    bpm: bpmOption, loadFileData
+    bpm: bpmOption, scale, thresholds, loadFileData
   }) {
 
     console.log("app--main.mjs - Processing data");
@@ -39,7 +39,9 @@ window.addEventListener('load', async () => {
     visualiser.classList.remove('hidden');
     canvasSizeManager.triggerResize();
 
-    const analyser = new MusicAnalyser(colors, context);
+    const analyser = new MusicAnalyser({
+      colors, scale, thresholds, context
+    });
 
     loadingStatus.classList.remove('hidden');
     updateLoadingStatus('Loading file');

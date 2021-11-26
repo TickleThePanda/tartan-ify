@@ -1,8 +1,12 @@
 class MusicAnalyser {
-  constructor(colors, context) {
+  constructor({
+    colors, scale, thresholds, context
+  }) {
     this.listeners = [];
     this.colors = colors;
+    this.scale = scale;
     this.context = context;
+    this.thresholds = thresholds;
   }
 
   addStatusUpdateListener(listener) {
@@ -26,7 +30,7 @@ class MusicAnalyser {
     const sampleRate = audioData.sampleRate;
 
     updateStatus('Calculating BPM')
-    const realBpm = Math.floor(await calculateBpm(sharedBuffers, bpm));
+    const realBpm = await calculateBpm(sharedBuffers, bpm);
 
     const interval = 1000 / (realBpm / 60);
 
@@ -37,7 +41,13 @@ class MusicAnalyser {
     const diffs = await calculateFftDiffs(fftsForIntervals);
 
     updateStatus('Rendering visualisation');
-    const bmp = await renderImageFromDiffs(diffs, this.colors, this.context);
+    const bmp = await renderImageFromDiffs({
+      diffs,
+      colors: this.colors,
+      scale: this.scale,
+      context: this.context,
+      thresholds: this.thresholds
+    });
 
     return {
       image: bmp,
@@ -52,14 +62,18 @@ async function decodeAudioData(fileBuffer) {
   return await ctx.decodeAudioData(fileBuffer);
 }
 
-async function renderImageFromDiffs(ffts, colors, context) {
+async function renderImageFromDiffs({
+  diffs, colors, thresholds, scale, context
+}) {
 
   const data = await new OneTimeTaskWorker('/js/worker--renderer.js')
     .run({
-        buffer: ffts.buffer,
-        colors
+        diffs: diffs.buffer,
+        colors,
+        thresholds,
+        scale
       },
-      [ffts.buffer]
+      [diffs.buffer]
     );
 
   const array = new Uint8ClampedArray(data);
