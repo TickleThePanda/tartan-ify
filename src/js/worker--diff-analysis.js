@@ -1,6 +1,8 @@
-onmessage = function(message) {
+onmessage = function({data: buffers}) {
 
-  const ffts = message.data.map(f => new Float32Array(f));
+  console.log(`worker--diff-analyis.js - nBuffers: ${buffers.length}, bufferLength: ${buffers[0].byteLength}`)
+
+  const ffts = buffers.map(f => new Float32Array(f));
 
   const results = [];
   for (let i = 0; i < ffts.length; i++) {

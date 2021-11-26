@@ -13,15 +13,25 @@ class MusicAnalyser {
     }
   }
 
-  async processData(audioFileData, interval) {
+  async processData(audioFileData, bpm) {
+
+    console.log(`app--music.analyser.mjs - fileDataSize: ${audioFileData.byteLength}, bpm: ${bpm}`)
 
     const updateStatus = m => this.listeners.forEach(l => l(m))
 
     updateStatus('Decoding audio data')
     const audioData = await decodeAudioData(audioFileData);
 
+    const sharedBuffers = convertToSharedBuffers(audioData);
+    const sampleRate = audioData.sampleRate;
+
+    updateStatus('Calculating BPM')
+    const realBpm = Math.floor(await calculateBpm(sharedBuffers, bpm));
+
+    const interval = 1000 / (realBpm / 60);
+
     updateStatus('Calculating frequency data');
-    const fftsForIntervals = await calculateFftsForIntervals(audioData, interval);
+    const fftsForIntervals = await calculateFftsForIntervals(sharedBuffers, sampleRate, interval);
 
     updateStatus('Calculating differences');
     const diffs = await calculateFftDiffs(fftsForIntervals);
@@ -31,7 +41,8 @@ class MusicAnalyser {
 
     return {
       image: bmp,
-      audio: audioData
+      audio: audioData,
+      bpm: realBpm
     };
   }
 }
@@ -42,78 +53,98 @@ async function decodeAudioData(fileBuffer) {
 }
 
 async function renderImageFromDiffs(ffts, colors, context) {
-  return new Promise(function(resolve, reject) {
-    const rendererWorker = new Worker('/js/worker--renderer.js');
 
-    rendererWorker.onmessage = async event => {
-      const array = new Uint8ClampedArray(event.data);
-
-      const wFromRenderer = Math.sqrt(array.length / 4);
-
-      const image = context.createImageData(wFromRenderer, wFromRenderer);
-
-      image.data.set(array);
-
-      const bmp = await createImageBitmap(image, 0, 0, wFromRenderer, wFromRenderer);
-
-      rendererWorker.terminate();
-
-      resolve(bmp);
-    };
-
-    const buffer = ffts.buffer;
-
-    rendererWorker.postMessage({
-        buffer,
+  const data = await new OneTimeTaskWorker('/js/worker--renderer.js')
+    .run({
+        buffer: ffts.buffer,
         colors
       },
-      [buffer]
+      [ffts.buffer]
     );
 
-  });
+  const array = new Uint8ClampedArray(data);
+
+  const widthFromRender = Math.sqrt(array.length / 4);
+
+  const image = context.createImageData(widthFromRender, widthFromRender);
+
+  image.data.set(array);
+
+  const bmp = await createImageBitmap(image, 0, 0, widthFromRender, widthFromRender);
+
+  return bmp;
 }
 
 async function calculateFftDiffs(ffts) {
-  return new Promise(function(resolve, reject) {
-    const diffAnalyserWorker = new Worker('/js/worker--diff-analysis.js');
 
-    const buffers = ffts.map(f => f.buffer);
+  const buffers = ffts.map(f => f.buffer);
 
-    diffAnalyserWorker.onmessage = function(message) {
-      resolve(new Float32Array(message.data));
-      diffAnalyserWorker.terminate();
-    }
+  const data = await new OneTimeTaskWorker('/js/worker--diff-analysis.js')
+    .run(buffers, buffers);
 
-    diffAnalyserWorker.postMessage(buffers, buffers);
-
-  });
+  return new Float32Array(data);
 }
 
-async function calculateFftsForIntervals(audioData, interval) {
+async function calculateFftsForIntervals(buffers, sampleRate, interval) {
 
-  return new Promise(function(resolve, reject) {
-    const fftWorker = new Worker('/js/worker--fft.js');
-
-    const buffers = [];
-
-    for (let i = 0; i < audioData.numberOfChannels; i++) {
-      buffers.push(audioData.getChannelData(i).buffer);
-    }
-
-    fftWorker.onmessage = function(message) {
-      resolve(message.data.map(f => new Float32Array(f)));
-      fftWorker.terminate();
-    }
-
-    fftWorker.postMessage({
-      sampleRate: audioData.sampleRate,
-      interval: interval,
-      buffers: buffers
+  const data = await new OneTimeTaskWorker('/js/worker--fft.js')
+    .run({
+      sampleRate,
+      interval,
+      buffers
     });
 
-  });
+  return data.map(f => new Float32Array(f));
 
+}
+
+
+async function calculateBpm(buffers, bpm) {
+
+  if (bpm !== 'autodetect') {
+    return bpm;
+  }
+
+  const { tempo } = await new OneTimeTaskWorker('/js/worker--tempo.js')
+    .run(buffers);
+
+  return tempo;
+
+}
+
+function convertToSharedBuffers(audioData) {
+  const buffers = [];
+
+  for (let i = 0; i < audioData.numberOfChannels; i++) {
+    const buffer = audioData.getChannelData(i).buffer;
+    buffers.push(copyToSharedBuffer(buffer));
+  }
+
+  return buffers;
+}
+
+function copyToSharedBuffer(src)  {
+  const dst = new SharedArrayBuffer(src.byteLength);
+  new Uint8Array(dst).set(new Uint8Array(src));
+  return dst;
 }
 
 
 export { MusicAnalyser };
+
+class OneTimeTaskWorker {
+  constructor(stringUrl) {
+    this.stringUrl = stringUrl;
+  }
+
+  async run(message, transfer) {
+    return new Promise((resolve, reject) => {
+      const worker = new Worker(this.stringUrl);
+      worker.onmessage = m => {
+        resolve(m.data);
+        worker.terminate();
+      }
+      worker.postMessage(message, transfer);
+    });
+  }
+}

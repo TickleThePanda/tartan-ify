@@ -15,22 +15,22 @@ function addLastSelectedEvents() {
       .map(i => form.querySelector("#" + i));
 
     const formGroupInputs = watcher
-      .dataset
-      .forNames
+      .dataset["forNames"]
       .split(/\s+/gi)
       .flatMap(i => [...form.querySelectorAll("[name=" + i + "]")]);
 
     const inputs = [... directInputs, ...formGroupInputs];
 
     for (let input of inputs) {
-      input.addEventListener('change', (e) => {
+
+      const f = (e) => {
         if (input.type.toLowerCase() === 'file') {
           const file = input.files[0];
           if (file !== undefined) {
             watcher.innerHTML = file.name;
           }
         } else {
-          watcher.innerHTML = form.querySelector('label[for="' + input.id + '"]').innerHTML;
+          watcher.innerHTML = form.querySelector('label[for="' + input.id + '"]').textContent;
         }
 
         for (let inputToReset of inputs.filter(e => e !== input)) {
@@ -42,9 +42,15 @@ function addLastSelectedEvents() {
             case 'radio':
               inputToReset.checked = false;
               break;
+            case 'text':
+              inputToReset.value = null;
+              break;
           }
         }
-      });
+      };
+
+      input.addEventListener('click', f);
+      input.addEventListener('change', f);
     }
 
   }
@@ -55,7 +61,7 @@ class AnalysisFormManager {
     this.formElement = formElement;
 
     this.fileInput = document.getElementById('music-file');
-    this.intervalInput = document.getElementById('analysis-interval');
+    this.bpmInput = document.getElementById('analysis-bpm');
     this.formErrors = document.getElementById('form-errors');
     this.submitButton = document.getElementById('form-submit');
 
@@ -90,19 +96,22 @@ class AnalysisFormManager {
     const fileInput = this.fileInput;
     const listeners = this.listeners;
     const formErrors = this.formErrors;
-    const intervalInput = this.intervalInput;
+    const bpmInput = this.bpmInput;
 
     this.formElement.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      console.log("app--analysis-form-manager.mjs - submit event");
 
       const formData = new FormData(e.target);
 
       const uploadedFile = formData.get('music-file');
       const exampleAudio = formData.get('example-options');
-      const intervalText = formData.get('analysis-interval');
+      const detectBpm = formData.get('detect-bpm');
+      const bpmText = formData.get('analysis-bpm');
 
-      if (isNaN(parseInt(intervalText))) {
-        formErrors.innerHTML = 'Please give a valid whole number for Interval';
+      if (detectBpm !== 'detect-bpm' && isNaN(parseInt(bpmText))) {
+        formErrors.innerHTML = 'Please select autodetect or specify a valid whole number for BPM';
         return;
       }
 
@@ -120,7 +129,7 @@ class AnalysisFormManager {
         }
       }
 
-      const interval = parseInt(intervalInput.value);
+      const bpm = detectBpm !== 'detect-bpm' ? parseInt(bpmInput.value) : 'autodetect';
 
       const fileLoadFunction = fileUploaded
          ? async () => await loadFileData(uploadedFile)
@@ -131,7 +140,7 @@ class AnalysisFormManager {
           };
 
       listeners.forEach(l => l({
-        interval: interval,
+        bpm: bpm,
         loadFileData: fileLoadFunction
       }));
 

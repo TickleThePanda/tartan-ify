@@ -17,23 +17,19 @@ function getMergedChannels(buffers) {
   return combined;
 }
 
-onmessage = function(message) {
+onmessage = function({ data: { buffers, sampleRate, interval }}) {
 
-  const buffers = message.data.buffers;
+  console.log(`worker--fft.js - nBuffers: ${buffers.length}, bufferLength: ${buffers[0].byteLength}, interval: ${interval}`);
 
-  const sampleRate = message.data.sampleRate;
-  const interval = message.data.interval;
-  const intervalRate = interval / 1000;
+  const intervalInSeconds = interval / 1000;
 
   const combined = getMergedChannels(buffers);
   const totalSamples = combined.length;
 
-  let startSample = 0;
-
   const temp = new Float32Array(length / 2);
   const freqDatas = [];
 
-  const samplesPerInterval = sampleRate * intervalRate;
+  const samplesPerInterval = sampleRate * intervalInSeconds;
 
   for (let intervalStart = 0;
             intervalStart + samplesPerInterval < totalSamples;

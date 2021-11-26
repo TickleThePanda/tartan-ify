@@ -27,11 +27,13 @@ window.addEventListener('load', async () => {
 
   canvasSizeManager.add(canvas);
 
-  formManager.registerSubmitSuccessListener(submit);
+  formManager.registerSubmitSuccessListener(analyse);
 
-  async function submit({
-    interval, loadFileData
+  async function analyse({
+    bpm: bpmOption, loadFileData
   }) {
+
+    console.log("app--main.mjs - Processing data");
 
     formManager.hide();
     visualiser.classList.remove('hidden');
@@ -44,12 +46,12 @@ window.addEventListener('load', async () => {
     analyser.addStatusUpdateListener(updateLoadingStatus);
 
     const audioFileData = await loadFileData();
-    const {audio, image} = await analyser.processData(audioFileData, interval);
+    const {audio, image: imageData, bpm: realBpm} = await analyser.processData(audioFileData, bpmOption);
 
     loadingStatus.classList.add('hidden');
 
     playAudio(audio);
-    startVisualisation(image, interval);
+    startVisualisation(imageData, realBpm);
   };
 
   function playAudio(audio) {
@@ -62,8 +64,8 @@ window.addEventListener('load', async () => {
 
   }
 
-  function startVisualisation(bmp, interval) {
-    new VisualisationPainter(canvas, context, bmp, interval).start();
+  function startVisualisation(imageData, beatsPerMinute) {
+    new VisualisationPainter(canvas, context, imageData, beatsPerMinute).start();
   }
 
   async function loadAudioSelection() {

@@ -1,9 +1,9 @@
 class VisualisationPainter {
-  constructor(canvas, context, image, interval) {
+  constructor(canvas, context, image, bpm) {
     this.canvas = canvas;
     this.context = context;
     this.image = image;
-    this.interval = interval;
+    this.bpm = bpm;
   }
 
   start() {
@@ -11,7 +11,7 @@ class VisualisationPainter {
     const image = this.image;
     const canvas = this.canvas;
     const context = this.context;
-    const interval = this.interval;
+    const interval = 1000 / (this.bpm / 60);
 
     const startTime = new Date();
 

@@ -1,6 +1,8 @@
 Tartan-ify is licensed under the below MIT license apart from:
  - src/js/lib--fft.js - Copyright (c) 2017 Project Nayuki (MIT License). See
    the file header for full license text.
+ - src/js/lib--bpm.js - Copyright (c) 2017 killercrush (MIT License). See the
+   the file header for full license text.
  - src/audio/ - Audio files are public domain.
 
 ---

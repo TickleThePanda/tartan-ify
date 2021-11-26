@@ -69,13 +69,26 @@
             </div>
           </div>
         </fieldset>
-        <label class="form__label" for="analysis-interval">
-          Chunk length (ms)
-          <input class="form__input-number" id="analysis-interval" name="analysis-interval" value="1000" />
-        </label>
-        <button class="form__button form__button--submit" type="submit" id="form-submit" name="process-music-file">
-          Tartan-ify
-        </button>
+        <fieldset class="form__fieldset">
+          <legend class="form__fieldset-legend">
+            <h3>BPM</h3>
+            <em class="js-last-selected-value form__option" data-for="detect-bpm" data-for-names="analysis-bpm">Not yet selected</em>
+          </legend>
+          <div>
+            <input type="radio" id="detect-bpm" name="detect-bpm" value="detect-bpm"/>
+            <label class="form__label" for="detect-bpm">Autodetect</label>
+          </div>
+          <div class="form__option--or">
+            or
+          </div>
+          <label class="form__label" for="analysis-bpm">
+            Specify BPM
+            <input class="form__input-number" id="analysis-bpm" name="analysis-bpm" />
+          </label>
+          <button class="form__button form__button--submit" type="submit" id="form-submit" name="process-music-file">
+            Tartan-ify
+          </button>
+        </fieldset>
         <div id="form-errors" class="form__error"></div>
       </form>
     </div>
