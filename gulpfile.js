@@ -43,7 +43,7 @@ gulp.task('audio', function() {
 
 gulp.task('headers', function() {
   return gulp.src('src/_headers')
-    .pipe(gulp.dest('_site/_headers'));
+    .pipe(gulp.dest('_site/'));
 });
 
 gulp.task('default', gulp.parallel('html', 'css', 'js', 'images', 'audio', 'headers'));
