@@ -120,6 +120,8 @@ class AnalysisFormManager {
     this.formElement.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      const submitType = e.submitter.value;
+
       console.log("app--analysis-form-manager.mjs - submit event");
 
       const formData = new FormData(e.target);
@@ -157,6 +159,8 @@ class AnalysisFormManager {
         }
       }
 
+      let batch = submitType === 'batch';
+
       const fileLoadFunction = fileUploaded
          ? async () => await loadFileData(uploadedFile)
          : async () => {
@@ -171,11 +175,14 @@ class AnalysisFormManager {
           autodetectMultiplier: parseFloat(autodetectMultiplier),
           value: parseFloat(bpmInput.value)
         },
-        scale: dataScaleText,
-        thresholds: {
-          min: minThresholdValue / 100,
-          max: maxThresholdValue / 100
+        singleOptions: {
+          scale: dataScaleText,
+          thresholds: {
+            min: minThresholdValue / 100,
+            max: maxThresholdValue / 100
+          },
         },
+        batch,
         loadFileData: fileLoadFunction
       }));
 

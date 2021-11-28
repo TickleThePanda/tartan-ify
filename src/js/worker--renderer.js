@@ -32,7 +32,7 @@ onmessage = function({
   }
 }) {
 
-  console.log(`worker--renderer - colors: ${diff} ${similar}, bufferLength: ${diffs.byteLength}, scale: ${scale}`)
+  console.log(`worker--renderer - colors: ${diff} ${similar}, bufferLength: ${diffs.byteLength}, scale: ${scale}, thresholds: ${thresholds.min} ${thresholds.max}`);
 
   let colors = [];
 

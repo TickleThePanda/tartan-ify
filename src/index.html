@@ -75,7 +75,7 @@
           </div>
         </fieldset>
         <div id="form-errors" class="form__error"></div>
-        <button class="form__button form__button--submit" type="submit" id="form-submit" name="process-music-file">
+        <button class="form__button form__button--submit" type="submit" id="form-submit" name="run-type" value="single">
           Tartan-ify
         </button>
         <details>
@@ -158,6 +158,10 @@
               <input type="number" id="max-percentile" name="max-percentile" value="50" min="0" max="100" step="0.1"/>
             </div>
           </fieldset>
+          <p>Generates multiple visualisations in one run.
+          <button class="form__button form__button--submit" type="submit" id="form-submit-batch" name="run-type" value="batch">
+            Batch run
+          </button>
         </details>
       </form>
     </div>
@@ -196,5 +200,7 @@
       </div>
     </div>
     <div id="loading-status" class="page modal hidden"></div>
+    <div id="batch" class="page batch hidden">
+    </div>
   </body>
 </html>

@@ -43,13 +43,15 @@ onmessage = function({data: buffers}) {
 
   const buffer = convertResultsToArray(results).buffer;
 
-  postMessage(buffer, [buffer]);
+  postMessage(buffer);
 
 }
 
 function convertResultsToArray(results) {
 
-  const data = new Float32Array(results.length * results.length);
+  const arr = new SharedArrayBuffer(results.length * results.length * Float32Array.BYTES_PER_ELEMENT);
+
+  const data = new Float32Array(arr);
 
   for (let i = 0; i < results.length; i++) {
     for (let j = 0; j < results.length; j++) {

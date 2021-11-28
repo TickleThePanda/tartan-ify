@@ -1,12 +1,11 @@
+import { TaskPromiseWorker } from './lib--task-promise-worker.mjs';
+
 class MusicAnalyser {
   constructor({
-    colors, scale, thresholds, context
+    scale
   }) {
     this.listeners = [];
-    this.colors = colors;
     this.scale = scale;
-    this.context = context;
-    this.thresholds = thresholds;
   }
 
   addStatusUpdateListener(listener) {
@@ -17,7 +16,7 @@ class MusicAnalyser {
     }
   }
 
-  async processData(audioFileData, bpm) {
+  async generateDiffs(audioFileData, bpm) {
 
     console.log(`app--music.analyser.mjs - fileDataSize: ${audioFileData.byteLength}, bpm: ${bpm}`)
 
@@ -40,17 +39,8 @@ class MusicAnalyser {
     updateStatus('Calculating difference for chunks');
     const diffs = await calculateFftDiffs(fftsForIntervals);
 
-    updateStatus('Rendering visualisation');
-    const bmp = await renderImageFromDiffs({
-      diffs,
-      colors: this.colors,
-      scale: this.scale,
-      context: this.context,
-      thresholds: this.thresholds
-    });
-
     return {
-      image: bmp,
+      diffs,
       audio: audioData,
       bpm: realBpm
     };
@@ -62,38 +52,11 @@ async function decodeAudioData(fileBuffer) {
   return await ctx.decodeAudioData(fileBuffer);
 }
 
-async function renderImageFromDiffs({
-  diffs, colors, thresholds, scale, context
-}) {
-
-  const data = await new OneTimeTaskWorker('/js/worker--renderer.js')
-    .run({
-        diffs: diffs.buffer,
-        colors,
-        thresholds,
-        scale
-      },
-      [diffs.buffer]
-    );
-
-  const array = new Uint8ClampedArray(data);
-
-  const widthFromRender = Math.sqrt(array.length / 4);
-
-  const image = context.createImageData(widthFromRender, widthFromRender);
-
-  image.data.set(array);
-
-  const bmp = await createImageBitmap(image, 0, 0, widthFromRender, widthFromRender);
-
-  return bmp;
-}
-
 async function calculateFftDiffs(ffts) {
 
   const buffers = ffts.map(f => f.buffer);
 
-  const data = await new OneTimeTaskWorker('/js/worker--diff-analysis.js')
+  const data = await new TaskPromiseWorker('/js/worker--diff-analysis.js')
     .run(buffers, buffers);
 
   return new Float32Array(data);
@@ -101,7 +64,7 @@ async function calculateFftDiffs(ffts) {
 
 async function calculateFftsForIntervals(buffers, sampleRate, interval) {
 
-  const data = await new OneTimeTaskWorker('/js/worker--fft.js')
+  const data = await new TaskPromiseWorker('/js/worker--fft.js')
     .run({
       sampleRate,
       interval,
@@ -119,7 +82,7 @@ async function calculateBpm(buffers, bpm) {
     return bpm.value;
   }
 
-  const { tempo } = await new OneTimeTaskWorker('/js/worker--tempo.js')
+  const { tempo } = await new TaskPromiseWorker('/js/worker--tempo.js')
     .run(buffers);
 
   return tempo * bpm.autodetectMultiplier;
@@ -146,23 +109,3 @@ function copyToSharedBuffer(src)  {
 
 export { MusicAnalyser };
 
-class OneTimeTaskWorker {
-  constructor(stringUrl) {
-    this.stringUrl = stringUrl;
-  }
-
-  async run(message, transfer) {
-    return new Promise((resolve, reject) => {
-      const worker = new Worker(this.stringUrl);
-      worker.onmessage = m => {
-        resolve(m.data);
-        worker.terminate();
-      };
-      worker.onerror = (event) => {
-        reject(event.message);
-        worker.terminate();
-      };
-      worker.postMessage(message, transfer);
-    });
-  }
-}
