@@ -1,6 +1,7 @@
 import { CanvasSizeManager } from './view--canvas-size.mjs';
 import { AnalysisFormManager } from './view--analysis-form.mjs';
-import { VisualisationPainter } from './view--graph.mjs';
+import { SingleVisualisationPainter } from './view--single-vis.mjs';
+import { BatchVisualisationPainter } from './view--batch-vis.mjs';
 import { MusicAnalyser } from './app--music-analyser.mjs';
 import { ColorManager } from './view--colors.mjs';
 import { DiffVisualiser } from './app--diff-visualiser.mjs';
@@ -13,7 +14,7 @@ window.addEventListener('load', async () => {
   }
 
   const visualiser = document.getElementById('visualiser');
-  const batch = document.getElementById('batch');
+  const batchElement = document.getElementById('batch');
   const canvas = document.getElementById('similarity-graph');
   const context = canvas.getContext('2d');
 
@@ -86,7 +87,7 @@ window.addEventListener('load', async () => {
     canvasSizeManager.triggerResize();
     loadingStatus.classList.add('hidden');
     playAudio(audio);
-    startVisualisation(imageData, bpm);
+    startSingleVisualisation(imageData, bpm);
   }
 
   async function renderBatchVisualisation({
@@ -97,7 +98,7 @@ window.addEventListener('load', async () => {
     let images = [];
 
     const minThresholds = [0, 0.1, 1, 10].map(v => v/100);
-    const maxThresholds = [100, 75, 50, 40, 30, 20, 15].map(v => v/100);
+    const maxThresholds = [90, 75, 50, 40, 30, 20, 15].map(v => v/100);
     const scales = ['log', 'sqrt', 'linear', 'squared', 'exponential'];
 
     let count = 0;
@@ -119,26 +120,7 @@ window.addEventListener('load', async () => {
     loadingStatus.classList.add('hidden');
     batch.classList.remove('hidden');
 
-    for (let image of images) {
-      const div = document.createElement('div');
-      div.className = 'batch--item';
-
-      const canvas = document.createElement('canvas');
-      canvas.width = 1000;
-      canvas.height = 1000;
-
-      const heading = document.createElement('h3');
-      heading.innerHTML = image.description;
-
-      batch.appendChild(div);
-      div.appendChild(heading);
-      div.appendChild(canvas);
-
-      const context = canvas.getContext('2d');
-      context.imageSmoothingEnabled = false;
-      context.drawImage(image.imageData, 0, 0, canvas.width, canvas.height);
-    }
-
+    startBatchVisualisation(images);
 
   }
 
@@ -152,8 +134,12 @@ window.addEventListener('load', async () => {
 
   }
 
-  function startVisualisation(imageData, beatsPerMinute) {
-    new VisualisationPainter(canvas, context, imageData, beatsPerMinute).start();
+  function startSingleVisualisation(imageData, beatsPerMinute) {
+    new SingleVisualisationPainter(canvas, context, imageData, beatsPerMinute).start();
+  }
+
+  function startBatchVisualisation(images) {
+    new BatchVisualisationPainter(batchElement, images).start();
   }
 
   async function loadAudioSelection() {

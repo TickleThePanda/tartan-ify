@@ -2,8 +2,21 @@
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 0.5rem;
+  row-gap: 1rem;
+
+  padding: 0.5rem;
+
+  &--item {
+    display: grid;
+  }
 
   canvas {
     max-width: 100%;
+    align-self: end;
+  }
+
+  h3 {
+    overflow-wrap: anywhere;
+    margin: 0;
   }
 }

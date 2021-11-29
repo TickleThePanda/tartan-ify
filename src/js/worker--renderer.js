@@ -107,9 +107,7 @@ class MusicSimilarityRenderer {
 
           let [r,g,b] = [0,0,0];
 
-          if (v === EXCLUDED_SAME_INDEX) {
-            [r,g,b] = [255,255,255];
-          } else if (v === EXCLUDED_NO_DIFF || v === TOO_SIMILAR) {
+          if (v === EXCLUDED_SAME_INDEX || v === EXCLUDED_NO_DIFF || v === TOO_SIMILAR) {
             [r,g,b] = hslToRgb(
               hf(0),
               sf(0),

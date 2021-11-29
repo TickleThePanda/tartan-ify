@@ -1,4 +1,4 @@
-class VisualisationPainter {
+class SingleVisualisationPainter {
   constructor(canvas, context, image, bpm) {
     this.canvas = canvas;
     this.context = context;
@@ -68,4 +68,4 @@ class VisualisationPainter {
 
 }
 
-export { VisualisationPainter };
+export { SingleVisualisationPainter };
