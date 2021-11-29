@@ -3,7 +3,6 @@ import { AnalysisFormManager } from './view--analysis-form.mjs';
 import { SingleVisualisationPainter } from './view--single-vis.mjs';
 import { BatchVisualisationPainter } from './view--batch-vis.mjs';
 import { MusicAnalyser } from './app--music-analyser.mjs';
-import { ColorManager } from './view--colors.mjs';
 import { DiffVisualiser } from './app--diff-visualiser.mjs';
 
 window.addEventListener('load', async () => {
@@ -23,9 +22,6 @@ window.addEventListener('load', async () => {
     await loadAudioSelection()
   );
 
-  const colorManager = new ColorManager(visualiser);
-  const colors = colorManager.getColors();
-
   const canvasSizeManager = new CanvasSizeManager();
 
   canvasSizeManager.add(canvas);
@@ -33,7 +29,7 @@ window.addEventListener('load', async () => {
   formManager.registerSubmitSuccessListener(analyse);
 
   async function analyse({
-    bpm: bpmOption, singleOptions: { scale, thresholds }, batch, loadFileData
+    bpm: bpmOption, singleOptions: { scale, thresholds }, batch, loadFileData, colors
   }) {
 
     console.log("app--main.mjs - Processing data");
@@ -82,7 +78,7 @@ window.addEventListener('load', async () => {
     diffs, thresholds, scale, audio, bpm
   }) {
     updateLoadingStatus('Rendering visualisation');
-    imageData = await diffVisualiser.renderVisualisation({diffs, thresholds, scale});
+    const imageData = await diffVisualiser.renderVisualisation({diffs, thresholds, scale});
     visualiser.classList.remove('hidden');
     canvasSizeManager.triggerResize();
     loadingStatus.classList.add('hidden');

@@ -134,6 +134,8 @@ class AnalysisFormManager {
       const dataScaleText = formData.get('scale');
       const minThresholdValue = formData.get('min-percentile');
       const maxThresholdValue = formData.get('max-percentile');
+      const minColor = formData.get('min-color');
+      const maxColor = formData.get('max-color');
 
       if (minThresholdValue > maxThresholdValue) {
         formErrors.innerHTML = 'Max percentile must be grester than min percentile';
@@ -181,6 +183,10 @@ class AnalysisFormManager {
             min: minThresholdValue / 100,
             max: maxThresholdValue / 100
           },
+        },
+        colors: {
+          similar: minColor,
+          diff: maxColor
         },
         batch,
         loadFileData: fileLoadFunction

@@ -158,6 +158,19 @@
               <input type="number" id="max-percentile" name="max-percentile" value="50" min="0" max="100" step="0.1"/>
             </div>
           </fieldset>
+          <fieldset class="form__fieldset">
+            <legend class="form__fieldset-legend">
+              <h3>Colors</h3>
+            </legend>
+            <div>
+              <label class="form__label" for="min-color">Similar colour</label>
+              <input type="color" id="min-color" name="min-color" value="#ff3251"/>
+            </div>
+            <div>
+              <label class="form__label" for="max-color">Different color</label>
+              <input type="color" id="max-color" name="max-color" value="#010147"/>
+            </div>
+          </fieldset>
           <p>Generates multiple visualisations in one run.
           <button class="form__button form__button--submit" type="submit" id="form-submit-batch" name="run-type" value="batch">
             Batch run
