@@ -4,13 +4,15 @@ import { SingleVisualisationPainter } from './view--single-vis.mjs';
 import { BatchVisualisationPainter } from './view--batch-vis.mjs';
 import { MusicAnalyser } from './app--music-analyser.mjs';
 import { DiffVisualiser } from './app--diff-visualiser.mjs';
+import { StatusManager } from './view--status-manager.mjs';
+import { Stage } from './lib--stage.mjs';
 
 window.addEventListener('load', async () => {
 
+  const stage = new Stage();
+
   const loadingStatus = document.getElementById('loading-status');
-  function updateLoadingStatus(m) {
-    loadingStatus.innerHTML = m;
-  }
+  const statusManager = new StatusManager(loadingStatus, stage.get.bind(stage));
 
   const visualiser = document.getElementById('visualiser');
   const batchElement = document.getElementById('batch');
@@ -35,6 +37,8 @@ window.addEventListener('load', async () => {
     console.log("app--main.mjs - Processing data");
 
     formManager.hide();
+    statusManager.start();
+    statusManager.visible = true;
 
     const analyser = new MusicAnalyser({
       scale, thresholds
@@ -44,8 +48,10 @@ window.addEventListener('load', async () => {
     })
 
     loadingStatus.classList.remove('hidden');
-    updateLoadingStatus('Loading file');
-    analyser.addStatusUpdateListener(updateLoadingStatus);
+    stage.update({
+      status: 'Loading file'
+    });
+    analyser.addStatusUpdateListener(stage.update.bind(stage));
 
     const audioFileData = await loadFileData();
     let audio, diffs, realBpm;
@@ -66,8 +72,7 @@ window.addEventListener('load', async () => {
       }
 
     } catch (e) {
-      loadingStatus.innerHTML = `There was a problem generating the visualisation.<br>${e}`;
-      loadingStatus.classList.add('error');
+      stage.updateError(`There was a problem generating the visualisation.<br>${e}`);
       return;
     }
 
@@ -77,11 +82,14 @@ window.addEventListener('load', async () => {
     diffVisualiser,
     diffs, thresholds, scale, audio, bpm
   }) {
-    updateLoadingStatus('Rendering visualisation');
-    const imageData = await diffVisualiser.renderVisualisation({diffs, thresholds, scale});
+    const imageData = await diffVisualiser.renderVisualisation({
+      diffs, thresholds, scale,
+      updateStatus: stage.update.bind(stage)
+    });
     visualiser.classList.remove('hidden');
     canvasSizeManager.triggerResize();
-    loadingStatus.classList.add('hidden');
+    statusManager.visible = false;
+    statusManager.stop();
     playAudio(audio);
     startSingleVisualisation(imageData, bpm);
   }
@@ -90,7 +98,9 @@ window.addEventListener('load', async () => {
     diffVisualiser,
     diffs
   }) {
-    updateLoadingStatus('Rendering visualisations');
+    stage.update({
+      status: 'Rendering visualisations'
+    });
     let images = [];
 
     const minThresholds = [0, 0.1, 1, 10].map(v => v/100);
@@ -103,8 +113,15 @@ window.addEventListener('load', async () => {
       for (let max of maxThresholds) {
         for (let scale of scales) {
 
-          updateLoadingStatus(`Rendering visualisation ${count++}/${totalVis}`);
-          const imageData = await diffVisualiser.renderVisualisation({diffs, thresholds: {min, max}, scale});
+          const imageData = await diffVisualiser.renderVisualisation({
+            diffs, thresholds: {min, max}, scale,
+            updateStatus: ({status, task}) => {
+              stage.update({
+                status: `${status} ${count++}/${totalVis}`,
+                task: task
+              });
+            }
+          });
           images.push({
             description: `${scale}, min:${min}, max:${max}`,
             imageData

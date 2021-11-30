@@ -25,8 +25,6 @@ function getInputHandler(form, input) {
 
 }
 
-
-
 function addLastSelectedEvents() {
 
   const watchers = document.querySelectorAll('.js-last-selected-value');

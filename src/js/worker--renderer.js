@@ -1,4 +1,5 @@
 importScripts('lib--color.js');
+importScripts('lib--worker-status.js');
 
 const TOO_DIFFERENT = -3;
 const TOO_SIMILAR = -2;
@@ -99,6 +100,12 @@ class MusicSimilarityRenderer {
       const array = new Uint8ClampedArray(width * width * 4);
 
       for (let i = 0; i < width; i++) {
+
+        updateStatus({
+          stage: 'Rendering image',
+          percentage: i / width
+        });
+
         for (let j = 0; j < width; j++) {
 
           const v = scaled[i * width + j];

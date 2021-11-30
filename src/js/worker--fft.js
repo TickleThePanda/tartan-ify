@@ -1,4 +1,5 @@
 importScripts('lib--fft.js');
+importScripts('lib--worker-status.js');
 
 function getMergedChannels(buffers) {
   const channels = buffers.map(b => new Float32Array(b));
@@ -34,6 +35,11 @@ onmessage = function({ data: { buffers, sampleRate, interval }}) {
   for (let intervalStart = 0;
             intervalStart + samplesPerInterval < totalSamples;
             intervalStart += samplesPerInterval) {
+
+    updateStatus({
+      stage: 'Analysing interval',
+      percentage: intervalStart / totalSamples
+    });
 
     let count = 0;
 

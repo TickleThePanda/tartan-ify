@@ -1,3 +1,5 @@
+importScripts('lib--worker-status.js');
+
 onmessage = function({data: buffers}) {
 
   console.log(`worker--diff-analyis.js - nBuffers: ${buffers.length}, bufferLength: ${buffers[0].byteLength}`)
@@ -10,6 +12,10 @@ onmessage = function({data: buffers}) {
   }
 
   for (let i = 0; i < ffts.length; i++) {
+    updateStatus({
+      stage: 'Generating diff',
+      percentage: Math.sqrt(i) / Math.sqrt(ffts.length)
+    });
     for (let j = i; j < ffts.length; j++) {
       let diff = 0;
       if (i === j) {

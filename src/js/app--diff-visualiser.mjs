@@ -10,17 +10,23 @@ export class DiffVisualiser {
   }
 
   async renderVisualisation({
-    diffs, thresholds, scale
+    diffs, thresholds, scale, updateStatus
   }) {
 
-    const data = await new TaskPromiseWorker('/js/worker--renderer.js')
+    const task = new TaskPromiseWorker('/js/worker--renderer.js');
+
+    updateStatus({
+      status: 'Generating visualisation ',
+      task
+    });
+
+    const data = await task
       .run({
-          diffs: diffs.buffer,
-          colors: this.colors,
-          thresholds,
-          scale
-        }
-      );
+        diffs: diffs.buffer,
+        colors: this.colors,
+        thresholds,
+        scale
+      });
 
     const array = new Uint8ClampedArray(data);
 

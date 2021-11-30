@@ -16,28 +16,26 @@ class MusicAnalyser {
     }
   }
 
+  updateStatus(status) {
+    this.listeners.forEach(l => l(status));
+  }
+
   async generateDiffs(audioFileData, bpm) {
 
     console.log(`app--music.analyser.mjs - fileDataSize: ${audioFileData.byteLength}, bpm: ${bpm}`)
 
-    const updateStatus = m => this.listeners.forEach(l => l(m))
-
-    updateStatus('Decoding audio data')
-    const audioData = await decodeAudioData(audioFileData);
+    const audioData = await this.decodeAudioData(audioFileData);
 
     const sharedBuffers = convertToSharedBuffers(audioData);
     const sampleRate = audioData.sampleRate;
 
-    updateStatus('Detecting BPM')
-    const realBpm = await calculateBpm(sharedBuffers, bpm);
+    const realBpm = await this.calculateBpm(sharedBuffers, bpm);
 
     const interval = 1000 / (realBpm / 60);
 
-    updateStatus('Analysing spectrum for chunks');
-    const fftsForIntervals = await calculateFftsForIntervals(sharedBuffers, sampleRate, interval);
+    const fftsForIntervals = await this.calculateFftsForIntervals(sharedBuffers, sampleRate, interval);
 
-    updateStatus('Calculating difference for chunks');
-    const diffs = await calculateFftDiffs(fftsForIntervals);
+    const diffs = await this.calculateFftDiffs(fftsForIntervals);
 
     return {
       diffs,
@@ -45,48 +43,70 @@ class MusicAnalyser {
       bpm: realBpm
     };
   }
-}
 
-async function decodeAudioData(fileBuffer) {
-  const ctx = new AudioContext();
-  return await ctx.decodeAudioData(fileBuffer);
-}
-
-async function calculateFftDiffs(ffts) {
-
-  const buffers = ffts.map(f => f.buffer);
-
-  const data = await new TaskPromiseWorker('/js/worker--diff-analysis.js')
-    .run(buffers, buffers);
-
-  return new Float32Array(data);
-}
-
-async function calculateFftsForIntervals(buffers, sampleRate, interval) {
-
-  const data = await new TaskPromiseWorker('/js/worker--fft.js')
-    .run({
-      sampleRate,
-      interval,
-      buffers
+  async decodeAudioData(fileBuffer) {
+    this.updateStatus({
+      status: 'Decoding audio data'
     });
-
-  return data.map(f => new Float32Array(f));
-
-}
-
-
-async function calculateBpm(buffers, bpm) {
-
-  if (!bpm.autodetect) {
-    return bpm.value;
+    const ctx = new AudioContext();
+    return await ctx.decodeAudioData(fileBuffer);
   }
 
-  const { tempo } = await new TaskPromiseWorker('/js/worker--tempo.js')
-    .run(buffers);
+  async calculateFftDiffs(ffts) {
 
-  return tempo * bpm.autodetectMultiplier;
+    const task = new TaskPromiseWorker('/js/worker--diff-analysis.js');
 
+    this.updateStatus({
+      status: 'Calculating difference for chunks',
+      task
+    });
+
+    const buffers = ffts.map(f => f.buffer);
+
+    const data = await task
+      .run(buffers, buffers);
+
+    return new Float32Array(data);
+  }
+
+  async calculateFftsForIntervals(buffers, sampleRate, interval) {
+
+    const task = new TaskPromiseWorker('/js/worker--fft.js');
+
+    this.updateStatus({
+      status: 'Analysing spectrum for chunks',
+      task
+    });
+
+    const data = await task
+      .run({
+        sampleRate,
+        interval,
+        buffers
+      });
+
+    return data.map(f => new Float32Array(f));
+
+  }
+
+  async calculateBpm(buffers, bpm) {
+
+    if (!bpm.autodetect) {
+      return bpm.value;
+    }
+
+    const task = new TaskPromiseWorker('/js/worker--tempo.js');
+
+    this.updateStatus({
+      status: 'Detecting BPM',
+      task
+    });
+
+    const { tempo } = await task.run(buffers);
+
+    return tempo * bpm.autodetectMultiplier;
+
+  }
 }
 
 function convertToSharedBuffers(audioData) {
