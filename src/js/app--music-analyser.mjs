@@ -45,11 +45,40 @@ class MusicAnalyser {
   }
 
   async decodeAudioData(fileBuffer) {
+
+    const length = fileBuffer.byteLength;
+
+    const task = {
+      status: {
+        percentage: 0
+      }
+    }
+
+    const start = Date.now();
+
     this.updateStatus({
-      status: 'Decoding audio data'
+      status: 'Decoding audio data',
+      task
     });
+
+    const intervalId = setInterval(() => {
+      const timeMod = 0.0008;
+      const expectedTime = length * timeMod;
+
+      const end = Date.now();
+
+      const diff = end - start;
+
+      task.status.percentage = Math.min(diff / expectedTime, 1);
+
+    }, 100);
+
     const ctx = new AudioContext();
-    return await ctx.decodeAudioData(fileBuffer);
+    const data = await ctx.decodeAudioData(fileBuffer);
+
+    clearInterval(intervalId);
+
+    return data;
   }
 
   async calculateFftDiffs(ffts) {
