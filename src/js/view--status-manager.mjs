@@ -2,8 +2,16 @@ export class StatusManager {
   element;
   #statusFunction;
   #shouldContinue = false;
-  constructor(element, statusFunction) {
-    this.element = element;
+  constructor({
+    wrapper,
+    status,
+    task,
+    percentage
+  }, statusFunction) {
+    this.element = wrapper;
+    this.statusElement = status;
+    this.taskElement = task;
+    this.percentageElement = percentage;
     this.#statusFunction = statusFunction;
   }
 
@@ -23,8 +31,22 @@ export class StatusManager {
     this.#shouldContinue = true;
 
     const updateStatus = () => {
-      const { text, type } = this.#statusFunction();
-      this.element.innerHTML = text;
+      const { type, status, task, percentage } = this.#statusFunction();
+      if (status !== null && status !== undefined) {
+        this.statusElement.innerHTML = status;
+      } else {
+        this.statusElement.innerHTML = "";
+      }
+      if (task !== null && task !== undefined) {
+        this.taskElement.innerHTML = task;
+      } else {
+        this.taskElement.innerHTML = "";
+      }
+      if (percentage !== null && percentage !== undefined) {
+        this.percentageElement.innerHTML = `${Math.floor(percentage * 100)}%`;
+      } else {
+        this.percentageElement.innerHTML = "";
+      }
 
       if (type === 'error') {
         this.element.classList.add('error');

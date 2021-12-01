@@ -36,6 +36,10 @@ onmessage = function({
 
   console.log(`worker--renderer - colors: ${diff} ${similar}, bufferLength: ${diffs.byteLength}, scale: ${scale}, thresholds: ${thresholds}, matrixParams: ${matrixParams}`);
 
+  updateStatus({
+    stage: "Initialising"
+  });
+
   let colors = [];
 
   const colorDiffRgb = colorTextToRgb(diff);

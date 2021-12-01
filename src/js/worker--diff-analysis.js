@@ -2,6 +2,11 @@ importScripts('lib--worker-status.js');
 
 onmessage = function({data: buffers}) {
 
+  updateStatus({
+    stage: 'Generating diff',
+    percentage: 0
+  });
+
   console.log(`worker--diff-analyis.js - nBuffers: ${buffers.length}, bufferLength: ${buffers[0].byteLength}`)
 
   const ffts = buffers.map(f => new Float32Array(f));
@@ -11,11 +16,20 @@ onmessage = function({data: buffers}) {
     results[i] = [];
   }
 
+  const loopTotal = ffts.length * ffts.length + ffts.length;
+
+  const calculatePercentage = v => {
+    const x = ffts.length - v;
+    return 1 - (x * x + x) / loopTotal;
+  };
+
   for (let i = 0; i < ffts.length; i++) {
+
     updateStatus({
       stage: 'Generating diff',
-      percentage: Math.sqrt(i) / Math.sqrt(ffts.length)
+      percentage: calculatePercentage(i),
     });
+
     for (let j = i; j < ffts.length; j++) {
       let diff = 0;
       if (i === j) {

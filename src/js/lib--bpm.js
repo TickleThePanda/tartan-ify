@@ -23,7 +23,9 @@
  * SOFTWARE.
  */
 
- class Agent {
+importScripts('lib--worker-status.js');
+
+class Agent {
   /**
    * Constructor
    * @param {Number} tempo - tempo hypothesis of the Agent
@@ -438,17 +440,29 @@ class MusicTempo {
       throw "audioData is not an array";
     }
     const timeStep = params.timeStep || 0.01;
+    updateStatus({
+      stage: "Calculating spectral flux",
+      percentage: 0
+    });
     let res = OnsetDetection.calculateSF(audioData, FFT, params);
+
     /**
      * Spectral flux
      * @type {Array}
      */
     this.spectralFlux = res;
+    updateStatus({
+      stage: "Normalising spectral flux"
+    });
     OnsetDetection.normalize(this.spectralFlux);
+
     /**
      * Spectral flux peaks indexes
      * @type {Array}
      */
+    updateStatus({
+      stage: "Finding peaks"
+    });
     this.peaks = OnsetDetection.findPeaks(this.spectralFlux, params);
     /**
      * Onsets times array
@@ -456,8 +470,17 @@ class MusicTempo {
      */
     this.events = this.peaks.map((a) => a * timeStep);
 
+    updateStatus({
+      stage: "Processing rhythmic events"
+    });
     let clusters = TempoInduction.processRhythmicEvents(this.events, params);
+    updateStatus({
+      stage: "Merging clusters"
+    });
     clusters = TempoInduction.mergeClusters(clusters, params);
+    updateStatus({
+      stage: "Calculating score"
+    });
     let scores = TempoInduction.calculateScore(clusters, params);
     clusters = {
       clIntervals: clusters.clIntervals,
@@ -469,6 +492,9 @@ class MusicTempo {
      * Tempo hypotheses array
      * @type {Array}
      */
+    updateStatus({
+      stage: "Create tempo list"
+    });
     this.tempoList = TempoInduction.createTempoList(clusters, params);
 
     let minSFValue = this.spectralFlux.reduce((a, b) => Math.min(a, b));
@@ -477,6 +503,9 @@ class MusicTempo {
      * Agents array
      * @type {Array}
      */
+    updateStatus({
+      stage: "Track beats"
+    });
     this.agents = BeatTracking.trackBeat(
       this.events,
       eventsScores,
@@ -502,6 +531,9 @@ class MusicTempo {
      */
     this.beatInterval = -1;
 
+    updateStatus({
+      stage: "Finding best beat"
+    });
     for (let i = 0; i < this.agents.length; i++) {
       if (this.agents[i].score > bestScore) {
         bestScore = this.agents[i].score;
@@ -547,33 +579,6 @@ class OnsetDetection {
         "fft doesn't contain getHammingWindow or getSpectrum methods"
       );
     }
-    // Array.fill polyfill
-    if (!Array.prototype.fill) {
-      Array.prototype.fill = function (value) {
-        if (this == null) {
-          throw new TypeError("this is null or not defined");
-        }
-        var O = Object(this);
-        var len = O.length >>> 0;
-        var start = arguments[1];
-        var relativeStart = start >> 0;
-        var k =
-          relativeStart < 0
-            ? Math.max(len + relativeStart, 0)
-            : Math.min(relativeStart, len);
-        var end = arguments[2];
-        var relativeEnd = end === undefined ? len : end >> 0;
-        var final =
-          relativeEnd < 0
-            ? Math.max(len + relativeEnd, 0)
-            : Math.min(relativeEnd, len);
-        while (k < final) {
-          O[k] = value;
-          k++;
-        }
-        return O;
-      };
-    }
     params.bufferSize = params.bufferSize || 2048;
     //params.samplingRate = params.samplingRate || 44100;
     params.hopSize = params.hopSize || 441;
@@ -602,6 +607,10 @@ class OnsetDetection {
     audioData = audioData.concat(zerosEnd);
 
     for (let wndStart = 0; wndStart < length; wndStart += hopSize) {
+      updateStatus({
+        stage: "Calculating spectral flux",
+        percentage: wndStart / length
+      });
       let wndEnd = wndStart + bufferSize;
 
       let re = [];

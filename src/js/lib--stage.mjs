@@ -24,30 +24,27 @@ export class Stage {
   get() {
     if (this.error !== undefined) {
       return {
-        text: this.error,
+        status: this.error,
         type: 'error'
       };
-    } else if (this.status !== undefined) {
-      if (this.task === undefined) {
-        return {
-          text: this.status
-        };
-      } else {
-        const taskStatusText = this.task.status.toString();
-        if (taskStatusText !== "") {
-          return {
-            text: `${this.status}<br>${taskStatusText}%`
-          };
-        } else {
-          return {
-            text: this.status
-          };
-        }
-      }
-    } else {
+    }
+
+    if (this.status === undefined) {
       return {
         text: 'Loading...'
       };
+    }
+
+    if (this.task === undefined || this.task.status === undefined) {
+      return {
+        status: this.status
+      };
+    }
+
+    return {
+      status: this.status,
+      task: this.task.status.stage,
+      percentage: this.task.status.percentage
     }
   }
 }

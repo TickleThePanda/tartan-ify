@@ -11,8 +11,12 @@ window.addEventListener('load', async () => {
 
   const stage = new Stage();
 
-  const loadingStatus = document.getElementById('loading-status');
-  const statusManager = new StatusManager(loadingStatus, stage.get.bind(stage));
+  const statusManager = new StatusManager({
+    wrapper: document.getElementById('loading-status'),
+    status: document.getElementById('loading-status-status'),
+    task: document.getElementById('loading-status-task'),
+    percentage: document.getElementById('loading-status-percentage'),
+  }, stage.get.bind(stage));
 
   const visualiser = document.getElementById('visualiser');
   const batchElement = document.getElementById('batch');
@@ -47,7 +51,6 @@ window.addEventListener('load', async () => {
       colors, context, updateStatus: stage.update.bind(stage)
     })
 
-    loadingStatus.classList.remove('hidden');
     stage.update({
       status: 'Loading file'
     });
@@ -109,13 +112,13 @@ window.addEventListener('load', async () => {
     const images = await diffVisualiser.renderVisualisations({
       diffs,
       matrixParams: {
-        minThresholds,
+        minThresholds ,
         maxThresholds,
         scales
       }
     });
 
-    loadingStatus.classList.add('hidden');
+    statusManager.visible = false;
     batch.classList.remove('hidden');
 
     startBatchVisualisation(images);

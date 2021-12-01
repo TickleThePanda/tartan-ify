@@ -4,20 +4,20 @@ class Status {
 
   constructor() {}
 
-  toString() {
-    if (this.stage !== null && this.percentage !== null) {
-      return `${this.stage} - ${Math.floor(this.percentage * 100)}`
-    } else {
-      return "";
-    }
-  }
-
   update({
     stage,
     percentage
   }) {
-    this.stage = stage;
-    this.percentage = percentage;
+    if (stage === undefined || percentage === null) {
+      this.stage = null;
+    } else {
+      this.stage = stage;
+    }
+    if (percentage === undefined || percentage === null) {
+      this.percentage = null
+    } else {
+      this.percentage = percentage;
+    }
   }
 }
 
