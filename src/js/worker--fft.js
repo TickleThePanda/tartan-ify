@@ -22,6 +22,10 @@ onmessage = function({ data: { buffers, sampleRate, interval }}) {
 
   console.log(`worker--fft.js - nBuffers: ${buffers.length}, bufferLength: ${buffers[0].byteLength}, interval: ${interval}`);
 
+  updateStatus({
+    stage: 'Initialising'
+  })
+
   const intervalInSeconds = interval / 1000;
 
   const combined = getMergedChannels(buffers);
