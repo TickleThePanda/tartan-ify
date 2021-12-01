@@ -6,13 +6,13 @@ export class BatchVisualisationPainter {
 
   start() {
 
-    for (let image of this.images) {
+    for (let { title, imageData } of this.images) {
       const div = document.createElement('div');
       div.className = 'batch--item';
 
       const canvas = document.createElement('canvas');
 
-      const imageWidth = image.imageData.width;
+      const imageWidth = imageData.width;
       const currentMagnitude = Math.ceil(Math.log2(imageWidth));
       const minMagnitude = Math.ceil(Math.log2(1000));
       const canvasSize = imageWidth > 1000
@@ -23,7 +23,7 @@ export class BatchVisualisationPainter {
       canvas.height = canvasSize;
 
       const heading = document.createElement('h3');
-      heading.innerHTML = image.description;
+      heading.innerHTML = title;
 
       div.appendChild(heading);
       div.appendChild(canvas);
@@ -31,7 +31,7 @@ export class BatchVisualisationPainter {
 
       const context = canvas.getContext('2d');
       context.imageSmoothingEnabled = false;
-      context.drawImage(image.imageData, 0, 0, canvas.width, canvas.height);
+      context.drawImage(imageData, 0, 0, canvas.width, canvas.height);
     }
   }
 }

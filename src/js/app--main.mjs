@@ -44,7 +44,7 @@ window.addEventListener('load', async () => {
       scale, thresholds
     });
     const diffVisualiser = new DiffVisualiser({
-      colors, context
+      colors, context, updateStatus: stage.update.bind(stage)
     })
 
     loadingStatus.classList.remove('hidden');
@@ -101,34 +101,19 @@ window.addEventListener('load', async () => {
     stage.update({
       status: 'Rendering visualisations'
     });
-    let images = [];
 
     const minThresholds = [0, 0.1, 1, 10].map(v => v/100);
     const maxThresholds = [90, 75, 50, 40, 30, 20, 15].map(v => v/100);
     const scales = ['log', 'sqrt', 'linear', 'squared', 'exponential'];
 
-    let count = 0;
-    const totalVis = minThresholds.length * maxThresholds.length * scales.length;
-    for (let min of minThresholds) {
-      for (let max of maxThresholds) {
-        for (let scale of scales) {
-
-          const imageData = await diffVisualiser.renderVisualisation({
-            diffs, thresholds: {min, max}, scale,
-            updateStatus: ({status, task}) => {
-              stage.update({
-                status: `${status} ${count++}/${totalVis}`,
-                task: task
-              });
-            }
-          });
-          images.push({
-            description: `${scale}, min:${min}, max:${max}`,
-            imageData
-          });
-        }
+    const images = await diffVisualiser.renderVisualisations({
+      diffs,
+      matrixParams: {
+        minThresholds,
+        maxThresholds,
+        scales
       }
-    }
+    });
 
     loadingStatus.classList.add('hidden');
     batch.classList.remove('hidden');

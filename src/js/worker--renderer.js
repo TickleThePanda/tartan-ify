@@ -9,9 +9,9 @@ const EXCLUDED_NO_DIFF = 0;
 const EXCLUDED = [TOO_DIFFERENT, TOO_SIMILAR, EXCLUDED_SAME_INDEX, EXCLUDED_NO_DIFF];
 
 function skipExcluded(f) {
-  return v => EXCLUDED.includes(v) ? v : f(v);
+  return v => v <= 0 ? v : f(v);
 }
-const filterExcluded = v => !EXCLUDED.includes(v);
+const filterExcluded = v => v > 0;
 
 const mapFuncs = {
   exponential: v => Math.pow(2, v),
@@ -29,11 +29,12 @@ onmessage = function({
     },
     thresholds,
     scale,
-    diffs
+    diffs,
+    matrixParams
   }
 }) {
 
-  console.log(`worker--renderer - colors: ${diff} ${similar}, bufferLength: ${diffs.byteLength}, scale: ${scale}, thresholds: ${thresholds.min} ${thresholds.max}`);
+  console.log(`worker--renderer - colors: ${diff} ${similar}, bufferLength: ${diffs.byteLength}, scale: ${scale}, thresholds: ${thresholds}, matrixParams: ${matrixParams}`);
 
   let colors = [];
 
@@ -53,33 +54,76 @@ onmessage = function({
 
   const data = new Float32Array(diffs);
 
-  const renderer = new MusicSimilarityRenderer({
-    colors, thresholds, mapper: mapFuncs[scale]
-  });
+  if (!matrixParams) {
 
-  const render = renderer.render(data);
+    const renderer = new MusicSimilarityRenderer({
+      colors, thresholds, mapper: mapFuncs[scale]
+    });
 
-  console.log(`worker--renderer.js - renderSize: ${render.length}`);
+    const render = renderer.render(data);
 
-  const outBuffer = render.buffer;
+    console.log(`worker--renderer.js - renderSize: ${render.length}`);
 
-  postMessage(outBuffer, [outBuffer]);
+    const outBuffer = render.buffer;
+
+    postMessage(outBuffer, [outBuffer]);
+  } else {
+
+    const { minThresholds, maxThresholds, scales } = matrixParams;
+
+    let results = [];
+    let buffers = [];
+
+    let count = 0;
+    const totalVis = minThresholds.length * maxThresholds.length * scales.length;
+
+    for (let min of minThresholds) {
+      for (let max of maxThresholds) {
+        for (let scale of scales) {
+
+          const renderer = new MusicSimilarityRenderer({
+            colors, thresholds: {min, max}, mapper: mapFuncs[scale],
+            context: `${count++}/${totalVis}`
+          });
+
+          const render = renderer.render(data);
+
+          const outBuffer = render.buffer;
+          const title = `${scale}, min:${min}, max:${max}`;
+
+          results.push({
+            data: outBuffer,
+            title
+          });
+          buffers.push(outBuffer);
+        }
+      }
+    }
+
+    postMessage(results, buffers);
+  }
 }
 
 class MusicSimilarityRenderer {
 
-  constructor({colors: { diff, similar }, thresholds, mapper}) {
+  constructor({colors: { diff, similar }, thresholds, mapper, context}) {
     this.colorDiff = diff;
     this.colorSimilar = similar;
 
     this.thresholds = thresholds;
 
     this.mapper = mapper;
+    this.context = context;
   }
 
   render(data) {
 
     if (data.length > 0) {
+
+      updateStatus({
+        stage: `Rendering image ${this.context}`,
+        percentage: 0
+      });
 
       const scaled = this.scale(data);
 
@@ -102,15 +146,16 @@ class MusicSimilarityRenderer {
       for (let i = 0; i < width; i++) {
 
         updateStatus({
-          stage: 'Rendering image',
-          percentage: i / width
+          stage: `Rendering image ${this.context}`,
+          percentage: i / width * 0.8 + 0.2
         });
 
-        for (let j = 0; j < width; j++) {
+        for (let j = i; j < width; j++) {
 
           const v = scaled[i * width + j];
 
           const pos = (i * width + j) * 4;
+          const opp = (j * width + i) * 4;
 
           let [r,g,b] = [0,0,0];
 
@@ -134,10 +179,10 @@ class MusicSimilarityRenderer {
             );
           }
 
-          array[pos    ] = r;
-          array[pos + 1] = g;
-          array[pos + 2] = b;
-          array[pos + 3] = 255;
+          array[pos    ] = array[opp    ] = r;
+          array[pos + 1] = array[opp + 1] = g;
+          array[pos + 2] = array[opp + 2] = b;
+          array[pos + 3] = array[opp + 3] = 255;
 
         }
       }
@@ -149,36 +194,40 @@ class MusicSimilarityRenderer {
 
   scale(all) {
 
-    const max = d => d.filter(filterExcluded)
-      .reduce((a, b) => Math.max(a, b), Number.MIN_SAFE_INTEGER);
-    const min = d => d.filter(filterExcluded)
-      .reduce((a, b) => Math.min(a, b), Number.MAX_SAFE_INTEGER);
+    // Float32Array is a more efficient natural sort
+    const sorted = Float32Array.from(all.filter(filterExcluded)).sort();
 
-    const sorted = [...all].filter(filterExcluded).sort((a, b) => a - b);
+    updateStatus({
+      stage: `Rendering image ${this.context}`,
+      percentage: 0.1
+    });
 
     const tooSimilar = sorted[Math.floor(all.length * this.thresholds.min)];
     const tooDifferent = sorted[Math.ceil(all.length * this.thresholds.max)];
 
-    const data = all
-      .map(skipExcluded(v => v < tooSimilar ? TOO_SIMILAR : v))
-      .map(skipExcluded(v => v > tooDifferent ? TOO_DIFFERENT : v));
-
-    const scaledSimilarity = data
-      .map(skipExcluded(v => this.mapper(v)));
-
-    const maxScaled = max(scaledSimilarity);
-    const minScaled = min(scaledSimilarity);
+    const maxScaled = this.mapper(tooDifferent);
+    const minScaled = this.mapper(tooSimilar);
 
     const rangeScaled = maxScaled - minScaled;
 
-    console.log(`scaled - minValue: ${minScaled}, maxValue: ${maxScaled}`)
+    const mapNorm = v => (this.mapper(v) - minScaled) / rangeScaled
 
-    const norm = scaledSimilarity
-      .map(skipExcluded(v => (v - minScaled) / rangeScaled)); // invert back to diff
+    /*
+     * Remove excluded data, map to values, and normalise
+     */
+    const data = all
+      .map(skipExcluded(v =>
+        v < tooSimilar ? TOO_SIMILAR :
+        v > tooDifferent ? TOO_DIFFERENT :
+              mapNorm(v)
+      ));
 
-    console.log(`normalised - minValue: ${min(norm)}, maxValue: ${max(norm)}`);
+    updateStatus({
+      stage: `Rendering image ${this.context}`,
+      percentage: 0.2
+    });
 
-    return norm;
+    return data;
   }
 }
 
