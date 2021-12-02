@@ -1,7 +1,7 @@
 [Tartan-ify] visualises the similarities within a single piece of music
 in a [self-similarity matrix].
 
-This was inspired by [Song Sim] and I built it (but since extended it) at Hackference.
+This was inspired by [Song Sim] and I built it (but since extended it) at [Hackference].
 
 ### How it works
 
