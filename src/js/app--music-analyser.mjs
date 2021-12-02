@@ -86,7 +86,7 @@ class MusicAnalyser {
     const task = new TaskPromiseWorker('/js/worker--diff-analysis.js');
 
     this.updateStatus({
-      status: 'Calculating difference for chunks',
+      status: 'Calculating differences between segments',
       task
     });
 
@@ -103,7 +103,7 @@ class MusicAnalyser {
     const task = new TaskPromiseWorker('/js/worker--fft.js');
 
     this.updateStatus({
-      status: 'Analysing spectrum for chunks',
+      status: 'Analysing spectrum for each segments',
       task
     });
 

@@ -28,27 +28,30 @@
       <div class="description">
         <h1>Tartan-ify</h1>
 
-        <p>Tartan-ify generates visualisations that shows, in a piece
-        of music, where the similarities and differences are. <strong>All of
-        the processing happens in your browser.</strong>
+        <p>Tartan-ify visualises the similarities within a single piece of
+        music in <a href="https://en.wikipedia.org/wiki/Self-similarity_matrix">
+        self-similarity matricies</a>.
+
+        <p>All of the processing happens in your browser.
 
         <h2>How it works</h2>
-        <p>Tartan-ify splits the music up into chunks. Every chunk of the song
-        is compared against every other chunk. Each of these chunk comparisons
-        is shown in a matrix, with the time of the song on each axis, with the
-        colour of the block showing the similarity between the two chunks.
+        <p>Tartan-ify divides the music into segments and compares each
+        segment against every other segment. The comparisons are shown in
+        a matrix with both axes donoting time and the colour denoting the
+        difference between the segments at those times.
+
         <p>Tartan-ify does the comparison by analysing the spectrum of each
-        chunk, using a <a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform">
+        segment using a <a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform">
         Fast Fourier Transform</a>, and then taking the sum of the difference
-        in power of each frequency between the chunks.
+        of the power of each frequency between the segments.
 
         <h2>How to use Tartan-ify</h2>
-        <p>To use this tool, select a piece of music and then horizontal
+        <p>To use Tartan-ify, select a piece of music and then click
         <em>Tartan-ify</em>. The tool will detect the song's BPM and use
-        this to split the song into chunks and will choose sensible
+        this to split the song into segments and will choose sensible
         defaults for the visualisation.
 
-        <p>The smaller the chunks and the longer the song, the longer it will
+        <p>The smaller the segments and the longer the song, the longer it will
         take to generate the visualisation.
       </div>
       <form class="form">
@@ -84,12 +87,12 @@
           </summary>
           <fieldset class="form__fieldset">
             <legend class="form__fieldset-legend">
-              <h3>Chunking</h3>
+              <h3>segmenting</h3>
               <em class="js-last-selected-value form__option" data-for="detect-bpm" data-for-names="analysis-bpm">Not yet selected</em>
             </legend>
-            <p>This section defines how the song will be split into chunks. The
-            larger the BPM value, the smaller the chunks.
-            <p>Large chunks can allow you to see the large scale structures of a song, for
+            <p>This section defines how the song will be split into segments. The
+            larger the BPM value, the smaller the segments.
+            <p>Large segments can allow you to see the large scale structures of a song, for
             example, verse, chorus, bridge. Smaller can allow you to see smaller structures,
             like repeated motifs or notes.
             <p>Autodetect will try to find the BPM. You can specify a multipler to an
@@ -197,7 +200,7 @@
       </div>
       <div class="visualiser__legend">
         <div class="visualiser__legend-item">
-          <div class="visualiser__legend-item-name">Chunk similarity</div>
+          <div class="visualiser__legend-item-name">segment similarity</div>
           <div class="visualiser__legend-item-key">
             <div class="visualiser__legend-item-key-name">Similar</div>
             <div class="visualiser__legend-item-key-gradient"></div>
@@ -208,11 +211,11 @@
       <div class="visualiser__main">
         <div class="visualiser__axis visualiser__axis--horizontal">
           <div class="visualiser__axis-zero visualiser__axis-zero--horizontal">0</div>
-          <div class="visualiser__axis-text visualiser__axis-text--horizontal">Chunk of song</div>
+          <div class="visualiser__axis-text visualiser__axis-text--horizontal">segment of song</div>
         </div>
         <div class="visualiser__axis visualiser__axis--vertical">
           <div class="visualiser__axis-zero visualiser__axis-zero--vertical">0</div>
-          <div class="visualiser__axis-text visualiser__axis-text--vertical">Chunk of song</div>
+          <div class="visualiser__axis-text visualiser__axis-text--vertical">segment of song</div>
         </div>
         <canvas class="visualiser__plot" id="similarity-graph"></canvas>
       </div>
