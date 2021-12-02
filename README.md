@@ -23,13 +23,15 @@ workloads.
 ### Building
 
 Requirements:
- - Node.js and NPM
+ - Install Node.js and NPM
 
 To build, run:
-1. ```
+1. Install the dependencies
+   ```
    npm install
    ```
-2. ```
+2. Build the site
+   ```
    npm run build
    ```
 
