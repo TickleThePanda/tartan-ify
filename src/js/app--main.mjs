@@ -65,7 +65,8 @@ window.addEventListener('load', async () => {
       if (!batch) {
         renderSingleVisualisation({
           diffVisualiser,
-          diffs, thresholds, scale, audio, bpm: realBpm
+          diffs, thresholds, scale, audio, bpm: realBpm,
+          colors
         });
       } else {
         renderBatchVisualisation({
@@ -83,7 +84,7 @@ window.addEventListener('load', async () => {
 
   async function renderSingleVisualisation({
     diffVisualiser,
-    diffs, thresholds, scale, audio, bpm
+    diffs, thresholds, scale, audio, bpm, colors
   }) {
     const imageData = await diffVisualiser.renderVisualisation({
       diffs, thresholds, scale,
@@ -94,7 +95,9 @@ window.addEventListener('load', async () => {
     statusManager.visible = false;
     statusManager.stop();
     playAudio(audio);
-    startSingleVisualisation(imageData, bpm);
+    startSingleVisualisation({
+      image: imageData, bpm, colors
+    });
   }
 
   async function renderBatchVisualisation({
@@ -135,8 +138,13 @@ window.addEventListener('load', async () => {
 
   }
 
-  function startSingleVisualisation(imageData, beatsPerMinute) {
-    new SingleVisualisationPainter(canvas, context, imageData, beatsPerMinute).start();
+  function startSingleVisualisation({
+    image, bpm, colors
+  }) {
+    new SingleVisualisationPainter({
+      wrapper: visualiser,
+      canvas, context, image, bpm, colors
+    }).start();
   }
 
   function startBatchVisualisation(images) {

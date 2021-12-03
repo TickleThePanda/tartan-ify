@@ -1,12 +1,24 @@
 class SingleVisualisationPainter {
-  constructor(canvas, context, image, bpm) {
+  constructor({
+    wrapper,
+    canvas,
+    context,
+    image,
+    bpm,
+    colors
+  }) {
+    this.wrapper = wrapper
     this.canvas = canvas;
     this.context = context;
     this.image = image;
     this.bpm = bpm;
+    this.colors = colors;
   }
 
   start() {
+
+    this.wrapper.style.setProperty('--color-similar', this.colors.similar);
+    this.wrapper.style.setProperty('--color-diff', this.colors.diff);
 
     const image = this.image;
     const canvas = this.canvas;
