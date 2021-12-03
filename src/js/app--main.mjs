@@ -60,7 +60,7 @@ window.addEventListener('load', async () => {
     let audio, diffs, realBpm;
 
     try {
-      ({ audio, diffs, bpm: realBpm } = await analyser.generateDiffs(audioFileData, bpmOption));
+      ({ audio, diffs, bpm: realBpm } = await analyser.generateDiffMatrix(audioFileData, bpmOption));
 
       if (!batch) {
         renderSingleVisualisation({

@@ -20,9 +20,9 @@ class MusicAnalyser {
     this.listeners.forEach(l => l(status));
   }
 
-  async generateDiffs(audioFileData, bpm) {
+  async generateDiffMatrix(audioFileData, bpm) {
 
-    console.log(`app--music.analyser.mjs - fileDataSize: ${audioFileData.byteLength}, bpm: ${bpm}`)
+    console.log(`app--music.analyser.mjs - fileDataSize: ${audioFileData.byteLength}, bpm: ${bpm}`);
 
     const audioData = await this.decodeAudioData(audioFileData);
 
