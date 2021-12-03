@@ -2,6 +2,7 @@ const gulp = require('gulp');
 const less = require('gulp-less');
 const mocha = require('gulp-mocha');
 const ts = require('gulp-typescript');
+const sourcemaps = require('gulp-sourcemaps');
 
 const WORKER_JS_FILES = ['src/js/workers/**/*.{js,mjs}', '!src/js/workers/**/*.spec.{js,mjs}'];
 
@@ -33,9 +34,12 @@ const tsProject = ts.createProject('tsconfig.json');
 
 gulp.task('ts', function() {
   const tsResult = tsProject.src()
-    .pipe(tsProject());
+    .pipe(sourcemaps.init())
+    .pipe(tsProject()).js
+    .pipe(sourcemaps.write("."))
+    .pipe(gulp.dest('_site'));
 
-  return tsResult.js.pipe(gulp.dest('_site'));
+  return tsResult;
 })
 
 gulp.task('js', gulp.series('ts', 'test-workers', 'process-workers'));
