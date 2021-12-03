@@ -42,7 +42,7 @@ export class DiffVisualiser {
     diffs, thresholds, scale
   }: SingleDiffVisualiserRenderArgs) {
 
-    const task = new TaskPromiseWorker('/js/workers/worker--renderer.js');
+    const task = new TaskPromiseWorker('/js/workers/workers--renderer.js');
 
     this.status.update({
       status: 'Generating visualisation ',
@@ -74,7 +74,7 @@ export class DiffVisualiser {
     diffs, matrixParams
   }: MultiDiffVisualiserRenderArgs): Promise<BatchImage[]> {
 
-    const task = new TaskPromiseWorker('/js/workers/worker--renderer.js');
+    const task = new TaskPromiseWorker('/js/workers/w--renderer.js');
 
     this.status.update({
       status: 'Generating visualisations',

@@ -94,7 +94,7 @@ class MusicAnalyser {
 
   async calculateFftDiffMatrix(ffts: Float32Array[]) {
 
-    const task = new TaskPromiseWorker('/js/workers/worker--diff-analysis.js');
+    const task = new TaskPromiseWorker('/js/workers/w--diff-analysis.js');
 
     this.updateStatus({
       status: 'Calculating differences between segments',
@@ -115,7 +115,7 @@ class MusicAnalyser {
     interval: number
   ): Promise<Float32Array[]> {
 
-    const task = new TaskPromiseWorker('/js/worker/workers--fft.js');
+    const task = new TaskPromiseWorker('/js/worker/w--fft.js');
 
     this.updateStatus({
       status: 'Analysing spectrum for each segments',
@@ -139,7 +139,7 @@ class MusicAnalyser {
       return bpm.value;
     }
 
-    const task = new TaskPromiseWorker('/js/worker/workers--tempo.js');
+    const task = new TaskPromiseWorker('/js/workers/w--tempo.js');
 
     this.updateStatus({
       status: 'Detecting BPM',
