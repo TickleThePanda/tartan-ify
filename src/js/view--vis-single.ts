@@ -1,4 +1,23 @@
-class SingleVisualisationPainter {
+type SingleVisualisationPainterArgs = {
+  wrapper: HTMLElement,
+  canvas: HTMLCanvasElement,
+  context: CanvasRenderingContext2D,
+  image: ImageBitmap,
+  bpm: number,
+  colors: {
+    similar: string,
+    diff: string
+  }
+}
+
+export class SingleVisualisationPainter {
+  wrapper;
+  canvas;
+  context;
+  image;
+  bpm;
+  colors;
+
   constructor({
     wrapper,
     canvas,
@@ -6,7 +25,7 @@ class SingleVisualisationPainter {
     image,
     bpm,
     colors
-  }) {
+  }: SingleVisualisationPainterArgs) {
     this.wrapper = wrapper
     this.canvas = canvas;
     this.context = context;
@@ -25,14 +44,14 @@ class SingleVisualisationPainter {
     const context = this.context;
     const interval = 1000 / (this.bpm / 60);
 
-    const startTime = new Date();
+    const startTime = Date.now();
 
     let elapsedIntervals = 0;
 
     (function loop() {
       window.requestAnimationFrame(function() {
 
-        elapsedIntervals = Math.floor((new Date() - startTime) / interval);
+        elapsedIntervals = Math.floor((Date.now() - startTime) / interval);
 
         draw();
 
@@ -52,8 +71,8 @@ class SingleVisualisationPainter {
       context.imageSmoothingEnabled = false;
       context.clearRect(0, 0, canvas.width, canvas.height);
 
-      const wholeImageControl = document.getElementById('show-whole-image');
-      const cursorControl = document.getElementById('show-cursor');
+      const wholeImageControl = <HTMLInputElement> document.getElementById('show-whole-image');
+      const cursorControl = <HTMLInputElement> document.getElementById('show-cursor');
 
       if (wholeImageControl.checked) {
         context.drawImage(image, 0, 0, image.width, image.width, 0, 0, canvas.width, canvas.width);
@@ -79,5 +98,3 @@ class SingleVisualisationPainter {
   }
 
 }
-
-export { SingleVisualisationPainter };

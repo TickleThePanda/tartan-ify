@@ -1,5 +1,15 @@
+export type BatchImage = {
+  title: string,
+  imageData: ImageBitmap
+}
+
 export class BatchVisualisationPainter {
-  constructor(element, images) {
+  element;
+  images;
+  constructor(
+    element: HTMLElement,
+    images: BatchImage[]
+  ) {
     this.element = element;
     this.images = images;
   }

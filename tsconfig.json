@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "sourceRoot": "./src/js/",
+    "rootDir": "./src/",
+    "outDir": "./_site",
+    "noImplicitAny": true,
+    "module": "es6",
+    "target": "es2020",
+    "allowJs": true,
+    "alwaysStrict": true,
+    "sourceMap": true,
+    "lib": [
+      "es2020",
+      "dom"
+    ],
+    "typeRoots": [],
+    "types": []
+  },
+  "include": ["./src/js/**/*.ts"],
+  "exclude": ["./src/js/workers/**/*.js"]
+}

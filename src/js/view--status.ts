@@ -1,13 +1,40 @@
-export class StatusManager {
+type StatusManagerElementsArgs = {
+  wrapper: HTMLElement,
+  status: HTMLElement,
+  task: HTMLElement,
+  percentage: HTMLElement
+}
+
+export enum StatusType {
+  "ERROR"
+}
+
+type StatusFunction = {
+  type: StatusType,
+  status: string,
+  task: string,
+  percentage: number
+}
+
+export class StatusView {
+
   element;
+  statusElement;
+  taskElement;
+  percentageElement;
+
   #statusFunction;
   #shouldContinue = false;
-  constructor({
-    wrapper,
-    status,
-    task,
-    percentage
-  }, statusFunction) {
+
+  constructor(
+    {
+      wrapper,
+      status,
+      task,
+      percentage
+    }: StatusManagerElementsArgs,
+    statusFunction: () => StatusFunction
+  ) {
     this.element = wrapper;
     this.statusElement = status;
     this.taskElement = task;
@@ -48,7 +75,7 @@ export class StatusManager {
         this.percentageElement.innerHTML = "";
       }
 
-      if (type === 'error') {
+      if (type === StatusType.ERROR) {
         this.element.classList.add('error');
       }
 

@@ -1,9 +1,9 @@
-const GulpClient = require('gulp');
 const gulp = require('gulp');
 const less = require('gulp-less');
 const mocha = require('gulp-mocha');
+const ts = require('gulp-typescript');
 
-const JS_FILES = ['src/js/**/*.{js,mjs}', '!src/js/**/*.spec.{js,mjs}'];
+const WORKER_JS_FILES = ['src/js/workers/**/*.{js,mjs}', '!src/js/workers/**/*.spec.{js,mjs}'];
 
 gulp.task('css', function() {
   return gulp.src('src/_less/**/[^_]*.less')
@@ -18,18 +18,27 @@ gulp.task('html', function() {
     .pipe(gulp.dest('_site'));
 });
 
-gulp.task('test-js', function() {
-  return gulp.src('src/js/**/*.spec.{js,mjs}')
+gulp.task('test-workers', function() {
+  return gulp.src('src/js/workers/**/*.spec.{js,mjs}')
     .pipe(mocha())
     .on('error', console.error);
 });
 
-gulp.task('process-js', function() {
-  return gulp.src(JS_FILES)
-    .pipe(gulp.dest('_site/js/'));
+gulp.task('process-workers', function() {
+  return gulp.src(WORKER_JS_FILES)
+    .pipe(gulp.dest('_site/js/workers/'));
 });
 
-gulp.task('js', gulp.series('test-js', 'process-js'));
+const tsProject = ts.createProject('tsconfig.json');
+
+gulp.task('ts', function() {
+  const tsResult = tsProject.src()
+    .pipe(tsProject());
+
+  return tsResult.js.pipe(gulp.dest('_site'));
+})
+
+gulp.task('js', gulp.series('ts', 'test-workers', 'process-workers'));
 
 gulp.task('images', function() {
   return gulp.src('src/images/**.png')
@@ -50,7 +59,7 @@ gulp.task('default', gulp.parallel('html', 'css', 'js', 'images', 'audio', 'head
 
 gulp.task('watch', function() {
   gulp.watch('src/**/*.html', gulp.series('html'));
-  gulp.watch('src/js/**/*.{js,mjs}', gulp.series('js'));
+  gulp.watch('src/js/**/*.{ts,js,mjs}', gulp.series('js'));
   gulp.watch('src/_less/**/*.less', gulp.series('css'));
   gulp.watch('src/images/**/*.png)', gulp.series('images'));
   gulp.watch('src/audio/*.*', gulp.series('audio'));

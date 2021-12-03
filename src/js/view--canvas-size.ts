@@ -1,15 +1,17 @@
-function resizeCanvas(canvas) {
+function resizeCanvas(canvas: HTMLCanvasElement) {
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientWidth;
 }
 
 class CanvasSizeManager {
+  canvases: {
+    canvas: HTMLCanvasElement,
+    callback?: () => any
+  }[] = []
   constructor() {
-    const canvases = [];
-    this.canvases = canvases;
 
-    window.addEventListener('resize', function() {
-      canvases.forEach(c => {
+    window.addEventListener('resize', () => {
+      this.canvases.forEach(c => {
         resizeCanvas(c.canvas);
         if (c.callback) {
           c.callback();
@@ -18,7 +20,7 @@ class CanvasSizeManager {
     });
   }
 
-  add(canvas, callback) {
+  add(canvas: HTMLCanvasElement, callback?: () => any) {
     this.canvases.push({
       canvas: canvas,
       callback: callback

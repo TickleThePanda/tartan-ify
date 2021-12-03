@@ -1,17 +1,17 @@
-import { CanvasSizeManager } from './view--canvas-size.mjs';
-import { AnalysisFormManager } from './view--analysis-form.mjs';
-import { SingleVisualisationPainter } from './view--single-vis.mjs';
-import { BatchVisualisationPainter } from './view--batch-vis.mjs';
-import { MusicAnalyser } from './app--music-analyser.mjs';
-import { DiffVisualiser } from './app--diff-visualiser.mjs';
-import { StatusManager } from './view--status-manager.mjs';
-import { Stage } from './lib--stage.mjs';
+import { CanvasSizeManager } from './view--canvas-size.js';
+import { AnalysisFormManager, AnalysisOptions, ScaleOptions, ThresholdOptions, VisualisationColors } from './view--analysis-form.js';
+import { SingleVisualisationPainter } from './view--vis-single.js';
+import { BatchImage, BatchVisualisationPainter } from './view--vis-batch.js';
+import { MusicAnalyser } from './app--music-analyser.js';
+import { DiffVisualiser } from './app--diff-visualiser.js';
+import { StatusView } from './view--status.js';
+import { MutableStatus } from './lib--mutable-status.js';
 
 window.addEventListener('load', async () => {
 
-  const stage = new Stage();
+  const stage = new MutableStatus();
 
-  const statusManager = new StatusManager({
+  const statusManager = new StatusView({
     wrapper: document.getElementById('loading-status'),
     status: document.getElementById('loading-status-status'),
     task: document.getElementById('loading-status-task'),
@@ -20,7 +20,7 @@ window.addEventListener('load', async () => {
 
   const visualiser = document.getElementById('visualiser');
   const batchElement = document.getElementById('batch');
-  const canvas = document.getElementById('similarity-graph');
+  const canvas = <HTMLCanvasElement> document.getElementById('similarity-graph');
   const context = canvas.getContext('2d');
 
   const formManager = new AnalysisFormManager(
@@ -35,8 +35,12 @@ window.addEventListener('load', async () => {
   formManager.registerSubmitSuccessListener(analyse);
 
   async function analyse({
-    bpm: bpmOption, singleOptions: { scale, thresholds }, batch, loadFileData, colors
-  }) {
+    bpm: bpmOption,
+    singleOptions: { scale, thresholds },
+    batch,
+    loadFileData,
+    colors
+  }: AnalysisOptions) {
 
     console.log("app--main.mjs - Processing data");
 
@@ -45,10 +49,10 @@ window.addEventListener('load', async () => {
     statusManager.visible = true;
 
     const analyser = new MusicAnalyser({
-      scale, thresholds
+      scale
     });
     const diffVisualiser = new DiffVisualiser({
-      colors, context, updateStatus: stage.update.bind(stage)
+      colors, context, status: stage
     })
 
     stage.update({
@@ -84,11 +88,19 @@ window.addEventListener('load', async () => {
 
   async function renderSingleVisualisation({
     diffVisualiser,
-    diffs, thresholds, scale, audio, bpm, colors
+    diffs,
+    thresholds, scale, audio, bpm, colors
+  }: {
+    diffVisualiser: DiffVisualiser,
+    diffs: Float32Array,
+    thresholds: ThresholdOptions
+    scale: ScaleOptions,
+    audio: AudioBuffer,
+    bpm: number,
+    colors: VisualisationColors
   }) {
     const imageData = await diffVisualiser.renderVisualisation({
-      diffs, thresholds, scale,
-      updateStatus: stage.update.bind(stage)
+      diffs, thresholds, scale
     });
     visualiser.classList.remove('hidden');
     canvasSizeManager.triggerResize();
@@ -103,6 +115,9 @@ window.addEventListener('load', async () => {
   async function renderBatchVisualisation({
     diffVisualiser,
     diffs
+  }: {
+    diffVisualiser: DiffVisualiser,
+    diffs: Float32Array
   }) {
     stage.update({
       status: 'Rendering visualisations'
@@ -110,7 +125,7 @@ window.addEventListener('load', async () => {
 
     const minThresholds = [0, 0.1, 1, 10].map(v => v/100);
     const maxThresholds = [90, 75, 50, 40, 30, 20, 15].map(v => v/100);
-    const scales = ['log', 'sqrt', 'linear', 'squared', 'exponential'];
+    const scales: ScaleOptions[] = ['log', 'sqrt', 'linear', 'squared', 'exponential'];
 
     const images = await diffVisualiser.renderVisualisations({
       diffs,
@@ -122,13 +137,12 @@ window.addEventListener('load', async () => {
     });
 
     statusManager.visible = false;
-    batch.classList.remove('hidden');
+    batchElement.classList.remove('hidden');
 
     startBatchVisualisation(images);
-
   }
 
-  function playAudio(audio) {
+  function playAudio(audio: AudioBuffer) {
     const ctx = new AudioContext();
     const bufferSrc = new AudioBufferSourceNode(ctx, {
       buffer: audio
@@ -140,6 +154,10 @@ window.addEventListener('load', async () => {
 
   function startSingleVisualisation({
     image, bpm, colors
+  }: {
+    image: ImageBitmap,
+    bpm: number,
+    colors: VisualisationColors
   }) {
     new SingleVisualisationPainter({
       wrapper: visualiser,
@@ -147,8 +165,9 @@ window.addEventListener('load', async () => {
     }).start();
   }
 
-  function startBatchVisualisation(images) {
-    new BatchVisualisationPainter(batchElement, images).start();
+  function startBatchVisualisation(images: BatchImage[]) {
+    const batchVisualiser = new BatchVisualisationPainter(batchElement, images);
+    batchVisualiser.start();
   }
 
   async function loadAudioSelection() {

@@ -1,23 +1,50 @@
-import { TaskPromiseWorker } from './lib--task-promise-worker.mjs';
+import { MutableStatus } from './lib--mutable-status.js';
+import { TaskPromiseWorker } from './lib--task-promise-worker.js';
+import { VisualisationColors, ThresholdOptions, ScaleOptions } from './view--analysis-form.js';
+import { BatchImage } from './view--vis-batch.js';
+
+type DiffVisualiserArgs = {
+  colors: VisualisationColors,
+  context: CanvasRenderingContext2D,
+  status: MutableStatus
+}
+
+type SingleDiffVisualiserRenderArgs = {
+  diffs: Float32Array,
+  thresholds: ThresholdOptions,
+  scale: ScaleOptions
+}
+
+type MultiDiffVisualiserRenderArgs = {
+  diffs: Float32Array,
+  matrixParams: {
+    scales: ScaleOptions[],
+    minThresholds: number[],
+    maxThresholds: number[]
+  }
+}
 
 export class DiffVisualiser {
+  colors: VisualisationColors;
+  context: CanvasRenderingContext2D;
+  status: MutableStatus;
   constructor({
     colors,
     context,
-    updateStatus
-  }) {
+    status
+  }: DiffVisualiserArgs) {
     this.context = context;
     this.colors = colors;
-    this.updateStatus = updateStatus;
+    this.status = status;
   }
 
   async renderVisualisation({
     diffs, thresholds, scale
-  }) {
+  }: SingleDiffVisualiserRenderArgs) {
 
-    const task = new TaskPromiseWorker('/js/worker--renderer.js');
+    const task = new TaskPromiseWorker('/js/workers/worker--renderer.js');
 
-    this.updateStatus({
+    this.status.update({
       status: 'Generating visualisation ',
       task
     });
@@ -45,16 +72,19 @@ export class DiffVisualiser {
 
   async renderVisualisations({
     diffs, matrixParams
-  }) {
+  }: MultiDiffVisualiserRenderArgs): Promise<BatchImage[]> {
 
-    const task = new TaskPromiseWorker('/js/worker--renderer.js');
+    const task = new TaskPromiseWorker('/js/workers/worker--renderer.js');
 
-    this.updateStatus({
+    this.status.update({
       status: 'Generating visualisations',
       task
     });
 
-    const results = await task
+    const results: {
+      data: ArrayBuffer,
+      title: string
+    }[] = await task
       .run({
         diffs: diffs.buffer,
         colors: this.colors,

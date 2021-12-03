@@ -1,26 +1,37 @@
-import { TaskPromiseWorker } from './lib--task-promise-worker.mjs';
+import { TaskPromiseWorker, TaskWithStatus } from './lib--task-promise-worker.js';
+import { BpmOptions } from './view--analysis-form.js';
+
+type Status = {
+  status: string,
+  task: TaskWithStatus
+}
+
+type StatusListener = (status: Status) => any
 
 class MusicAnalyser {
+  listeners: StatusListener[];
+  scale: string;
   constructor({
     scale
+  }: {
+    scale: string
   }) {
     this.listeners = [];
     this.scale = scale;
   }
 
-  addStatusUpdateListener(listener) {
-    if (typeof listener === 'function') {
-      this.listeners.push(listener);
-    } else {
-      throw new Error("Listener provided was not a function");
-    }
+  addStatusUpdateListener(listener: StatusListener) {
+    this.listeners.push(listener);
   }
 
-  updateStatus(status) {
+  updateStatus(status: Status) {
     this.listeners.forEach(l => l(status));
   }
 
-  async generateDiffMatrix(audioFileData, bpm) {
+  async generateDiffMatrix(
+    audioFileData: ArrayBuffer,
+    bpm: BpmOptions
+  ) {
 
     console.log(`app--music.analyser.mjs - fileDataSize: ${audioFileData.byteLength}, bpm: ${bpm}`);
 
@@ -33,9 +44,9 @@ class MusicAnalyser {
 
     const interval = 1000 / (realBpm / 60);
 
-    const fftsForIntervals = await this.calculateFftsForIntervals(sharedBuffers, sampleRate, interval);
+    const fftsForIntervals = await this.calculateFftsForSegments(sharedBuffers, sampleRate, interval);
 
-    const diffs = await this.calculateFftDiffs(fftsForIntervals);
+    const diffs = await this.calculateFftDiffMatrix(fftsForIntervals);
 
     return {
       diffs,
@@ -44,11 +55,11 @@ class MusicAnalyser {
     };
   }
 
-  async decodeAudioData(fileBuffer) {
+  async decodeAudioData(fileBuffer: ArrayBuffer): Promise<AudioBuffer> {
 
     const length = fileBuffer.byteLength;
 
-    const task = {
+    const task: TaskWithStatus = {
       status: {
         percentage: 0
       }
@@ -81,9 +92,9 @@ class MusicAnalyser {
     return data;
   }
 
-  async calculateFftDiffs(ffts) {
+  async calculateFftDiffMatrix(ffts: Float32Array[]) {
 
-    const task = new TaskPromiseWorker('/js/worker--diff-analysis.js');
+    const task = new TaskPromiseWorker('/js/workers/worker--diff-analysis.js');
 
     this.updateStatus({
       status: 'Calculating differences between segments',
@@ -98,16 +109,20 @@ class MusicAnalyser {
     return new Float32Array(data);
   }
 
-  async calculateFftsForIntervals(buffers, sampleRate, interval) {
+  async calculateFftsForSegments(
+    buffers: SharedArrayBuffer[],
+    sampleRate: number,
+    interval: number
+  ): Promise<Float32Array[]> {
 
-    const task = new TaskPromiseWorker('/js/worker--fft.js');
+    const task = new TaskPromiseWorker('/js/worker/workers--fft.js');
 
     this.updateStatus({
       status: 'Analysing spectrum for each segments',
       task
     });
 
-    const data = await task
+    const data: ArrayBuffer[] = await task
       .run({
         sampleRate,
         interval,
@@ -118,38 +133,38 @@ class MusicAnalyser {
 
   }
 
-  async calculateBpm(buffers, bpm) {
+  async calculateBpm(buffers: ArrayBuffer[], bpm: BpmOptions): Promise<number> {
 
     if (!bpm.autodetect) {
       return bpm.value;
     }
 
-    const task = new TaskPromiseWorker('/js/worker--tempo.js');
+    const task = new TaskPromiseWorker('/js/worker/workers--tempo.js');
 
     this.updateStatus({
       status: 'Detecting BPM',
       task
     });
 
-    const { tempo } = await task.run(buffers);
+    const { tempo }: { tempo: number } = await task.run(buffers);
 
     return tempo * bpm.autodetectMultiplier;
 
   }
 }
 
-function convertToSharedBuffers(audioData) {
-  const buffers = [];
+function convertToSharedBuffers(audioBuffer: AudioBuffer): SharedArrayBuffer[] {
+  const converted = [];
 
-  for (let i = 0; i < audioData.numberOfChannels; i++) {
-    const buffer = audioData.getChannelData(i).buffer;
-    buffers.push(copyToSharedBuffer(buffer));
+  for (let i = 0; i < audioBuffer.numberOfChannels; i++) {
+    const buffer = audioBuffer.getChannelData(i).buffer;
+    converted.push(copyToSharedBuffer(buffer));
   }
 
-  return buffers;
+  return converted;
 }
 
-function copyToSharedBuffer(src)  {
+function copyToSharedBuffer(src: ArrayBuffer): SharedArrayBuffer {
   const dst = new SharedArrayBuffer(src.byteLength);
   new Uint8Array(dst).set(new Uint8Array(src));
   return dst;

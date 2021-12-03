@@ -1,12 +1,20 @@
-class Status {
-  stage = null;
-  percentage = null;
+type StatusValues = {
+  stage?: string;
+  percentage?: number;
+}
+
+class Status implements StatusValues {
+  stage?: string = null;
+  percentage?: number = null;
 
   constructor() {}
 
   update({
     stage,
     percentage
+  }: {
+    stage: string,
+    percentage: number
   }) {
     if (stage === undefined || percentage === null) {
       this.stage = null;
@@ -21,13 +29,20 @@ class Status {
   }
 }
 
-export class TaskPromiseWorker {
+export interface TaskWithStatus {
+  readonly status: StatusValues;
+}
+
+export class TaskPromiseWorker implements TaskWithStatus {
   #status = new Status();
-  constructor(stringUrl) {
+
+  stringUrl: string;
+
+  constructor(stringUrl: string) {
     this.stringUrl = stringUrl;
   }
 
-  async run(message, transfer) {
+  async run(message: any, transfer?: Transferable[]): Promise<any> {
     return new Promise((resolve, reject) => {
       const worker = new Worker(this.stringUrl);
       worker.onmessage = m => {

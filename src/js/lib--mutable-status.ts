@@ -1,21 +1,27 @@
+import { TaskWithStatus } from "./lib--task-promise-worker.js";
 
-export class Stage {
-  status;
-  task;
-  error;
+type StageUpdateArgs = {
+  status: string,
+  task?: TaskWithStatus
+}
+
+export class MutableStatus {
+  status: string;
+  task: TaskWithStatus;
+  error: string;
 
   constructor() {}
 
   update({
     status,
     task
-  }) {
+  }: StageUpdateArgs) {
     this.status = status;
     this.task = task;
     this.error = undefined;
   }
 
-  updateError(error) {
+  updateError(error: string) {
     this.status = undefined;
     this.task = undefined;
     this.error = error;
