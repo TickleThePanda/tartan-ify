@@ -42,7 +42,7 @@ export class DiffVisualiser {
     diffs, thresholds, scale
   }: SingleDiffVisualiserRenderArgs) {
 
-    const task = new TaskPromiseWorker('/js/workers/workers--renderer.js');
+    const task = new TaskPromiseWorker('/js/workers/w--renderer.js');
 
     this.status.update({
       status: 'Generating visualisation ',

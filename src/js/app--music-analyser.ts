@@ -115,7 +115,7 @@ class MusicAnalyser {
     interval: number
   ): Promise<Float32Array[]> {
 
-    const task = new TaskPromiseWorker('/js/worker/w--fft.js');
+    const task = new TaskPromiseWorker('/js/workers/w--fft.js');
 
     this.updateStatus({
       status: 'Analysing spectrum for each segments',
