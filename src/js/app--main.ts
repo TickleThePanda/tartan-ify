@@ -80,6 +80,7 @@ window.addEventListener('load', async () => {
       }
 
     } catch (e) {
+      console.log(e);
       stage.updateError(`There was a problem generating the visualisation.<br>${e}`);
       return;
     }

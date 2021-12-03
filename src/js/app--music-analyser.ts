@@ -1,9 +1,10 @@
+import { BpmCache } from './lib--bpm-cache.js';
 import { TaskPromiseWorker, TaskWithStatus } from './lib--task-promise-worker.js';
 import { BpmOptions } from './view--analysis-form.js';
 
 type Status = {
   status: string,
-  task: TaskWithStatus
+  task?: TaskWithStatus
 }
 
 type StatusListener = (status: Status) => any
@@ -11,6 +12,7 @@ type StatusListener = (status: Status) => any
 class MusicAnalyser {
   listeners: StatusListener[];
   scale: string;
+  bpmCache: BpmCache;
   constructor({
     scale
   }: {
@@ -18,6 +20,9 @@ class MusicAnalyser {
   }) {
     this.listeners = [];
     this.scale = scale;
+    this.bpmCache = new BpmCache({
+      version: "v1"
+    });
   }
 
   addStatusUpdateListener(listener: StatusListener) {
@@ -37,10 +42,16 @@ class MusicAnalyser {
 
     const audioData = await this.decodeAudioData(audioFileData);
 
+    const hash = await this.hashAudio(audioData.getChannelData(0));
+
     const sharedBuffers = convertToSharedBuffers(audioData);
     const sampleRate = audioData.sampleRate;
 
-    const realBpm = await this.calculateBpm(sharedBuffers, bpm);
+    const realBpm = await this.calculateBpm({
+      buffers: sharedBuffers,
+      bpm,
+      hash
+    });
 
     const interval = 1000 / (realBpm / 60);
 
@@ -133,10 +144,21 @@ class MusicAnalyser {
 
   }
 
-  async calculateBpm(buffers: ArrayBuffer[], bpm: BpmOptions): Promise<number> {
+  async calculateBpm({
+    buffers, bpm, hash
+  }: {
+    buffers: SharedArrayBuffer[],
+    bpm: BpmOptions,
+    hash: string
+  }): Promise<number> {
 
     if (!bpm.autodetect) {
       return bpm.value;
+    }
+
+    const storedBpm = this.bpmCache.get(hash);
+    if (storedBpm !== null) {
+      return storedBpm * bpm.autodetectMultiplier;
     }
 
     const task = new TaskPromiseWorker('/js/workers/w--tempo.js');
@@ -148,10 +170,26 @@ class MusicAnalyser {
 
     const { tempo }: { tempo: number } = await task.run(buffers);
 
+    this.bpmCache.set(hash, tempo);
+
     return tempo * bpm.autodetectMultiplier;
 
   }
+
+  async hashAudio(sharedBuffers: Float32Array) {
+
+    this.updateStatus({
+      status: 'Hashing audio'
+    });
+
+    const hashBuffer = await crypto.subtle.digest("SHA-1", sharedBuffers);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    return hash;
+  }
 }
+
 
 function convertToSharedBuffers(audioBuffer: AudioBuffer): SharedArrayBuffer[] {
   const converted = [];
