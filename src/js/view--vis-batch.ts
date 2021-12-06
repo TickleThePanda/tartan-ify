@@ -1,22 +1,23 @@
+import { VisView } from "./view--vis-view.js";
+
 export type BatchImage = {
   title: string,
   imageData: ImageBitmap
 }
 
-export class BatchVisualisationPainter {
+export class BatchVisualisationPainter implements VisView {
   element;
-  images;
   constructor(
-    element: HTMLElement,
-    images: BatchImage[]
+    element: HTMLElement
   ) {
     this.element = element;
-    this.images = images;
   }
 
-  start() {
+  start(
+    images: BatchImage[]
+  ) {
 
-    for (let { title, imageData } of this.images) {
+    for (let { title, imageData } of images) {
       const div = document.createElement('div');
       div.className = 'batch--item';
 
@@ -43,5 +44,9 @@ export class BatchVisualisationPainter {
       context.imageSmoothingEnabled = false;
       context.drawImage(imageData, 0, 0, canvas.width, canvas.height);
     }
+  }
+
+  show() {
+    this.element.classList.remove("hidden");
   }
 }

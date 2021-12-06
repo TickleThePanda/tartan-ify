@@ -13,7 +13,7 @@ export class BpmCache {
   }
 
   get(hash: string): number | null {
-    const storedBpm = localStorage.getItem(`bpm-${this.#version}-${hash}`);
+    const storedBpm = localStorage.getItem(this.toKey(hash));
     if (storedBpm !== null) {
       return parseFloat(storedBpm);
     } else {
@@ -22,7 +22,11 @@ export class BpmCache {
   }
 
   set(hash: string, bpm: number) {
-    localStorage.setItem("bpm-v1-" + hash, bpm.toString());
+    localStorage.setItem(this.toKey(hash), bpm.toString());
+  }
+
+  private toKey(hash: string) {
+    return `bpm-${this.#version}-${hash}`;
   }
 
 }

@@ -54,7 +54,8 @@
         <p>To use Tartan-ify, select a piece of music and then click
         <em>Tartan-ify</em>. The tool will detect the song's BPM and use
         this to split the song into segments and will choose sensible
-        defaults for the visualisation.
+        defaults for the visualisation. If the BPM can't be detected,
+        113 BPM will be used.
 
         <p>The smaller the segments and the longer the song, the longer it will
         take to generate the visualisation.
@@ -65,12 +66,12 @@
         <fieldset class="form__fieldset">
           <legend class="form__fieldset-legend">
             <h3>Select your music</h3>
-            <em class="js-last-selected-value form__option" data-for="music-file" data-for-names="example-options">Not yet selected</em>
+            <em class="js-last-selected-value form__option" data-for="music-files" data-for-names="example-options">Not yet selected</em>
           </legend>
           <div class="form__group-options">
             <div class="form__info form__option">
-              <label class="form__button" id="file-upload-label" for="music-file">
-                <input class="form__file-upload-hidden-button" type="file" id="music-file" name="music-file" />
+              <label class="form__button" id="file-upload-label" for="music-files">
+                <input class="form__file-upload-hidden-button" type="file" multiple id="music-files" name="music-files" />
                 Select from your device
               </label>
             </div>
@@ -228,6 +229,7 @@
     </div>
     <div id="loading-status" class="page modal hidden loading-status">
       <h3 id="loading-status-status" class="loading-status__status"></h3>
+      <p id="loading-status-context" class="loading-status__context"></p>
       <p id="loading-status-task" class="loading-status__task"></p>
       <p id="loading-status-percentage" class="loading-status__percentage"></p>
     </div>

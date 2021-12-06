@@ -34,7 +34,7 @@ onmessage = function({
   }
 }) {
 
-  console.log(`worker--renderer - colors: ${diff} ${similar}, bufferLength: ${diffs.byteLength}, scale: ${scale}, thresholds: ${thresholds}, matrixParams: ${matrixParams}`);
+  console.log(`worker--renderer - colors: ${diff} ${similar}, bufferLength: ${diffs.byteLength}, scale: ${scale}, thresholds: ${thresholds.min}-${thresholds.max}, matrixParams: ${matrixParams}`);
 
   updateStatus({
     stage: "Initialising"

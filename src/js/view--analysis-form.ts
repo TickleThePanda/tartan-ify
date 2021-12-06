@@ -1,3 +1,4 @@
+import { handleMultiSelectElements } from "./view--multi-select-manager.js";
 
 class SubmitEvent extends Event {
   submitter: HTMLInputElement;
@@ -5,11 +6,14 @@ class SubmitEvent extends Event {
 
 export class AnalysisFormManager {
   formElement;
-  fileInput: HTMLInputElement;
+  filesInput: HTMLInputElement;
   bpmInput: HTMLInputElement;
   formErrors: HTMLInputElement;
   submitButton: HTMLInputElement;
-  listeners: AnalysisFormSubmitListener[];
+
+  singleListeners: ((event: SingleAnalysisOptions) => any)[] = [];
+  batchParamListeners: ((event: BatchParamAnalysisOptions) => any)[] = [];
+  batchFileListeners: ((event: BatchFileAnalysisOptions) => any)[] = [];
 
   constructor(
     formElement: HTMLElement,
@@ -21,7 +25,7 @@ export class AnalysisFormManager {
   ) {
     this.formElement = formElement;
 
-    this.fileInput = <HTMLInputElement> document.getElementById('music-file');
+    this.filesInput = <HTMLInputElement> document.getElementById('music-files');
     this.bpmInput = <HTMLInputElement> document.getElementById('analysis-bpm');
     this.formErrors = <HTMLInputElement> document.getElementById('form-errors');
     this.submitButton = <HTMLInputElement> document.getElementById('form-submit');
@@ -40,21 +44,18 @@ export class AnalysisFormManager {
     document.querySelector('.js-example-toggle-options')
       .innerHTML = examplesHtml;
 
-    addLastSelectedEvents();
+    handleMultiSelectElements();
 
-    this.fileInput.addEventListener('change', e => {
-      const file = this.fileInput.files[0];
-      if (!file || !isAudio(file)) {
-        this.formErrors.innerHTML = 'Please select an audio file';
+    this.filesInput.addEventListener('change', e => {
+      const files = this.filesInput.files;
+      if (files.length === 0 || !containsOnlyAudioFiles(files)) {
+        this.formErrors.innerHTML = 'Please select at least one audio file';
       } else {
         this.formErrors.innerHTML = '';
       }
 
     });
 
-    this.listeners = [];
-
-    const listeners = this.listeners;
     const formErrors = this.formErrors;
     const bpmInput = this.bpmInput;
 
@@ -67,7 +68,7 @@ export class AnalysisFormManager {
 
       const formData = new FormData(<HTMLFormElement> e.target);
 
-      const uploadedFile = <Blob> formData.get('music-file');
+      const selectedFiles = <File[]> formData.getAll('music-files');
       const exampleAudio = <string> formData.get('example-options');
       const detectBpm = formData.get('detect-bpm');
       const autodetectMultiplier = <string> formData.get('detect-bpm-multiplier');
@@ -88,50 +89,78 @@ export class AnalysisFormManager {
         return;
       }
 
-      const fileUploaded = uploadedFile.size !== 0;
+      const filesWereUploaded = selectedFiles.length !== 0 && allHaveContent(selectedFiles);
       const exampleAudioSelected = exampleAudio !== null;
 
-      if (!fileUploaded && !exampleAudioSelected) {
+      if (!filesWereUploaded && !exampleAudioSelected) {
         formErrors.innerHTML = 'Please select an audio file.';
         return;
       }
-      if (fileUploaded) {
-        if (!isAudio(uploadedFile)) {
-          formErrors.innerHTML = 'Please select an audio file.';
-          return;
-        }
+      if (filesWereUploaded && !containsOnlyAudioFiles(selectedFiles)) {
+        formErrors.innerHTML = 'Please select an audio file.';
+        return;
       }
 
-      let batch = submitType === 'batch';
+      const multiFileLoad: FileDataLoaders = filesWereUploaded
+        ? loadFiles(selectedFiles)
+        : [loadFileFromUrl(exampleAudio)];
 
-      const fileLoadFunction: FileDataLoader = fileUploaded
-         ? async () => await loadFileData(uploadedFile)
-         : async () => {
-            const audioResponse = await fetch(exampleAudio);
-            const audioBlob = await audioResponse.blob();
-            return await loadFileData(audioBlob)
-          };
+      const singleFileLoad: FileDataLoader = filesWereUploaded
+        ? () => loadFileData(selectedFiles[0])
+        : loadFileFromUrl(exampleAudio);
 
-      listeners.forEach(l => l({
-        bpm: {
-          autodetect: detectBpm === 'detect-bpm',
-          autodetectMultiplier: parseFloat(autodetectMultiplier),
-          value: parseFloat(bpmInput.value)
-        },
-        singleOptions: {
-          scale: <ScaleOptions> dataScaleText,
-          thresholds: {
-            min: parseFloat(minThresholdValue) / 100,
-            max: parseFloat(maxThresholdValue) / 100
-          },
-        },
-        colors: {
-          similar: minColor,
-          diff: maxColor
-        },
-        batch,
-        loadFileData: fileLoadFunction
-      }));
+      const bpm = {
+        autodetect: detectBpm === 'detect-bpm',
+        autodetectMultiplier: parseFloat(autodetectMultiplier),
+        value: parseFloat(bpmInput.value)
+      };
+
+      const colors = {
+        similar: minColor,
+        diff: maxColor
+      };
+
+      const thresholds = {
+        min: parseFloat(minThresholdValue) / 100,
+        max: parseFloat(maxThresholdValue) / 100
+      };
+
+      const scale = <ScaleOptions> dataScaleText;
+
+
+      if (submitType === 'batch') {
+
+        if (selectedFiles.length > 1) {
+          formErrors.innerHTML = 'Batch param mode only supports one file.';
+          return;
+        }
+
+        this.batchParamListeners.forEach(l => l({
+          bpm,
+          colors,
+          fileLoader: singleFileLoad
+        }));
+
+      } else if (selectedFiles.length > 1) {
+
+        this.batchFileListeners.forEach(l => l({
+          bpm,
+          colors,
+          thresholds,
+          scale,
+          fileLoaders: multiFileLoad
+        }));
+
+      } else {
+
+        this.singleListeners.forEach(l => l({
+          bpm,
+          colors,
+          thresholds,
+          scale,
+          fileLoader: singleFileLoad,
+        }));
+      }
 
     });
   }
@@ -140,17 +169,42 @@ export class AnalysisFormManager {
     this.formElement.classList.add('hidden');
   }
 
-  registerSubmitSuccessListener(listener: AnalysisFormSubmitListener) {
-    this.listeners.push(listener);
+  registerSingleSubmitListener(listener: (event: SingleAnalysisOptions) => any) {
+    this.singleListeners.push(listener);
+  }
+  registerBatchFileSubmitListener(listener: (event: BatchFileAnalysisOptions) => any) {
+    this.batchFileListeners.push(listener);
+  }
+  registerBatchParamSubmitListener(listener: (event: SingleAnalysisOptions) => any) {
+    this.batchParamListeners.push(listener);
   }
 
 }
 
-type AnalysisFormSubmitListener = (event: AnalysisFormSubmitEvent) => any
+function loadFiles(files: File[] | FileList): FileDataLoader[] {
+  return Array.from(files).map(f => () => loadFileData(f));
+}
 
-type AnalysisFormSubmitEvent = AnalysisOptions;
+function loadFileFromUrl(exampleAudio: string): FileDataLoader {
 
-async function loadFileData(file: Blob): Promise<ArrayBuffer> {
+  return async () => {
+    const audioResponse = await fetch(exampleAudio);
+    const audioBlob = await audioResponse.blob();
+    return {
+      name: exampleAudio.split("/").pop(),
+      data: await loadBlobData(audioBlob)
+    };
+  };
+}
+
+async function loadFileData(file: File): Promise<FileWithInfo> {
+  return {
+    name: file.name,
+    data: await loadBlobData(file)
+  }
+}
+
+async function loadBlobData(blob: Blob): Promise<ArrayBuffer> {
   return await new Promise(function(resolve, reject) {
     const fileReader = new FileReader();
 
@@ -162,110 +216,55 @@ async function loadFileData(file: Blob): Promise<ArrayBuffer> {
       reject(event);
     }
 
-    fileReader.readAsArrayBuffer(file);
+    fileReader.readAsArrayBuffer(blob);
 
   });
 }
 
+function containsOnlyAudioFiles(files: File[] | FileList) {
+  return Array.from(files)
+    .every(isAudio);
+}
+
+function allHaveContent(files: File[] | FileList): boolean {
+  return Array.from(files)
+    .every(f => f.size > 0);
+}
 
 function isAudio(file: Blob) {
   return file.type === '' || file.type.startsWith('audio');
 }
 
-function getInputHandler(form: HTMLFormElement, input: HTMLInputElement): InputHandler {
-
-  const inputHandlers: InputHandlers = {
-    file: (_, i) => ({
-      isSelected: () => i.value !== '' || i.files[0] !== undefined,
-      reset: () => i.value = null,
-      getNiceValue: () => i.files[0] !== undefined ? i.files[0].name : null,
-    }),
-    radio: (form, i) => ({
-      isSelected: () => i.checked,
-      reset: () => i.checked = false,
-      getNiceValue: () => form.querySelector('label[for="' + i.id + '"]').textContent,
-    }),
-    text: (_, i) => ({
-      isSelected: () => i.value !== '',
-      reset: () => i.value = null,
-      getNiceValue: () => i.value,
-    }),
-  }
-
-  return inputHandlers[input.type.toLowerCase()](form, input);
-
+export type FileWithInfo = {
+  name: string,
+  data: ArrayBuffer
 }
 
+export type FileDataLoader = () => Promise<FileWithInfo>;
+export type FileDataLoaders = FileDataLoader[];
 
-type InputHandlers = Record<string, InputHandlerCreator>;
-type InputHandlerCreator = (form: HTMLFormElement, input: HTMLInputElement) => InputHandler;
-
-type InputHandler = {
-  isSelected: () => boolean,
-  reset: () => any,
-  getNiceValue: () => string
-};
-
-function addLastSelectedEvents() {
-
-  const watchers = document.querySelectorAll('.js-last-selected-value');
-
-  for (let watcher of <HTMLElement[]> Array.from(watchers)) {
-    const form = <HTMLFormElement> watcher.closest('form');
-
-    const directInputs = watcher
-      .dataset["for"]
-      .split(/\s+/gi)
-      .map(i => <HTMLInputElement> form.querySelector("#" + i));
-
-    const formGroupInputs = watcher
-      .dataset["forNames"]
-      .split(/\s+/gi)
-      .flatMap(i => <HTMLInputElement[]> Array.from(form.querySelectorAll("[name=" + i + "]")));
-
-    const inputs: HTMLInputElement[] = [... directInputs, ...formGroupInputs];
-
-    const setWatcherValue = (v: string) => v !== null ? watcher.innerHTML = v : null;
-
-    for (let input of inputs) {
-      const handler = getInputHandler(form, input);
-
-      const handleChange = () => {
-
-        if (handler.isSelected()) {
-          setWatcherValue(handler.getNiceValue());
-
-          for (let inputToReset of inputs.filter(e => e !== input)) {
-            const inputToResetHandler = getInputHandler(form, inputToReset);
-
-            inputToResetHandler.reset();
-          }
-        }
-      };
-
-      input.addEventListener('click', handleChange);
-      input.addEventListener('change', handleChange);
-
-      if (handler.isSelected()) {
-        setWatcherValue(handler.getNiceValue());
-      }
-    }
-
-  }
-}
-
-export type FileDataLoader = () => Promise<ArrayBuffer>;
-
-export type AnalysisOptions = {
-  bpm: BpmOptions,
-  singleOptions: {
-    scale: ScaleOptions,
-    thresholds: ThresholdOptions,
-  },
+type BaseOptions = {
   colors: VisualisationColors,
-  batch: boolean,
-  loadFileData: FileDataLoader
-};
+}
+
+type SingleParamsAnalysisOptions = {
+  bpm: BpmOptions,
+  scale: ScaleOptions,
+  thresholds: ThresholdOptions,
+} & BaseOptions;
+
+export type SingleAnalysisOptions = {
+  fileLoader: FileDataLoader
+} & SingleParamsAnalysisOptions;
+
+export type BatchFileAnalysisOptions = {
+  fileLoaders: FileDataLoaders
+} & SingleParamsAnalysisOptions & BaseOptions;
+
+export type BatchParamAnalysisOptions = {
+  bpm: BpmOptions,
+  fileLoader: FileDataLoader
+} & BaseOptions;
 
 export type ScaleOptions = "log" | "sqrt" | "linear" | "squared" | "exponential";
 
@@ -284,4 +283,5 @@ export type BpmOptions = {
   autodetectMultiplier: number,
   value: number
 };
+
 

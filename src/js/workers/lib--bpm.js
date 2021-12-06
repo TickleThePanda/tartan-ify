@@ -25,6 +25,14 @@
 
 importScripts('lib--worker-status.js');
 
+class NoTempoFoundException extends Error {
+  constructor(message) {
+    super(message);
+    this.message = "Tempo extraction failed: " + message;
+  }
+}
+
+
 class Agent {
   /**
    * Constructor
@@ -552,7 +560,7 @@ class MusicTempo {
       this.beats = this.bestAgent.events;
     }
     if (this.tempo == -1) {
-      throw "Tempo extraction failed";
+      throw new NoTempoFoundException("No agents with high score");
     }
   }
 }
@@ -587,7 +595,7 @@ class OnsetDetection {
 
     let k = Math.floor(Math.log(bufferSize) / Math.LN2);
     if (Math.pow(2, k) !== bufferSize) {
-      throw "Invalid buffer size (" + bufferSize + "), must be power of 2";
+      throw new Error("Invalid buffer size (" + bufferSize + "), must be power of 2");
     }
 
     const hammWindow = fft.getHammingWindow(bufferSize);
@@ -713,7 +721,7 @@ class OnsetDetection {
     }
 
     if (peaks.length < 2) {
-      throw "Fail to find peaks";
+      throw new NoTempoFoundException("Fail to find peaks");
     }
     return peaks;
   }
@@ -775,7 +783,7 @@ class TempoInduction {
       }
     }
     if (clCount == 0) {
-      throw "Fail to find IOIs";
+      throw new NoTempoFoundException("Fail to find IOIs");
     }
     clIntervals.length = clCount;
     clSizes.length = clCount;

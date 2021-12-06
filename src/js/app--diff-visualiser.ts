@@ -4,7 +4,6 @@ import { VisualisationColors, ThresholdOptions, ScaleOptions } from './view--ana
 import { BatchImage } from './view--vis-batch.js';
 
 type DiffVisualiserArgs = {
-  colors: VisualisationColors,
   context: CanvasRenderingContext2D,
   status: MutableStatus
 }
@@ -12,7 +11,8 @@ type DiffVisualiserArgs = {
 type SingleDiffVisualiserRenderArgs = {
   diffs: Float32Array,
   thresholds: ThresholdOptions,
-  scale: ScaleOptions
+  scale: ScaleOptions,
+  colors: VisualisationColors
 }
 
 type MultiDiffVisualiserRenderArgs = {
@@ -21,25 +21,23 @@ type MultiDiffVisualiserRenderArgs = {
     scales: ScaleOptions[],
     minThresholds: number[],
     maxThresholds: number[]
-  }
+  },
+  colors: VisualisationColors
 }
 
 export class DiffVisualiser {
-  colors: VisualisationColors;
   context: CanvasRenderingContext2D;
   status: MutableStatus;
   constructor({
-    colors,
     context,
     status
   }: DiffVisualiserArgs) {
     this.context = context;
-    this.colors = colors;
     this.status = status;
   }
 
   async renderVisualisation({
-    diffs, thresholds, scale
+    diffs, thresholds, scale, colors
   }: SingleDiffVisualiserRenderArgs) {
 
     const task = new TaskPromiseWorker('/js/workers/w--renderer.js');
@@ -52,7 +50,7 @@ export class DiffVisualiser {
     const data = await task
       .run({
         diffs: diffs.buffer,
-        colors: this.colors,
+        colors: colors,
         thresholds,
         scale
       });
@@ -71,7 +69,7 @@ export class DiffVisualiser {
   }
 
   async renderVisualisations({
-    diffs, matrixParams
+    diffs, matrixParams, colors
   }: MultiDiffVisualiserRenderArgs): Promise<BatchImage[]> {
 
     const task = new TaskPromiseWorker('/js/workers/w--renderer.js');
@@ -87,7 +85,7 @@ export class DiffVisualiser {
     }[] = await task
       .run({
         diffs: diffs.buffer,
-        colors: this.colors,
+        colors: colors,
         matrixParams
       });
 

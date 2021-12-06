@@ -1,24 +1,56 @@
 .loading-status {
 
-  padding: 1em;
+  display: grid;
+
+  padding: 0.5em;
 
   border: 0.15rem var(--palette-primary-stroke) solid;
   border-radius: 0.25rem;
 
-  width: 25em;
-  height: 6.5em;
+  width: 30em;
+  height: 7.5em;
   max-width: 100%;
   max-height: 100%;
 
+  gap: 0.5em;
+
+  grid-template-areas:
+    "c c"
+    "s s"
+    "t p";
+
   &__status {
+    grid-area: s;
     font-size: 1.25em;
+    margin: 0;
+    height: 1em;
+    line-height: 1;
   }
   &__task {
-    margin-top: 0.5em;
+    grid-area: t;
+    margin: 0;
+    justify-self: end;
+  }
+  &__context {
+    grid-area: c;
+    justify-self: end;
+    font-size: 0.9em;
+    margin: 0;
   }
   &__percentage {
+    grid-area: p;
     font-style: italic;
-    font-size: 0.9em;
-    margin-top: 0.25em;
+    line-height: 1;
+    width: 2em;
+    height: 1em;
+    justify-self: start;
+  }
+  &__percentage:empty {
+    grid-area: p;
+    font-style: italic;
+    line-height: 1;
+    width: 0;
+    height: 1em;
+    justify-self: start;
   }
 }

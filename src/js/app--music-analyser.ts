@@ -11,15 +11,10 @@ type StatusListener = (status: Status) => any
 
 class MusicAnalyser {
   listeners: StatusListener[];
-  scale: string;
   bpmCache: BpmCache;
-  constructor({
-    scale
-  }: {
-    scale: string
-  }) {
+
+  constructor() {
     this.listeners = [];
-    this.scale = scale;
     this.bpmCache = new BpmCache({
       version: "v1"
     });
@@ -168,11 +163,22 @@ class MusicAnalyser {
       task
     });
 
-    const { tempo }: { tempo: number } = await task.run(buffers);
+    try {
+      const { tempo }: { tempo: number } = await task.run(buffers);
 
-    this.bpmCache.set(hash, tempo);
+      this.bpmCache.set(hash, tempo);
+      return tempo * bpm.autodetectMultiplier;
+    } catch (e) {
+      if (typeof e === 'string' && e.startsWith('Error: Tempo extraction failed')) {
+        const tempo = 113;
 
-    return tempo * bpm.autodetectMultiplier;
+        this.bpmCache.set(hash, tempo);
+        return tempo * bpm.autodetectMultiplier;
+      } else {
+        throw e;
+      }
+    }
+
 
   }
 

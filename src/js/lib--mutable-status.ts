@@ -7,10 +7,15 @@ type StageUpdateArgs = {
 
 export class MutableStatus {
   status: string;
+  context: string;
   task: TaskWithStatus;
   error: string;
 
   constructor() {}
+
+  updateContext(context: string) {
+    this.context = context;
+  }
 
   update({
     status,
@@ -30,6 +35,7 @@ export class MutableStatus {
   get() {
     if (this.error !== undefined) {
       return {
+        context: this.context,
         status: this.error,
         type: 'error'
       };
@@ -37,17 +43,20 @@ export class MutableStatus {
 
     if (this.status === undefined) {
       return {
+        context: this.context,
         text: 'Loading...'
       };
     }
 
     if (this.task === undefined || this.task.status === undefined) {
       return {
+        context: this.context,
         status: this.status
       };
     }
 
     return {
+      context: this.context,
       status: this.status,
       task: this.task.status.stage,
       percentage: this.task.status.percentage

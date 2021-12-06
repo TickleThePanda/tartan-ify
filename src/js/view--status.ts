@@ -2,7 +2,8 @@ type StatusManagerElementsArgs = {
   wrapper: HTMLElement,
   status: HTMLElement,
   task: HTMLElement,
-  percentage: HTMLElement
+  percentage: HTMLElement,
+  context: HTMLElement
 }
 
 export enum StatusType {
@@ -13,15 +14,17 @@ type StatusFunction = {
   type: StatusType,
   status: string,
   task: string,
-  percentage: number
+  percentage: number,
+  context: string
 }
 
 export class StatusView {
 
-  element;
-  statusElement;
-  taskElement;
-  percentageElement;
+  #wrapper;
+  #statusElement;
+  #taskElement;
+  #percentageElement;
+  #contextElement;
 
   #statusFunction;
   #shouldContinue = false;
@@ -30,27 +33,29 @@ export class StatusView {
     {
       wrapper,
       status,
+      context,
       task,
       percentage
     }: StatusManagerElementsArgs,
     statusFunction: () => StatusFunction
   ) {
-    this.element = wrapper;
-    this.statusElement = status;
-    this.taskElement = task;
-    this.percentageElement = percentage;
+    this.#wrapper = wrapper;
+    this.#statusElement = status;
+    this.#taskElement = task;
+    this.#percentageElement = percentage;
+    this.#contextElement = context;
     this.#statusFunction = statusFunction;
   }
 
   get visible() {
-    return !this.element.classList.contains('hidden');
+    return !this.#wrapper.classList.contains('hidden');
   }
 
   set visible(isVisible) {
     if (isVisible) {
-      this.element.classList.remove('hidden');
+      this.#wrapper.classList.remove('hidden');
     } else {
-      this.element.classList.add('hidden');
+      this.#wrapper.classList.add('hidden');
     }
   }
 
@@ -58,25 +63,31 @@ export class StatusView {
     this.#shouldContinue = true;
 
     const updateStatus = () => {
-      const { type, status, task, percentage } = this.#statusFunction();
+      const { type, context, status, task, percentage } = this.#statusFunction();
       if (status !== null && status !== undefined) {
-        this.statusElement.innerHTML = status;
+        this.#statusElement.innerHTML = status;
       } else {
-        this.statusElement.innerHTML = "";
+        this.#statusElement.innerHTML = "";
       }
       if (task !== null && task !== undefined) {
-        this.taskElement.innerHTML = task;
+        this.#taskElement.innerHTML = task;
       } else {
-        this.taskElement.innerHTML = "";
+        this.#taskElement.innerHTML = "";
       }
       if (percentage !== null && percentage !== undefined) {
-        this.percentageElement.innerHTML = `${Math.floor(percentage * 100)}%`;
+        this.#percentageElement.innerHTML = `${Math.floor(percentage * 100)}%`;
       } else {
-        this.percentageElement.innerHTML = "";
+        this.#percentageElement.innerHTML = "";
+      }
+
+      if (context !== null && context !== undefined) {
+        this.#contextElement.innerHTML = context;
+      } else {
+        this.#contextElement.innerHTML = "";
       }
 
       if (type === StatusType.ERROR) {
-        this.element.classList.add('error');
+        this.#wrapper.classList.add('error');
       }
 
       if (this.#shouldContinue) {

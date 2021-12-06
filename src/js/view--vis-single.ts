@@ -1,7 +1,14 @@
+import { CanvasSizeManager } from "./view--canvas-size.js";
+import { VisView } from "./view--vis-view.js";
+
 type SingleVisualisationPainterArgs = {
   wrapper: HTMLElement,
   canvas: HTMLCanvasElement,
   context: CanvasRenderingContext2D,
+  canvasSizeManager: CanvasSizeManager
+}
+
+type SingleVisualisationStartArgs = {
   image: ImageBitmap,
   bpm: number,
   colors: {
@@ -10,39 +17,41 @@ type SingleVisualisationPainterArgs = {
   }
 }
 
-export class SingleVisualisationPainter {
+export class SingleVisualisationPainter implements VisView {
   wrapper;
   canvas;
   context;
-  image;
-  bpm;
-  colors;
+  canvasSizeManager;
 
   constructor({
     wrapper,
     canvas,
     context,
-    image,
-    bpm,
-    colors
+    canvasSizeManager
   }: SingleVisualisationPainterArgs) {
     this.wrapper = wrapper
     this.canvas = canvas;
     this.context = context;
-    this.image = image;
-    this.bpm = bpm;
-    this.colors = colors;
+    this.canvasSizeManager = canvasSizeManager;
   }
 
-  start() {
+  show() {
+    this.wrapper.classList.remove("hidden");
+    this.canvasSizeManager.triggerResize();
+  }
 
-    this.wrapper.style.setProperty('--color-similar', this.colors.similar);
-    this.wrapper.style.setProperty('--color-diff', this.colors.diff);
+  start({
+    image,
+    bpm,
+    colors
+  }: SingleVisualisationStartArgs) {
 
-    const image = this.image;
+    this.wrapper.style.setProperty('--color-similar', colors.similar);
+    this.wrapper.style.setProperty('--color-diff', colors.diff);
+
     const canvas = this.canvas;
     const context = this.context;
-    const interval = 1000 / (this.bpm / 60);
+    const interval = 1000 / (bpm / 60);
 
     const startTime = Date.now();
 
@@ -96,5 +105,4 @@ export class SingleVisualisationPainter {
       }
     }
   }
-
 }
