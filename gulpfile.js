@@ -83,7 +83,7 @@ gulp.task('default', gulp.parallel('html', 'css', 'js', 'images', 'audio', 'head
 
 gulp.task('watch', function() {
   gulp.watch('src/**/*.html', gulp.series('html'));
-  gulp.watch('src/js/**/*.{ts,js,mjs}', gulp.series('js'));
+  gulp.watch(['src/js/**/*.{ts,js,mjs}', '.browserslistrc', 'tsconfig.json', 'package.json'], gulp.series('js'));
   gulp.watch('src/_less/**/*.less', gulp.series('css'));
   gulp.watch('src/images/**/*.png)', gulp.series('images'));
   gulp.watch('src/audio/*.*', gulp.series('audio'));
