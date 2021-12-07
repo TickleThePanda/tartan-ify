@@ -1,6 +1,6 @@
-import { BpmCache } from './lib--bpm-cache.js';
-import { TaskPromiseWorker, TaskWithStatus } from './lib--task-promise-worker.js';
-import { BpmOptions } from './view--analysis-form.js';
+import { BpmCache } from './lib--bpm-cache';
+import { TaskPromiseWorker, TaskWithStatus } from './lib--task-promise-worker';
+import { BpmOptions } from './view--analysis-form';
 
 type Status = {
   status: string,

@@ -1,5 +1,5 @@
-import { CanvasSizeManager } from "./view--canvas-size.js";
-import { VisView } from "./view--vis-view.js";
+import { CanvasSizeManager } from "./view--canvas-size";
+import { VisView } from "./view--vis-view";
 
 type SingleVisualisationPainterArgs = {
   wrapper: HTMLElement,

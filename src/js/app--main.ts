@@ -1,12 +1,12 @@
-import { CanvasSizeManager } from './view--canvas-size.js';
-import { AnalysisFormManager, BatchFileAnalysisOptions, BatchParamAnalysisOptions, ScaleOptions, SingleAnalysisOptions, ThresholdOptions, VisualisationColors } from './view--analysis-form.js';
-import { SingleVisualisationPainter } from './view--vis-single.js';
-import { BatchImage, BatchVisualisationPainter } from './view--vis-batch.js';
-import { MusicAnalyser } from './app--music-analyser.js';
-import { DiffVisualiser } from './app--diff-visualiser.js';
-import { StatusView } from './view--status.js';
-import { MutableStatus } from './lib--mutable-status.js';
-import { VisView } from './view--vis-view.js';
+import { CanvasSizeManager } from './view--canvas-size';
+import { AnalysisFormManager, BatchFileAnalysisOptions, BatchParamAnalysisOptions, ScaleOptions, SingleAnalysisOptions, ThresholdOptions, VisualisationColors } from './view--analysis-form';
+import { SingleVisualisationPainter } from './view--vis-single';
+import { BatchImage, BatchVisualisationPainter } from './view--vis-batch';
+import { MusicAnalyser } from './app--music-analyser';
+import { DiffVisualiser } from './app--diff-visualiser';
+import { StatusView } from './view--status';
+import { MutableStatus } from './lib--mutable-status';
+import { VisView } from './view--vis-view';
 
 window.addEventListener('load', async () => {
 

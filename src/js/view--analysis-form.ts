@@ -1,4 +1,4 @@
-import { handleMultiSelectElements } from "./view--multi-select-manager.js";
+import { handleMultiSelectElements } from "./view--multi-select-manager";
 
 class SubmitEvent extends Event {
   submitter: HTMLInputElement;

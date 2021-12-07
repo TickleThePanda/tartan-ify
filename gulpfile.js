@@ -1,8 +1,14 @@
 const gulp = require('gulp');
 const less = require('gulp-less');
 const mocha = require('gulp-mocha');
-const ts = require('gulp-typescript');
 const sourcemaps = require('gulp-sourcemaps');
+const uglify = require("gulp-uglify");
+
+const browserify = require("browserify");
+const tsify = require("tsify");
+const source = require("vinyl-source-stream");
+const buffer = require("vinyl-buffer");
+const babelify = require('babelify');
 
 const WORKER_JS_FILES = ['src/js/workers/**/*.{js,mjs}', '!src/js/workers/**/*.spec.{js,mjs}'];
 
@@ -30,16 +36,30 @@ gulp.task('process-workers', function() {
     .pipe(gulp.dest('_site/js/workers/'));
 });
 
-const tsProject = ts.createProject('tsconfig.json');
+const bundler = browserify({
+    basedir: ".",
+    debug: true,
+    entries: ["src/js/app--main.ts"],
+    cache: {},
+    packageCache: {},
+  })
+  .plugin(tsify)
+  .transform(babelify.configure({
+    presets : ["@babel/preset-env"],
+    extensions: ".ts"
+  }));
 
 gulp.task('ts', function() {
-  const tsResult = tsProject.src()
-    .pipe(sourcemaps.init())
-    .pipe(tsProject()).js
-    .pipe(sourcemaps.write("."))
-    .pipe(gulp.dest('_site'));
 
-  return tsResult;
+  return bundler
+    .bundle()
+    .pipe(source("bundle.js"))
+    .pipe(buffer())
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(uglify())
+    .pipe(sourcemaps.write("./"))
+    .pipe(gulp.dest("_site/js/"));
+
 })
 
 gulp.task('js', gulp.series('ts', 'test-workers', 'process-workers'));

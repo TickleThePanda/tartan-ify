@@ -1,4 +1,4 @@
-import { VisView } from "./view--vis-view.js";
+import { VisView } from "./view--vis-view";
 
 export type BatchImage = {
   title: string,

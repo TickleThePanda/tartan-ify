@@ -1,4 +1,4 @@
-import { TaskWithStatus } from "./lib--task-promise-worker.js";
+import { TaskWithStatus } from "./lib--task-promise-worker";
 
 type StageUpdateArgs = {
   status: string,

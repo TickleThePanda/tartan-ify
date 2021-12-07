@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "sourceRoot": "./src/js/",
-    "rootDir": "./src/",
-    "outDir": "./_site",
+    "rootDir": "./src/js/",
+    "outDir": "./_site/js/",
     "noImplicitAny": true,
     "module": "es6",
     "target": "es2020",
@@ -13,6 +13,7 @@
       "es2020",
       "dom"
     ],
+    "moduleResolution": "node",
     "typeRoots": [],
     "types": []
   },
