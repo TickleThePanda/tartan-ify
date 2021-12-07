@@ -196,6 +196,8 @@ class BatchFileAnalysisHandler {
 
     let images: BatchImage[] = [];
 
+    let currentTrack = 1;
+
     for (const loader of fileLoaders) {
 
       this.stage.updateContext(null);
@@ -206,7 +208,7 @@ class BatchFileAnalysisHandler {
 
       const inputFile = await loader();
 
-      this.stage.updateContext(inputFile.name);
+      this.stage.updateContext(`${currentTrack++}/${fileLoaders.length}: ${inputFile.name}`);
 
       const { diffs } = await this.analyser.generateDiffMatrix(inputFile.data, bpmOption);
 
