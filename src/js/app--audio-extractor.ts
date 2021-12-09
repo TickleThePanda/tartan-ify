@@ -48,7 +48,7 @@ export class AudioExtractor {
     });
 
     const intervalId = setInterval(() => {
-      const timeMod = 0.0008;
+      const timeMod = 0.0005;
       const expectedTime = length * timeMod;
 
       const end = Date.now();

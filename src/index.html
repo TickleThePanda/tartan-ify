@@ -24,7 +24,7 @@
     <meta name="twitter:url" value="https://tartan-ify.ticklethepanda.co.uk/" />
   </head>
   <body class="viewport-exact">
-    <div id="music-form" class="page">
+    <section id="music-form" class="page">
       <div class="description">
         <h1>Tartan-ify</h1>
 
@@ -87,6 +87,9 @@
         <div id="form-errors" class="form__error"></div>
         <button class="form__button form__button--submit" type="submit" id="form-submit" name="run-type" value="single">
           Tartan-ify
+        </button>
+        <button class="form__button form__button--submit-secondary" type="submit" id="form-history" name="run-type" value="history">
+          View history
         </button>
         <details>
           <summary>
@@ -192,8 +195,8 @@
           </legend
         </details>
       </form>
-    </div>
-    <div id="visualiser" class="page visualiser hidden">
+    </section>
+    <section id="visualiser" class="page visualiser hidden">
       <a href="/" class="link link--home">
         &LeftAngleBracket; Back
       </a>
@@ -226,14 +229,20 @@
         </div>
         <canvas class="visualiser__plot" id="similarity-graph"></canvas>
       </div>
-    </div>
-    <div id="loading-status" class="page modal hidden loading-status">
+    </section>
+    <section id="loading-status" class="page modal hidden loading-status">
       <h3 id="loading-status-status" class="loading-status__status"></h3>
       <p id="loading-status-context" class="loading-status__context"></p>
       <p id="loading-status-task" class="loading-status__task"></p>
       <p id="loading-status-percentage" class="loading-status__percentage"></p>
-    </div>
-    <div id="batch" class="page batch hidden">
-    </div>
+    </section>
+    <section id="batch" class="page batch hidden">
+      <div class="batch__header">
+        <a href="/" class="link link--home">
+          &LeftAngleBracket; Back
+        </a>
+        <h3 class="page" id="batch-page-header"></h3>
+      </div>
+    </section>
   </body>
 </html>

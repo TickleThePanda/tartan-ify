@@ -2,7 +2,10 @@ import { convertImage } from "./lib--image-data-to-bitmap";
 import { VisView } from "./view--vis-view";
 
 export type BatchImage = {
-  title: string,
+  title: string | {
+    header: string,
+    context: Record<string, string>
+  },
   imageData: Uint8ClampedArray
 }
 
@@ -15,8 +18,12 @@ export class BatchVisualisationPainter implements VisView {
   }
 
   async start(
-    images: BatchImage[]
+    images: BatchImage[],
+    heading: string
   ) {
+
+    const headingElement = document.getElementById('batch-page-header') ?? (() => {throw new Error("Unable to find batch page header")})();
+    headingElement.innerHTML = heading;
 
     for (let { title, imageData: image  } of images) {
 
@@ -38,9 +45,28 @@ export class BatchVisualisationPainter implements VisView {
       canvas.height = canvasSize;
 
       const heading = document.createElement('h3');
-      heading.innerHTML = title;
+      heading.innerHTML = typeof title === 'string' ? title : title.header;
 
       div.appendChild(heading);
+
+      if (typeof title !== 'string') {
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.innerHTML = "Details"
+        const detailsList = document.createElement('ul');
+
+        details.appendChild(summary);
+        details.appendChild(detailsList);
+        for (const [k, v] of Object.entries(title.context)) {
+          const el = document.createElement('li');
+          el.innerHTML = `${k}: ${v}`;
+
+          detailsList.appendChild(el);
+        }
+
+        div.appendChild(details);
+      }
+
       div.appendChild(canvas);
       this.element.appendChild(div);
 

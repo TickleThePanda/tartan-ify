@@ -39,7 +39,6 @@ window.addEventListener('load', async () => {
   const canvasSizeManager = new CanvasSizeManager();
   canvasSizeManager.add(canvas);
 
-
   const diffVisualiser = new DiffVisualiser({
     context: context,
     status: stage
@@ -89,11 +88,17 @@ window.addEventListener('load', async () => {
     audioExtractor,
     cache
   );
+  const historyHandler = new HistoryHandler(
+    pageManager,
+    batchVisualiserPainter,
+    stage,
+    cache
+  );
 
   function logErrors<A>(f: (v: A) => any) : (v: A) => Promise<any> {
-    return async (v) => {
+    return async (...v) => {
       try {
-        return await f(v);
+        return await f(...v);
       } catch (e: any) {
         console.log(e, e.stack ?? "No stack trace");
       }
@@ -114,6 +119,11 @@ window.addEventListener('load', async () => {
   formManager.registerBatchParamSubmitListener(
     logErrors(
       (args) => batchParamsAnalysisHandler.analyse(args)
+    )
+  );
+  formManager.registerHistoryListener(
+    logErrors(
+      (args) => historyHandler.handleHistory(args)
     )
   );
 
@@ -196,9 +206,14 @@ class SingleAnalysisHandler {
           bpm
         })
 
-        return await this.diffVisualiser.renderVisualisation({
-          diffs, thresholds, scale, colors
-        });
+        return {
+          image: new Blob(
+            [await this.diffVisualiser.renderVisualisation({
+              diffs, thresholds, scale, colors
+            })]
+          ),
+          trackName: track.name
+        };
       }
     );
 
@@ -208,7 +223,7 @@ class SingleAnalysisHandler {
     playAudio(track.audioBuffer);
 
     this.visPainter.start({
-      image: imageData, bpm, colors
+      image: new Uint8ClampedArray(await imageData.arrayBuffer()), bpm, colors
     });
 
   }
@@ -277,22 +292,26 @@ class BatchFileAnalysisHandler {
             bpm
           })
 
-          return await this.diffVisualiser.renderVisualisation({
-            diffs, thresholds, scale, colors
-          });
+          return {
+            image: new Blob([
+              await this.diffVisualiser.renderVisualisation({
+              diffs, thresholds, scale, colors
+            })]),
+            trackName: track.name
+          };
         }
       );
 
       images.push({
         title: inputFile.name,
-        imageData
+        imageData: new Uint8ClampedArray(await imageData.arrayBuffer())
       });
 
     };
 
     this.pages.showVisualisation(this.visPainter);
 
-    this.visPainter.start(images);
+    this.visPainter.start(images, "Batch files");
 
   }
 
@@ -349,13 +368,25 @@ class BatchParamsAnalysisHandler {
       context: MatrixParam,
     };
 
-    const foundImages: ImageWithContext[] = <ImageWithContext[]> cachedImages
-      .filter(i => i.imageData !== undefined);
+    const foundImages: ImageWithContext[] = await Promise.all(
+        cachedImages
+          .filter(i => i.imageData !== undefined)
+          .map(async ({imageData, context}) => ({
+            imageData: new Uint8ClampedArray(<ArrayBuffer>await imageData?.arrayBuffer()),
+            context
+          }))
+      );
 
     let allImages: ImageWithContext[] = [];
 
     if (foundImages.length === matrixParams.length) {
       allImages = foundImages;
+
+
+      this.stage.update({
+        status: "Updating access time for cached images"
+      });
+
     } else {
 
       const track = await this.audioExtractor.extract(inputFile.data, inputFile.name);
@@ -381,6 +412,10 @@ class BatchParamsAnalysisHandler {
         colors
       });
 
+      this.stage.update({
+        status: "Caching images"
+      });
+
       for (const image of newlyCreatedImages) {
         await this.cache.store({
           ...image.context,
@@ -388,23 +423,76 @@ class BatchParamsAnalysisHandler {
           trackHash: uploadHash,
           diffColor: colors.diff,
           similarColor: colors.similar
-        }, image.imageData);
+        }, {
+          image: new Blob([image.imageData]),
+          trackName: track.name
+        });
       }
 
       allImages = [...foundImages, ...newlyCreatedImages];
 
     }
 
+
     this.pages.showVisualisation(this.visPainter);
     this.visPainter.start(
       allImages.map(i => ({
         title: `${i.context.scale}, ${i.context.minThreshold}, ${i.context.maxThreshold}`,
         imageData: i.imageData
-      }))
+      })),
+      "Batch parameters"
     );
   }
 
 }
+
+
+class HistoryHandler {
+
+  constructor(
+    private pages: PageManager,
+    private visPainter: BatchVisualisationPainter,
+    private stage: MutableStatus,
+    private cache: AnalysisStore
+  ){}
+
+  async handleHistory({}): Promise<void> {
+
+    this.pages.showLoading();
+
+    this.stage.update({
+      status: `Loading file`
+    });
+
+    const cached = await this.cache.getAllByCreationDate();
+
+    const images = await Promise.all(
+      cached.map(async (i) => ({
+        title: {
+          header: i.trackName,
+          context: {
+            "Scale": i.scale,
+            "Max": `${i.minThreshold}`,
+            "Min": `${i.maxThreshold}`,
+            "BPM":
+              !i.bpmOptions.autodetect
+                ? `${i.bpmOptions.value}`
+              : i.bpmOptions.autodetectMultiplier !== undefined
+                ? `auto ${i.bpmOptions.autodetectMultiplier}`
+                : `auto`,
+
+          }
+        },
+        imageData: new Uint8ClampedArray(await i.image.arrayBuffer())
+      }))
+    );
+
+    this.pages.showVisualisation(this.visPainter);
+    this.visPainter.start(images, "History");
+  }
+
+}
+
 
 function generateParams() {
   const minThresholds = [0, 0.1, 1, 10].map(v => v/100);

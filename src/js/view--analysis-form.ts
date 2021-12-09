@@ -14,6 +14,7 @@ export class AnalysisFormManager {
   singleListeners: ((event: SingleAnalysisOptions) => any)[] = [];
   batchParamListeners: ((event: BatchParamAnalysisOptions) => any)[] = [];
   batchFileListeners: ((event: BatchFileAnalysisOptions) => any)[] = [];
+  historyListeners: ((event: HistoryOptions) => any)[] = [];
 
   constructor(
     formElement: HTMLElement,
@@ -73,6 +74,11 @@ export class AnalysisFormManager {
       e.preventDefault();
 
       const submitType = e.submitter.value || null;
+
+      if (submitType === 'history') {
+        this.historyListeners.forEach(l => l({}));
+        return;
+      }
 
       console.log("app--analysis-form-manager.mjs - submit event");
 
@@ -188,6 +194,9 @@ export class AnalysisFormManager {
   registerBatchParamSubmitListener(listener: (event: BatchParamAnalysisOptions) => any) {
     this.batchParamListeners.push(listener);
   }
+  registerHistoryListener(listener: (event: HistoryOptions) => any) {
+    this.historyListeners.push(listener);
+  }
 
 }
 
@@ -275,6 +284,8 @@ export type BatchParamAnalysisOptions = {
   bpm: BpmOptions,
   fileLoader: FileDataLoader
 } & BaseOptions;
+
+export type HistoryOptions = {}
 
 export type ScaleOptions = "log" | "sqrt" | "linear" | "squared" | "exponential";
 

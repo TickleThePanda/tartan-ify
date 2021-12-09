@@ -48,7 +48,12 @@ const bundler = browserify({
   .plugin(tsify)
   .transform(babelify.configure({
     presets : ["@babel/preset-env"],
-    extensions: ".ts"
+    extensions: [".ts", ".js"],
+    sourceMaps: 'inline',
+    parserOpts: {
+      sourceType: "module",
+      allowImportExportEverywhere: true
+    }
   }));
 
 gulp.task('ts', function(cb) {

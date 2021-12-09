@@ -1,5 +1,6 @@
 .batch {
   display: grid;
+  grid-template-areas: "h h h h h";
   grid-template-columns: repeat(5, 1fr);
   gap: 0.5rem;
   row-gap: 1rem;
@@ -8,6 +9,8 @@
 
   &--item {
     display: grid;
+    gap: 0.5em;
+    grid-template-rows: auto min-content min-content;
   }
 
   canvas {
@@ -18,5 +21,29 @@
   h3 {
     overflow-wrap: anywhere;
     margin: 0;
+    padding: 0;
+  }
+
+  &__header {
+    grid-area: h;
+
+    & > h3 {
+      font-size: 2em;
+      margin: 0;
+      padding: 0;
+    }
+
+    & > .link--home {
+      position: static;
+    }
+  }
+
+  details {
+    align-self: end;
+    font-size: 0.8em;
+    margin: 0;
+    summary {
+      padding-bottom: 0.2em;
+    }
   }
 }
