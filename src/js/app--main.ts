@@ -461,7 +461,7 @@ class HistoryHandler {
     this.pages.showLoading();
 
     this.stage.update({
-      status: `Loading file`
+      status: `Loading history`
     });
 
     const cached = await this.cache.getAllByCreationDate();
@@ -486,6 +486,8 @@ class HistoryHandler {
         imageData: new Uint8ClampedArray(await i.image.arrayBuffer())
       }))
     );
+
+    images.reverse();
 
     this.pages.showVisualisation(this.visPainter);
     this.visPainter.start(images, "History");
