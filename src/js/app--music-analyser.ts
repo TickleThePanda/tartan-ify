@@ -1,108 +1,59 @@
+import { Track } from './app--audio-extractor';
 import { BpmCache } from './lib--bpm-cache';
-import { TaskPromiseWorker, TaskWithStatus } from './lib--task-promise-worker';
+import { MutableStatus } from './lib--mutable-status';
+import { TaskPromiseWorker } from './lib--task-promise-worker';
 import { BpmOptions } from './view--analysis-form';
 
-type Status = {
-  status: string,
-  task?: TaskWithStatus
-}
-
-type StatusListener = (status: Status) => any
-
 class MusicAnalyser {
-  listeners: StatusListener[];
-  bpmCache: BpmCache;
+  #status: MutableStatus;
+  #bpmCache: BpmCache = new BpmCache({
+    version: "v1"
+  });
 
-  constructor() {
-    this.listeners = [];
-    this.bpmCache = new BpmCache({
-      version: "v1"
-    });
+  constructor(status: MutableStatus) {
+    this.#status = status;
+    this.#bpmCache ;
   }
 
-  addStatusUpdateListener(listener: StatusListener) {
-    this.listeners.push(listener);
-  }
-
-  updateStatus(status: Status) {
-    this.listeners.forEach(l => l(status));
-  }
-
-  async generateDiffMatrix(
-    audioFileData: ArrayBuffer,
+  async bpm({
+    pcm,
+    hash,
+    bpm
+  } : Track & {
+    hash: string,
     bpm: BpmOptions
-  ) {
+  }): Promise<number> {
 
-    console.log(`app--music.analyser.mjs - fileDataSize: ${audioFileData.byteLength}, bpm: ${bpm}`);
+    console.log(`app--music.analyser.mjs - fileDataSize: ${pcm.byteLength}, bpm: ${bpm}`);
 
-    const audioData = await this.decodeAudioData(audioFileData);
-
-    const hash = await this.hashAudio(audioData.getChannelData(0));
-
-    const sharedBuffers = convertToSharedBuffers(audioData);
-    const sampleRate = audioData.sampleRate;
-
-    const realBpm = await this.calculateBpm({
-      buffers: sharedBuffers,
+    return await this.calculateBpm({
+      pcm,
       bpm,
       hash
     });
+  }
 
-    const interval = 1000 / (realBpm / 60);
+  async calculateDiffMatrix({
+    pcm,
+    sampleRate,
+    bpm
+  } : Track & { bpm: number }
+  ): Promise<Float32Array> {
 
-    const fftsForIntervals = await this.calculateFftsForSegments(sharedBuffers, sampleRate, interval);
+    const interval = 1000 / (bpm / 60);
+
+    const fftsForIntervals = await this.calculateFftsForSegments(pcm, sampleRate, interval);
 
     const diffs = await this.calculateFftDiffMatrix(fftsForIntervals);
 
-    return {
-      diffs,
-      audio: audioData,
-      bpm: realBpm
-    };
-  }
-
-  async decodeAudioData(fileBuffer: ArrayBuffer): Promise<AudioBuffer> {
-
-    const length = fileBuffer.byteLength;
-
-    const task: TaskWithStatus = {
-      status: {
-        percentage: 0
-      }
-    }
-
-    const start = Date.now();
-
-    this.updateStatus({
-      status: 'Decoding audio data',
-      task
-    });
-
-    const intervalId = setInterval(() => {
-      const timeMod = 0.0008;
-      const expectedTime = length * timeMod;
-
-      const end = Date.now();
-
-      const diff = end - start;
-
-      task.status.percentage = Math.min(diff / expectedTime, 1);
-
-    }, 100);
-
-    const ctx = new AudioContext();
-    const data = await ctx.decodeAudioData(fileBuffer);
-
-    clearInterval(intervalId);
-
-    return data;
+    return diffs;
   }
 
   async calculateFftDiffMatrix(ffts: Float32Array[]) {
 
     const task = new TaskPromiseWorker('/js/workers/w--diff-analysis.js');
 
-    this.updateStatus({
+    this.#status.update({
       status: 'Calculating differences between segments',
       task
     });
@@ -116,14 +67,14 @@ class MusicAnalyser {
   }
 
   async calculateFftsForSegments(
-    buffers: SharedArrayBuffer[],
+    pcm: SharedArrayBuffer,
     sampleRate: number,
     interval: number
   ): Promise<Float32Array[]> {
 
     const task = new TaskPromiseWorker('/js/workers/w--fft.js');
 
-    this.updateStatus({
+    this.#status.update({
       status: 'Analysing spectrum for each segments',
       task
     });
@@ -132,7 +83,7 @@ class MusicAnalyser {
       .run({
         sampleRate,
         interval,
-        buffers
+        pcm
       });
 
     return data.map(f => new Float32Array(f));
@@ -140,9 +91,9 @@ class MusicAnalyser {
   }
 
   async calculateBpm({
-    buffers, bpm, hash
+    pcm, bpm, hash
   }: {
-    buffers: SharedArrayBuffer[],
+    pcm: SharedArrayBuffer,
     bpm: BpmOptions,
     hash: string
   }): Promise<number> {
@@ -151,28 +102,28 @@ class MusicAnalyser {
       return bpm.value;
     }
 
-    const storedBpm = this.bpmCache.get(hash);
+    const storedBpm = this.#bpmCache.get(hash);
     if (storedBpm !== null) {
       return storedBpm * bpm.autodetectMultiplier;
     }
 
     const task = new TaskPromiseWorker('/js/workers/w--tempo.js');
 
-    this.updateStatus({
+    this.#status.update({
       status: 'Detecting BPM',
       task
     });
 
     try {
-      const { tempo }: { tempo: number } = await task.run(buffers);
+      const { tempo }: { tempo: number } = await task.run(pcm);
 
-      this.bpmCache.set(hash, tempo);
+      this.#bpmCache.set(hash, tempo);
       return tempo * bpm.autodetectMultiplier;
     } catch (e) {
       if (typeof e === 'string' && e.startsWith('Error: Tempo extraction failed')) {
         const tempo = 113;
 
-        this.bpmCache.set(hash, tempo);
+        this.#bpmCache.set(hash, tempo);
         return tempo * bpm.autodetectMultiplier;
       } else {
         throw e;
@@ -182,38 +133,7 @@ class MusicAnalyser {
 
   }
 
-  async hashAudio(sharedBuffers: Float32Array) {
-
-    this.updateStatus({
-      status: 'Hashing audio'
-    });
-
-    const hashBuffer = await crypto.subtle.digest("SHA-1", sharedBuffers);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-    return hash;
-  }
 }
-
-
-function convertToSharedBuffers(audioBuffer: AudioBuffer): SharedArrayBuffer[] {
-  const converted = [];
-
-  for (let i = 0; i < audioBuffer.numberOfChannels; i++) {
-    const buffer = audioBuffer.getChannelData(i).buffer;
-    converted.push(copyToSharedBuffer(buffer));
-  }
-
-  return converted;
-}
-
-function copyToSharedBuffer(src: ArrayBuffer): SharedArrayBuffer {
-  const dst = new SharedArrayBuffer(src.byteLength);
-  new Uint8Array(dst).set(new Uint8Array(src));
-  return dst;
-}
-
 
 export { MusicAnalyser };
 

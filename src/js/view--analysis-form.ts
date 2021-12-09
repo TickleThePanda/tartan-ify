@@ -1,6 +1,6 @@
 import { handleMultiSelectElements } from "./view--multi-select-manager";
 
-class SubmitEvent extends Event {
+interface SubmitEvent extends Event {
   submitter: HTMLInputElement;
 }
 
@@ -41,13 +41,23 @@ export class AnalysisFormManager {
         `;
     }
 
-    document.querySelector('.js-example-toggle-options')
-      .innerHTML = examplesHtml;
+    const toggleOptions = document.querySelector('.js-example-toggle-options');
+
+    if (toggleOptions !== null) {
+      toggleOptions.innerHTML = examplesHtml;
+    } else {
+      throw new Error("Unable to set options, no such element .js-example-toggle-options");
+    }
 
     handleMultiSelectElements();
 
     this.filesInput.addEventListener('change', e => {
       const files = this.filesInput.files;
+
+      if (files === null) {
+        throw new Error("File input list was null");
+      }
+
       if (files.length === 0 || !containsOnlyAudioFiles(files)) {
         this.formErrors.innerHTML = 'Please select at least one audio file';
       } else {
@@ -55,14 +65,14 @@ export class AnalysisFormManager {
       }
 
     });
-
     const formErrors = this.formErrors;
     const bpmInput = this.bpmInput;
 
+    //@ts-ignore
     this.formElement.addEventListener('submit', async (e: SubmitEvent) => {
       e.preventDefault();
 
-      const submitType = e.submitter.value;
+      const submitType = e.submitter.value || null;
 
       console.log("app--analysis-form-manager.mjs - submit event");
 
@@ -175,7 +185,7 @@ export class AnalysisFormManager {
   registerBatchFileSubmitListener(listener: (event: BatchFileAnalysisOptions) => any) {
     this.batchFileListeners.push(listener);
   }
-  registerBatchParamSubmitListener(listener: (event: SingleAnalysisOptions) => any) {
+  registerBatchParamSubmitListener(listener: (event: BatchParamAnalysisOptions) => any) {
     this.batchParamListeners.push(listener);
   }
 
@@ -191,7 +201,7 @@ function loadFileFromUrl(exampleAudio: string): FileDataLoader {
     const audioResponse = await fetch(exampleAudio);
     const audioBlob = await audioResponse.blob();
     return {
-      name: exampleAudio.split("/").pop(),
+      name: exampleAudio.split("/").pop() ?? "Unknown",
       data: await loadBlobData(audioBlob)
     };
   };

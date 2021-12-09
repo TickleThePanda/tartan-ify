@@ -4,8 +4,8 @@ type StatusValues = {
 }
 
 class Status implements StatusValues {
-  stage?: string = null;
-  percentage?: number = null;
+  stage?: string = undefined;
+  percentage?: number = undefined;
 
   constructor() {}
 
@@ -16,16 +16,8 @@ class Status implements StatusValues {
     stage: string,
     percentage: number
   }) {
-    if (stage === undefined || percentage === null) {
-      this.stage = null;
-    } else {
-      this.stage = stage;
-    }
-    if (percentage === undefined || percentage === null) {
-      this.percentage = null
-    } else {
-      this.percentage = percentage;
-    }
+    this.stage = stage;
+    this.percentage = percentage;
   }
 }
 
@@ -60,7 +52,7 @@ export class TaskPromiseWorker implements TaskWithStatus {
         reject(event.message);
         worker.terminate();
       };
-      worker.postMessage(message, transfer);
+      worker.postMessage(message, transfer ?? []);
     });
   }
 

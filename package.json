@@ -38,6 +38,7 @@
     "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
+    "@types/object-hash": "^2.2.1",
     "idb": "^7.0.0"
   }
 }

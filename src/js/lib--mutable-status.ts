@@ -1,4 +1,13 @@
 import { TaskWithStatus } from "./lib--task-promise-worker";
+import { StatusType } from "./view--status";
+
+export type CurrentStatus = {
+  type?: StatusType,
+  status?: string,
+  task?: string,
+  percentage?: number,
+  context?: string
+}
 
 type StageUpdateArgs = {
   status: string,
@@ -6,14 +15,14 @@ type StageUpdateArgs = {
 }
 
 export class MutableStatus {
-  status: string;
-  context: string;
-  task: TaskWithStatus;
-  error: string;
+  status: string | undefined = undefined;
+  context: string | undefined = undefined;
+  task: TaskWithStatus | undefined = undefined;
+  error: string | undefined = undefined;
 
   constructor() {}
 
-  updateContext(context: string) {
+  updateContext(context?: string) {
     this.context = context;
   }
 
@@ -32,19 +41,19 @@ export class MutableStatus {
     this.error = error;
   }
 
-  get() {
+  get(): CurrentStatus {
     if (this.error !== undefined) {
       return {
         context: this.context,
         status: this.error,
-        type: 'error'
+        type: StatusType.ERROR
       };
     }
 
     if (this.status === undefined) {
       return {
         context: this.context,
-        text: 'Loading...'
+        status: 'Loading...'
       };
     }
 

@@ -1,3 +1,4 @@
+import { convertImage } from "./lib--image-data-to-bitmap";
 import { CanvasSizeManager } from "./view--canvas-size";
 import { VisView } from "./view--vis-view";
 
@@ -9,7 +10,7 @@ type SingleVisualisationPainterArgs = {
 }
 
 type SingleVisualisationStartArgs = {
-  image: ImageBitmap,
+  image: Uint8ClampedArray,
   bpm: number,
   colors: {
     similar: string,
@@ -40,11 +41,13 @@ export class SingleVisualisationPainter implements VisView {
     this.canvasSizeManager.triggerResize();
   }
 
-  start({
-    image,
+  async start({
+    image: imageData,
     bpm,
     colors
   }: SingleVisualisationStartArgs) {
+
+    const image = await convertImage(this.context, imageData);
 
     this.wrapper.style.setProperty('--color-similar', colors.similar);
     this.wrapper.style.setProperty('--color-diff', colors.diff);

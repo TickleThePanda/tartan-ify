@@ -1,6 +1,6 @@
 import { MutableStatus } from './lib--mutable-status';
 import { TaskPromiseWorker } from './lib--task-promise-worker';
-import { VisualisationColors, ThresholdOptions, ScaleOptions } from './view--analysis-form';
+import { VisualisationColors, ThresholdOptions, ScaleOptions as ScaleOption } from './view--analysis-form';
 import { BatchImage } from './view--vis-batch';
 
 type DiffVisualiserArgs = {
@@ -11,18 +11,25 @@ type DiffVisualiserArgs = {
 type SingleDiffVisualiserRenderArgs = {
   diffs: Float32Array,
   thresholds: ThresholdOptions,
-  scale: ScaleOptions,
+  scale: ScaleOption,
   colors: VisualisationColors
+}
+
+export type MatrixParam = {
+  scale: ScaleOption,
+  minThreshold: number,
+  maxThreshold: number
 }
 
 type MultiDiffVisualiserRenderArgs = {
   diffs: Float32Array,
-  matrixParams: {
-    scales: ScaleOptions[],
-    minThresholds: number[],
-    maxThresholds: number[]
-  },
+  matrixParams: MatrixParam[],
   colors: VisualisationColors
+}
+
+type MultiDiffVisualiserResult = {
+  context: MatrixParam,
+  imageData: Uint8ClampedArray
 }
 
 export class DiffVisualiser {
@@ -38,7 +45,7 @@ export class DiffVisualiser {
 
   async renderVisualisation({
     diffs, thresholds, scale, colors
-  }: SingleDiffVisualiserRenderArgs) {
+  }: SingleDiffVisualiserRenderArgs): Promise<Uint8ClampedArray> {
 
     const task = new TaskPromiseWorker('/js/workers/w--renderer.js');
 
@@ -55,22 +62,13 @@ export class DiffVisualiser {
         scale
       });
 
-    const array = new Uint8ClampedArray(data);
+    return new Uint8ClampedArray(data);
 
-    const widthFromRender = Math.sqrt(array.length / 4);
-
-    const image = this.context.createImageData(widthFromRender, widthFromRender);
-
-    image.data.set(array);
-
-    const imageData = await createImageBitmap(image, 0, 0, widthFromRender, widthFromRender);
-
-    return imageData;
   }
 
   async renderVisualisations({
     diffs, matrixParams, colors
-  }: MultiDiffVisualiserRenderArgs): Promise<BatchImage[]> {
+  }: MultiDiffVisualiserRenderArgs): Promise<MultiDiffVisualiserResult[]> {
 
     const task = new TaskPromiseWorker('/js/workers/w--renderer.js');
 
@@ -81,7 +79,7 @@ export class DiffVisualiser {
 
     const results: {
       data: ArrayBuffer,
-      title: string
+      context: MatrixParam
     }[] = await task
       .run({
         diffs: diffs.buffer,
@@ -89,21 +87,10 @@ export class DiffVisualiser {
         matrixParams
       });
 
-    return await Promise.all(results.map(async ({data, title}) => {
-      const array = new Uint8ClampedArray(data);
-
-      const widthFromRender = Math.sqrt(array.length / 4);
-
-      const image = this.context.createImageData(widthFromRender, widthFromRender);
-
-      image.data.set(array);
-
-      return {
-        title,
-        imageData: await createImageBitmap(image, 0, 0, widthFromRender, widthFromRender)
-      }
+    return await results.map(({data, context}) => ({
+      imageData: new Uint8ClampedArray(data),
+      context
     }));
-
   }
 }
 

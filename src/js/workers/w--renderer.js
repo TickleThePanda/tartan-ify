@@ -27,7 +27,7 @@ onmessage = function({
       diff,
       similar
     },
-    thresholds,
+    thresholds = {},
     scale,
     diffs,
     matrixParams
@@ -73,35 +73,32 @@ onmessage = function({
     postMessage(outBuffer, [outBuffer]);
   } else {
 
-    const { minThresholds, maxThresholds, scales } = matrixParams;
-
     let results = [];
     let buffers = [];
 
     let count = 0;
-    const totalVis = minThresholds.length * maxThresholds.length * scales.length;
+    const totalVis = matrixParams.length;
 
-    for (let min of minThresholds) {
-      for (let max of maxThresholds) {
-        for (let scale of scales) {
+    for (let { minThreshold: min, maxThreshold: max, scale } of matrixParams) {
 
-          const renderer = new MusicSimilarityRenderer({
-            colors, thresholds: {min, max}, mapper: mapFuncs[scale],
-            context: `${count++}/${totalVis}`
-          });
+      const renderer = new MusicSimilarityRenderer({
+        colors, thresholds: {min, max}, mapper: mapFuncs[scale],
+        context: `${count++}/${totalVis}`
+      });
 
-          const render = renderer.render(data);
+      const render = renderer.render(data);
 
-          const outBuffer = render.buffer;
-          const title = `${scale}, min:${min}, max:${max}`;
+      const outBuffer = render.buffer;
 
-          results.push({
-            data: outBuffer,
-            title
-          });
-          buffers.push(outBuffer);
+      results.push({
+        data: outBuffer,
+        context: {
+          minThreshold: min,
+          maxThreshold: max,
+          scale
         }
-      }
+      });
+      buffers.push(outBuffer);
     }
 
     postMessage(results, buffers);

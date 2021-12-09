@@ -1,3 +1,5 @@
+import { MutableStatus } from "./lib--mutable-status";
+
 type StatusManagerElementsArgs = {
   wrapper: HTMLElement,
   status: HTMLElement,
@@ -10,14 +12,6 @@ export enum StatusType {
   "ERROR"
 }
 
-type StatusFunction = {
-  type: StatusType,
-  status: string,
-  task: string,
-  percentage: number,
-  context: string
-}
-
 export class StatusView {
 
   #wrapper;
@@ -26,7 +20,7 @@ export class StatusView {
   #percentageElement;
   #contextElement;
 
-  #statusFunction;
+  #statusManager;
   #shouldContinue = false;
 
   constructor(
@@ -37,14 +31,14 @@ export class StatusView {
       task,
       percentage
     }: StatusManagerElementsArgs,
-    statusFunction: () => StatusFunction
+    statusManager: MutableStatus
   ) {
     this.#wrapper = wrapper;
     this.#statusElement = status;
     this.#taskElement = task;
     this.#percentageElement = percentage;
     this.#contextElement = context;
-    this.#statusFunction = statusFunction;
+    this.#statusManager = statusManager;
   }
 
   get visible() {
@@ -63,24 +57,24 @@ export class StatusView {
     this.#shouldContinue = true;
 
     const updateStatus = () => {
-      const { type, context, status, task, percentage } = this.#statusFunction();
-      if (status !== null && status !== undefined) {
+      const { type, context, status, task, percentage } = this.#statusManager.get();
+      if (status !== undefined) {
         this.#statusElement.innerHTML = status;
       } else {
         this.#statusElement.innerHTML = "";
       }
-      if (task !== null && task !== undefined) {
+      if (task !== undefined) {
         this.#taskElement.innerHTML = task;
       } else {
         this.#taskElement.innerHTML = "";
       }
-      if (percentage !== null && percentage !== undefined) {
+      if (percentage !== undefined) {
         this.#percentageElement.innerHTML = `${Math.floor(percentage * 100)}%`;
       } else {
         this.#percentageElement.innerHTML = "";
       }
 
-      if (context !== null && context !== undefined) {
+      if (context !== undefined) {
         this.#contextElement.innerHTML = context;
       } else {
         this.#contextElement.innerHTML = "";

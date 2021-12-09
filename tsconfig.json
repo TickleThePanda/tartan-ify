@@ -7,6 +7,7 @@
     "module": "es6",
     "target": "es2020",
     "allowJs": true,
+    "strict": true,
     "alwaysStrict": true,
     "sourceMap": true,
     "lib": [
@@ -15,7 +16,7 @@
     ],
     "moduleResolution": "node",
     "typeRoots": [],
-    "types": []
+      "types": []
   },
   "include": ["./src/js/**/*.ts"],
   "exclude": ["./src/js/workers/**/*.js"]

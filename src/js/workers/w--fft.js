@@ -1,26 +1,9 @@
 importScripts('lib--fft.js');
 importScripts('lib--worker-status.js');
 
-function getMergedChannels(buffers) {
-  const channels = buffers.map(b => new Float32Array(b));
-  const totalSamples = channels[0].length;
+onmessage = function({ data: { pcm, sampleRate, interval }}) {
 
-  const combined = new Float32Array(totalSamples);
-
-  for (let i = 0; i < totalSamples; i++) {
-    let sum = 0;
-    for (let iC = 0; iC < channels.length; iC++) {
-      sum += channels[iC][i];
-    }
-    combined[i] = sum / channels.length;
-  }
-
-  return combined;
-}
-
-onmessage = function({ data: { buffers, sampleRate, interval }}) {
-
-  console.log(`worker--fft.js - nBuffers: ${buffers.length}, bufferLength: ${buffers[0].byteLength}, interval: ${interval}`);
+  console.log(`worker--fft.js - bufferLength: ${pcm.byteLength}, interval: ${interval}`);
 
   updateStatus({
     stage: 'Initialising'
@@ -28,8 +11,9 @@ onmessage = function({ data: { buffers, sampleRate, interval }}) {
 
   const intervalInSeconds = interval / 1000;
 
-  const combined = getMergedChannels(buffers);
-  const totalSamples = combined.length;
+  const audio = new Float32Array(pcm);
+
+  const totalSamples = audio.length;
 
   const temp = new Float32Array(length / 2);
   const freqDatas = [];
@@ -57,7 +41,7 @@ onmessage = function({ data: { buffers, sampleRate, interval }}) {
 
       const windowEnd = windowStart + length;
 
-      const sliced = combined.slice(windowStart, windowEnd);
+      const sliced = audio.slice(windowStart, windowEnd);
 
       calculateFrequencyData(sliced, temp);
 

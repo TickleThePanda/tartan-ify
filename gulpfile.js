@@ -10,6 +10,8 @@ const source = require("vinyl-source-stream");
 const buffer = require("vinyl-buffer");
 const babelify = require('babelify');
 
+const { pipeline } = require('stream');
+
 const WORKER_JS_FILES = ['src/js/workers/**/*.{js,mjs}', '!src/js/workers/**/*.spec.{js,mjs}'];
 
 gulp.task('css', function() {
@@ -49,16 +51,18 @@ const bundler = browserify({
     extensions: ".ts"
   }));
 
-gulp.task('ts', function() {
+gulp.task('ts', function(cb) {
 
-  return bundler
-    .bundle()
-    .pipe(source("bundle.js"))
-    .pipe(buffer())
-    .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe(uglify())
-    .pipe(sourcemaps.write("./"))
-    .pipe(gulp.dest("_site/js/"));
+  pipeline(
+    bundler.bundle(),
+    source("bundle.js"),
+    buffer(),
+    sourcemaps.init({ loadMaps: true }),
+    uglify(),
+    sourcemaps.write("./"),
+    gulp.dest("_site/js/"),
+    cb
+  );
 
 })
 
