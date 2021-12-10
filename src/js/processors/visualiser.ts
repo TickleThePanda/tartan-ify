@@ -1,7 +1,6 @@
-import { MutableStatus } from './lib--mutable-status';
-import { TaskPromiseWorker } from './lib--task-promise-worker';
-import { VisualisationColors, ThresholdOptions, ScaleOptions as ScaleOption } from './view--analysis-form';
-import { BatchImage } from './view--vis-batch';
+import { MutableStatus } from '../views/status';
+import { TaskPromiseWorker } from './tool--task-promise-worker';
+import { VisualisationColors, ThresholdOptions, ScaleOptions as ScaleOption } from '../views/analysis-form';
 
 type DiffVisualiserArgs = {
   context: CanvasRenderingContext2D,

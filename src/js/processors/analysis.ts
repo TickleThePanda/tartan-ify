@@ -1,8 +1,8 @@
-import { Track } from './app--audio-extractor';
-import { BpmCache } from './lib--bpm-cache';
-import { MutableStatus } from './lib--mutable-status';
-import { TaskPromiseWorker } from './lib--task-promise-worker';
-import { BpmOptions } from './view--analysis-form';
+import { Track } from './audio-extractor';
+import { BpmCache } from '../stores';
+import { MutableStatus } from '../views/status';
+import { TaskPromiseWorker } from './tool--task-promise-worker';
+import { BpmOptions } from '../views/analysis-form';
 
 class MusicAnalyser {
   #status: MutableStatus;

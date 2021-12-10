@@ -1,4 +1,4 @@
-import { handleMultiSelectElements } from "./view--multi-select-manager";
+import { handleMultiSelectElements } from "./multi-select-manager";
 
 interface SubmitEvent extends Event {
   submitter: HTMLInputElement;

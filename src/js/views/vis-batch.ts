@@ -1,5 +1,5 @@
-import { convertImage } from "./lib--image-data-to-bitmap";
-import { VisView } from "./view--vis-view";
+import { convertImage } from "./tool--image-data-to-bitmap";
+import { VisView } from "./vis-view";
 
 export type BatchImage = {
   title: string | {

@@ -1,5 +1,4 @@
-import { MutableStatus } from "./lib--mutable-status";
-import { TaskWithStatus } from "./lib--task-promise-worker";
+import { MutableStatus, TaskWithStatus } from "../views/status";
 
 export type Track = {
   audioBuffer: AudioBuffer,

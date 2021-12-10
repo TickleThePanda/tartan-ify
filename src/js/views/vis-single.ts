@@ -1,6 +1,6 @@
-import { convertImage } from "./lib--image-data-to-bitmap";
-import { CanvasSizeManager } from "./view--canvas-size";
-import { VisView } from "./view--vis-view";
+import { convertImage } from "./tool--image-data-to-bitmap";
+import { CanvasSizeManager } from "./canvas-size-manager";
+import { VisView } from "./vis-view";
 
 type SingleVisualisationPainterArgs = {
   wrapper: HTMLElement,

@@ -1,5 +1,5 @@
 import { openDB, DBSchema } from 'idb';
-import { BpmOptions } from './view--analysis-form';
+import { BpmOptions } from '../views/analysis-form';
 
 const STORE_NAME = 'analysis-store';
 

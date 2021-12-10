@@ -1,29 +1,4 @@
-type StatusValues = {
-  stage?: string;
-  percentage?: number;
-}
-
-class Status implements StatusValues {
-  stage?: string = undefined;
-  percentage?: number = undefined;
-
-  constructor() {}
-
-  update({
-    stage,
-    percentage
-  }: {
-    stage: string,
-    percentage: number
-  }) {
-    this.stage = stage;
-    this.percentage = percentage;
-  }
-}
-
-export interface TaskWithStatus {
-  readonly status: StatusValues;
-}
+import { Status, TaskWithStatus } from "../views/status";
 
 export class TaskPromiseWorker implements TaskWithStatus {
   #status = new Status();
