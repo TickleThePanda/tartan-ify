@@ -130,7 +130,13 @@ export class AnalysisFormManager {
         : [loadFileFromUrl(exampleAudio)];
 
       const singleFileLoad: FileDataLoader = filesWereUploaded
-        ? () => loadFileData(selectedFiles[0])
+        ? () =>
+            loadFileData(
+              selectedFiles[0] ??
+                (() => {
+                  throw new Error("Unable to get selected file");
+                })()
+            )
         : loadFileFromUrl(exampleAudio);
 
       const bpm = {

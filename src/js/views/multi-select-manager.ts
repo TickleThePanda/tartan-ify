@@ -63,7 +63,10 @@ function getInputHandler(
       reset: () => (i.value = ""),
       getNiceValue: () =>
         i.files?.length === 1
-          ? i.files[0].name
+          ? i.files[0]?.name ??
+            (() => {
+              throw new Error("Unable to get file to show name");
+            })()
           : (i.files?.length ?? 0) > 0
           ? `${i.files?.length} files selected`
           : null,
@@ -81,7 +84,13 @@ function getInputHandler(
     }),
   };
 
-  return inputHandlers[input.type.toLowerCase()](form, input);
+  const type = input.type?.toLowerCase();
+  const handler = inputHandlers[type];
+  if (handler === undefined) {
+    throw new Error("No handler for " + type);
+  } else {
+    return handler(form, input);
+  }
 }
 
 type InputHandlers = Record<string, InputHandlerCreator>;

@@ -50,7 +50,9 @@ const bundler = browserify({
   cache: {},
   packageCache: {},
 })
-  .plugin(tsify)
+  .plugin(tsify, {
+    project: "tsconfig.json"
+  })
   .transform(
     babelify.configure({
       presets: ["@babel/preset-env"],

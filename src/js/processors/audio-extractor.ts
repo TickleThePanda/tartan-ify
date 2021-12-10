@@ -72,6 +72,9 @@ export class AudioExtractor {
     }
 
     const channels = buffers.map((b) => new Float32Array(b));
+    if (channels[0] === undefined) {
+      throw new Error("No channels available");
+    }
     const totalSamples = channels[0].length;
     const byteLength = channels[0].byteLength;
 
@@ -81,8 +84,12 @@ export class AudioExtractor {
 
     for (let i = 0; i < totalSamples; i++) {
       let sum = 0;
-      for (let iC = 0; iC < channels.length; iC++) {
-        sum += channels[iC][i];
+      for (let c of channels) {
+        sum +=
+          c[i] ??
+          (() => {
+            throw new Error("Mismatched channel size");
+          })();
       }
       combined[i] = sum / channels.length;
     }
