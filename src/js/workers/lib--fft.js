@@ -31,8 +31,8 @@ const levels = 11;
 const cosTable = new Float32Array(length / 2);
 const sinTable = new Float32Array(length / 2);
 for (var i = 0; i < length / 2; i++) {
-  cosTable[i] = Math.cos(2 * Math.PI * i / length);
-  sinTable[i] = Math.sin(2 * Math.PI * i / length);
+  cosTable[i] = Math.cos((2 * Math.PI * i) / length);
+  sinTable[i] = Math.sin((2 * Math.PI * i) / length);
 }
 
 const bra = new Float32Array(2048);
@@ -41,7 +41,6 @@ const real = new Float32Array(2048);
 const imag = new Float32Array(2048);
 
 function calculateFrequencyData(input, freqs) {
-
   // Length variables
   if (input.length != 2048) {
     throw "Mismatched lengths";
@@ -67,7 +66,7 @@ function calculateFrequencyData(input, freqs) {
     for (let i = 0; i < length; i += size) {
       for (let j = i, k = 0; j < i + halfsize; j++, k += tablestep) {
         const l = j + halfsize;
-        const tpre =  real[l] * cosTable[k] + imag[l] * sinTable[k];
+        const tpre = real[l] * cosTable[k] + imag[l] * sinTable[k];
         const tpim = -real[l] * sinTable[k] + imag[l] * cosTable[k];
         real[l] = real[j] - tpre;
         imag[l] = imag[j] - tpim;

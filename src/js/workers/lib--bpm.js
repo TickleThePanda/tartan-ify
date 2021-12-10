@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-importScripts('lib--worker-status.js');
+importScripts("lib--worker-status.js");
 
 class NoTempoFoundException extends Error {
   constructor(message) {
@@ -31,7 +31,6 @@ class NoTempoFoundException extends Error {
     this.message = "Tempo extraction failed: " + message;
   }
 }
-
 
 class Agent {
   /**
@@ -450,7 +449,7 @@ class MusicTempo {
     const timeStep = params.timeStep || 0.01;
     updateStatus({
       stage: "Calculating spectral flux",
-      percentage: 0
+      percentage: 0,
     });
     let res = OnsetDetection.calculateSF(audioData, FFT, params);
 
@@ -460,7 +459,7 @@ class MusicTempo {
      */
     this.spectralFlux = res;
     updateStatus({
-      stage: "Normalising spectral flux"
+      stage: "Normalising spectral flux",
     });
     OnsetDetection.normalize(this.spectralFlux);
 
@@ -469,7 +468,7 @@ class MusicTempo {
      * @type {Array}
      */
     updateStatus({
-      stage: "Finding peaks"
+      stage: "Finding peaks",
     });
     this.peaks = OnsetDetection.findPeaks(this.spectralFlux, params);
     /**
@@ -479,15 +478,15 @@ class MusicTempo {
     this.events = this.peaks.map((a) => a * timeStep);
 
     updateStatus({
-      stage: "Processing rhythmic events"
+      stage: "Processing rhythmic events",
     });
     let clusters = TempoInduction.processRhythmicEvents(this.events, params);
     updateStatus({
-      stage: "Merging clusters"
+      stage: "Merging clusters",
     });
     clusters = TempoInduction.mergeClusters(clusters, params);
     updateStatus({
-      stage: "Calculating score"
+      stage: "Calculating score",
     });
     let scores = TempoInduction.calculateScore(clusters, params);
     clusters = {
@@ -501,7 +500,7 @@ class MusicTempo {
      * @type {Array}
      */
     updateStatus({
-      stage: "Create tempo list"
+      stage: "Create tempo list",
     });
     this.tempoList = TempoInduction.createTempoList(clusters, params);
 
@@ -512,7 +511,7 @@ class MusicTempo {
      * @type {Array}
      */
     updateStatus({
-      stage: "Track beats"
+      stage: "Track beats",
     });
     this.agents = BeatTracking.trackBeat(
       this.events,
@@ -540,7 +539,7 @@ class MusicTempo {
     this.beatInterval = -1;
 
     updateStatus({
-      stage: "Finding best beat"
+      stage: "Finding best beat",
     });
     for (let i = 0; i < this.agents.length; i++) {
       if (this.agents[i].score > bestScore) {
@@ -595,7 +594,9 @@ class OnsetDetection {
 
     let k = Math.floor(Math.log(bufferSize) / Math.LN2);
     if (Math.pow(2, k) !== bufferSize) {
-      throw new Error("Invalid buffer size (" + bufferSize + "), must be power of 2");
+      throw new Error(
+        "Invalid buffer size (" + bufferSize + "), must be power of 2"
+      );
     }
 
     const hammWindow = fft.getHammingWindow(bufferSize);
@@ -617,7 +618,7 @@ class OnsetDetection {
     for (let wndStart = 0; wndStart < length; wndStart += hopSize) {
       updateStatus({
         stage: "Calculating spectral flux",
-        percentage: wndStart / length
+        percentage: wndStart / length,
       });
       let wndEnd = wndStart + bufferSize;
 

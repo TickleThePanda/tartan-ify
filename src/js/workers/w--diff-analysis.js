@@ -1,15 +1,16 @@
-importScripts('lib--worker-status.js');
+importScripts("lib--worker-status.js");
 
-onmessage = function({data: buffers}) {
-
+onmessage = function ({ data: buffers }) {
   updateStatus({
-    stage: 'Generating diff',
-    percentage: 0
+    stage: "Generating diff",
+    percentage: 0,
   });
 
-  console.log(`worker--diff-analyis.js - nBuffers: ${buffers.length}, bufferLength: ${buffers[0].byteLength}`)
+  console.log(
+    `worker--diff-analyis.js - nBuffers: ${buffers.length}, bufferLength: ${buffers[0].byteLength}`
+  );
 
-  const ffts = buffers.map(f => new Float32Array(f));
+  const ffts = buffers.map((f) => new Float32Array(f));
 
   const results = [];
   for (let i = 0; i < ffts.length; i++) {
@@ -18,15 +19,14 @@ onmessage = function({data: buffers}) {
 
   const loopTotal = ffts.length * ffts.length + ffts.length;
 
-  const calculatePercentage = v => {
+  const calculatePercentage = (v) => {
     const x = ffts.length - v;
     return 1 - (x * x + x) / loopTotal;
   };
 
   for (let i = 0; i < ffts.length; i++) {
-
     updateStatus({
-      stage: 'Generating diff',
+      stage: "Generating diff",
       percentage: calculatePercentage(i),
     });
 
@@ -38,14 +38,11 @@ onmessage = function({data: buffers}) {
         const left = ffts[i];
         const right = ffts[j];
 
-        const leftSum = left
-            .reduce((a, b) => a + b);
+        const leftSum = left.reduce((a, b) => a + b);
 
-        const rightSum = right
-            .reduce((a, b) => a + b);
+        const rightSum = right.reduce((a, b) => a + b);
 
         for (let k = 0; k < left.length; k++) {
-
           const leftNorm = leftSum === 0 ? 0 : left[k] / leftSum;
           const rightNorm = rightSum === 0 ? 0 : right[k] / rightSum;
 
@@ -58,18 +55,17 @@ onmessage = function({data: buffers}) {
       results[j][i] = v;
       results[i][j] = v;
     }
-
   }
 
   const buffer = convertResultsToArray(results).buffer;
 
   postMessage(buffer);
-
-}
+};
 
 function convertResultsToArray(results) {
-
-  const arr = new SharedArrayBuffer(results.length * results.length * Float32Array.BYTES_PER_ELEMENT);
+  const arr = new SharedArrayBuffer(
+    results.length * results.length * Float32Array.BYTES_PER_ELEMENT
+  );
 
   const data = new Float32Array(arr);
 

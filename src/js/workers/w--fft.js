@@ -1,13 +1,14 @@
-importScripts('lib--fft.js');
-importScripts('lib--worker-status.js');
+importScripts("lib--fft.js");
+importScripts("lib--worker-status.js");
 
-onmessage = function({ data: { pcm, sampleRate, interval }}) {
-
-  console.log(`worker--fft.js - bufferLength: ${pcm.byteLength}, interval: ${interval}`);
+onmessage = function ({ data: { pcm, sampleRate, interval } }) {
+  console.log(
+    `worker--fft.js - bufferLength: ${pcm.byteLength}, interval: ${interval}`
+  );
 
   updateStatus({
-    stage: 'Initialising'
-  })
+    stage: "Initialising",
+  });
 
   const intervalInSeconds = interval / 1000;
 
@@ -20,13 +21,14 @@ onmessage = function({ data: { pcm, sampleRate, interval }}) {
 
   const samplesPerInterval = sampleRate * intervalInSeconds;
 
-  for (let intervalStart = 0;
-            intervalStart + samplesPerInterval < totalSamples;
-            intervalStart += samplesPerInterval) {
-
+  for (
+    let intervalStart = 0;
+    intervalStart + samplesPerInterval < totalSamples;
+    intervalStart += samplesPerInterval
+  ) {
     updateStatus({
-      stage: 'Analysing interval',
-      percentage: intervalStart / totalSamples
+      stage: "Analysing interval",
+      percentage: intervalStart / totalSamples,
     });
 
     let count = 0;
@@ -35,10 +37,11 @@ onmessage = function({ data: { pcm, sampleRate, interval }}) {
 
     const freqData = new Float32Array(length / 2);
 
-    for(let windowStart = intervalStart;
-          windowStart + length < intervalEnd;
-          windowStart += length) {
-
+    for (
+      let windowStart = intervalStart;
+      windowStart + length < intervalEnd;
+      windowStart += length
+    ) {
       const windowEnd = windowStart + length;
 
       const sliced = audio.slice(windowStart, windowEnd);
@@ -47,20 +50,19 @@ onmessage = function({ data: { pcm, sampleRate, interval }}) {
 
       count++;
 
-      for(let i = 0; i < length; i++) {
+      for (let i = 0; i < length; i++) {
         freqData[i] += temp[i];
       }
     }
 
-    for(let i = 0; i < length; i++) {
+    for (let i = 0; i < length; i++) {
       freqData[i] /= count;
     }
 
     freqDatas.push(freqData);
   }
 
-  const fftBuffers = freqDatas.map(fd => fd.buffer);
+  const fftBuffers = freqDatas.map((fd) => fd.buffer);
 
   postMessage(fftBuffers, fftBuffers);
-
-}
+};

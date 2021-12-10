@@ -1,9 +1,7 @@
-function updateStatus({
-  stage, percentage
-}) {
+function updateStatus({ stage, percentage }) {
   postMessage({
-    type: 'status',
+    type: "status",
     stage,
-    percentage
-  })
+    percentage,
+  });
 }
