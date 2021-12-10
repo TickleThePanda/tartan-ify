@@ -3,20 +3,20 @@ import { CanvasSizeManager } from "./canvas-size-manager";
 import { VisView } from "./vis-view";
 
 type SingleVisualisationPainterArgs = {
-  wrapper: HTMLElement,
-  canvas: HTMLCanvasElement,
-  context: CanvasRenderingContext2D,
-  canvasSizeManager: CanvasSizeManager
-}
+  wrapper: HTMLElement;
+  canvas: HTMLCanvasElement;
+  context: CanvasRenderingContext2D;
+  canvasSizeManager: CanvasSizeManager;
+};
 
 type SingleVisualisationStartArgs = {
-  image: Uint8ClampedArray,
-  bpm: number,
+  image: Uint8ClampedArray;
+  bpm: number;
   colors: {
-    similar: string,
-    diff: string
-  }
-}
+    similar: string;
+    diff: string;
+  };
+};
 
 export class SingleVisualisationPainter implements VisView {
   wrapper;
@@ -28,9 +28,9 @@ export class SingleVisualisationPainter implements VisView {
     wrapper,
     canvas,
     context,
-    canvasSizeManager
+    canvasSizeManager,
   }: SingleVisualisationPainterArgs) {
-    this.wrapper = wrapper
+    this.wrapper = wrapper;
     this.canvas = canvas;
     this.context = context;
     this.canvasSizeManager = canvasSizeManager;
@@ -41,16 +41,11 @@ export class SingleVisualisationPainter implements VisView {
     this.canvasSizeManager.triggerResize();
   }
 
-  async start({
-    image: imageData,
-    bpm,
-    colors
-  }: SingleVisualisationStartArgs) {
-
+  async start({ image: imageData, bpm, colors }: SingleVisualisationStartArgs) {
     const image = await convertImage(this.context, imageData);
 
-    this.wrapper.style.setProperty('--color-similar', colors.similar);
-    this.wrapper.style.setProperty('--color-diff', colors.diff);
+    this.wrapper.style.setProperty("--color-similar", colors.similar);
+    this.wrapper.style.setProperty("--color-diff", colors.diff);
 
     const canvas = this.canvas;
     const context = this.context;
@@ -61,8 +56,7 @@ export class SingleVisualisationPainter implements VisView {
     let elapsedIntervals = 0;
 
     (function loop() {
-      window.requestAnimationFrame(function() {
-
+      window.requestAnimationFrame(function () {
         elapsedIntervals = Math.floor((Date.now() - startTime) / interval);
 
         draw();
@@ -73,8 +67,8 @@ export class SingleVisualisationPainter implements VisView {
       });
     })();
 
-    window.addEventListener('resize', function() {
-      window.requestAnimationFrame(function() {
+    window.addEventListener("resize", function () {
+      window.requestAnimationFrame(function () {
         draw();
       });
     });
@@ -83,11 +77,25 @@ export class SingleVisualisationPainter implements VisView {
       context.imageSmoothingEnabled = false;
       context.clearRect(0, 0, canvas.width, canvas.height);
 
-      const wholeImageControl = <HTMLInputElement> document.getElementById('show-whole-image');
-      const cursorControl = <HTMLInputElement> document.getElementById('show-cursor');
+      const wholeImageControl = <HTMLInputElement>(
+        document.getElementById("show-whole-image")
+      );
+      const cursorControl = <HTMLInputElement>(
+        document.getElementById("show-cursor")
+      );
 
       if (wholeImageControl.checked) {
-        context.drawImage(image, 0, 0, image.width, image.width, 0, 0, canvas.width, canvas.width);
+        context.drawImage(
+          image,
+          0,
+          0,
+          image.width,
+          image.width,
+          0,
+          0,
+          canvas.width,
+          canvas.width
+        );
 
         const pixelSize = canvas.width / image.width;
         const progressOnCanvas = pixelSize * elapsedIntervals - pixelSize / 2;
@@ -99,12 +107,21 @@ export class SingleVisualisationPainter implements VisView {
           path.lineTo(progressOnCanvas, progressOnCanvas);
           path.lineTo(progressOnCanvas, 0);
           context.lineWidth = pixelSize;
-          context.strokeStyle = 'black';
+          context.strokeStyle = "black";
           context.stroke(path);
         }
-
       } else {
-        context.drawImage(image, 0, 0, elapsedIntervals, elapsedIntervals, 0, 0, canvas.width, canvas.width);
+        context.drawImage(
+          image,
+          0,
+          0,
+          elapsedIntervals,
+          elapsedIntervals,
+          0,
+          0,
+          canvas.width,
+          canvas.width
+        );
       }
     }
   }

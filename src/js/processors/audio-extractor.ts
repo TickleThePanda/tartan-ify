@@ -1,11 +1,11 @@
 import { MutableStatus, TaskWithStatus } from "../views/status";
 
 export type Track = {
-  audioBuffer: AudioBuffer,
-  pcm: SharedArrayBuffer,
-  name: string,
-  sampleRate: number
-}
+  audioBuffer: AudioBuffer;
+  pcm: SharedArrayBuffer;
+  name: string;
+  sampleRate: number;
+};
 
 export class AudioExtractor {
   #status: MutableStatus;
@@ -14,36 +14,31 @@ export class AudioExtractor {
     this.#status = status;
   }
 
-  async extract(
-    audio: ArrayBuffer,
-    name: string
-  ): Promise<Track> {
+  async extract(audio: ArrayBuffer, name: string): Promise<Track> {
     const audioBuffer = await this.decodeAudioData(audio);
     const pcm = await this.combineChannels(audioBuffer);
     return {
       audioBuffer: audioBuffer,
       pcm,
       name,
-      sampleRate: audioBuffer.sampleRate
-    }
+      sampleRate: audioBuffer.sampleRate,
+    };
   }
 
-
   private async decodeAudioData(fileBuffer: ArrayBuffer): Promise<AudioBuffer> {
-
     const length = fileBuffer.byteLength;
 
     const task: TaskWithStatus = {
       status: {
-        percentage: 0
-      }
-    }
+        percentage: 0,
+      },
+    };
 
     const start = Date.now();
 
     this.#status.update({
-      status: 'Decoding audio data',
-      task
+      status: "Decoding audio data",
+      task,
     });
 
     const intervalId = setInterval(() => {
@@ -55,7 +50,6 @@ export class AudioExtractor {
       const diff = end - start;
 
       task.status.percentage = Math.min(diff / expectedTime, 1);
-
     }, 100);
 
     const ctx = new AudioContext();
@@ -67,9 +61,8 @@ export class AudioExtractor {
   }
 
   private combineChannels(audioBuffer: AudioBuffer) {
-
     this.#status.update({
-      status: 'Combining channels'
+      status: "Combining channels",
     });
 
     const buffers = [];
@@ -78,7 +71,7 @@ export class AudioExtractor {
       buffers.push(audioBuffer.getChannelData(i));
     }
 
-    const channels = buffers.map(b => new Float32Array(b));
+    const channels = buffers.map((b) => new Float32Array(b));
     const totalSamples = channels[0].length;
     const byteLength = channels[0].byteLength;
 

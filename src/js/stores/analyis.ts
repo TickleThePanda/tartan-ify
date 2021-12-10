@@ -1,16 +1,16 @@
-import { openDB, DBSchema } from 'idb';
-import { BpmOptions } from '../views/analysis-form';
+import { openDB, DBSchema } from "idb";
+import { BpmOptions } from "../views/analysis-form";
 
-const STORE_NAME = 'analysis-store';
+const STORE_NAME = "analysis-store";
 
 interface AnalysisDatabaseSchema extends DBSchema {
-  'analysis-store': {
+  "analysis-store": {
     key: string;
     value: AnalysisCacheResult;
     indexes: {
-      'by-hash': string
-      'by-created': string
-    }
+      "by-hash": string;
+      "by-created": string;
+    };
   };
 }
 
@@ -22,16 +22,16 @@ export type AnalysisCacheKey = {
   diffColor: string;
   similarColor: string;
   trackHash: string;
-}
+};
 
 type InternalAnalysisCacheValue = AnalysisCacheValue & {
-  created: Date
-}
+  created: Date;
+};
 
 export type AnalysisCacheValue = {
-  image: Blob,
-  trackName: string
-}
+  image: Blob;
+  trackName: string;
+};
 
 export type AnalysisCacheResult = InternalAnalysisCacheValue & AnalysisCacheKey;
 
@@ -43,11 +43,11 @@ async function hashKey(key: AnalysisCacheKey): Promise<string> {
     bpmOptions: {
       value: bpmValue,
       autodetect: bpmAutoDetect,
-      autodetectMultiplier: bpmAutoDetectMultiplier
+      autodetectMultiplier: bpmAutoDetectMultiplier,
     },
     diffColor,
     similarColor,
-    trackHash
+    trackHash,
   } = key;
 
   const subset = {
@@ -59,20 +59,19 @@ async function hashKey(key: AnalysisCacheKey): Promise<string> {
     bpmAutoDetectMultiplier,
     diffColor,
     similarColor,
-    trackHash
+    trackHash,
   };
 
   const json = JSON.stringify(subset);
   const jsonBuffer = new TextEncoder().encode(json);
 
-  const hashBuffer = await crypto.subtle.digest('SHA-1', jsonBuffer);
+  const hashBuffer = await crypto.subtle.digest("SHA-1", jsonBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
 
   const array = Array.from(hashArray);
 
-  return array.map(b => b.toString(16).padStart(2, '0')).join('');
+  return array.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
-
 
 const db = openDB<AnalysisDatabaseSchema>(STORE_NAME, 5, {
   upgrade(db, ov, _nv, transaction) {
@@ -83,25 +82,23 @@ const db = openDB<AnalysisDatabaseSchema>(STORE_NAME, 5, {
         db.createObjectStore(STORE_NAME);
       case 1:
         const addHashIndexStore = transaction.objectStore(STORE_NAME);
-        addHashIndexStore.createIndex('by-hash', 'trackHash', {
-          unique: false
+        addHashIndexStore.createIndex("by-hash", "trackHash", {
+          unique: false,
         });
       case 2:
         transaction.objectStore(STORE_NAME).clear();
       case 3:
         const addLastAccessedStore = transaction.objectStore(STORE_NAME);
-        addLastAccessedStore.createIndex('by-created', 'created', {
-          unique: false
-        })
+        addLastAccessedStore.createIndex("by-created", "created", {
+          unique: false,
+        });
       case 4:
         transaction.objectStore(STORE_NAME).clear();
     }
-
   },
 });
 
 export class AnalysisStore {
-
   async get(key: AnalysisCacheKey): Promise<AnalysisCacheResult | undefined> {
     return await (await db).get(STORE_NAME, await hashKey(key));
   }
@@ -120,27 +117,31 @@ export class AnalysisStore {
     await this.store(key, actualValue);
     return {
       ...key,
-      ...actualValue
-    }
+      ...actualValue,
+    };
   }
 
-  async store(key: AnalysisCacheKey, val: AnalysisCacheValue): Promise<AnalysisCacheResult> {
+  async store(
+    key: AnalysisCacheKey,
+    val: AnalysisCacheValue
+  ): Promise<AnalysisCacheResult> {
     const fullValue = {
       ...key,
       ...val,
-      created: new Date()
+      created: new Date(),
     };
 
-    await (await db)
-      .put(STORE_NAME, fullValue,
-        await hashKey(key)
-      );
+    await (await db).put(STORE_NAME, fullValue, await hashKey(key));
 
     return fullValue;
   }
 
   async getAllByCreationDate(): Promise<AnalysisCacheResult[]> {
-    return (await db).getAllFromIndex('analysis-store', 'by-created', undefined);
+    return (await db).getAllFromIndex(
+      "analysis-store",
+      "by-created",
+      undefined
+    );
   }
 
   async clear() {

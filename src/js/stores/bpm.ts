@@ -1,14 +1,11 @@
 type BpmCacheArgs = {
-  version: string
-}
+  version: string;
+};
 
 export class BpmCache {
-
   #version;
 
-  constructor({
-    version
-  }: BpmCacheArgs) {
+  constructor({ version }: BpmCacheArgs) {
     this.#version = version;
   }
 
@@ -28,5 +25,4 @@ export class BpmCache {
   private toKey(hash: string) {
     return `bpm-${this.#version}-${hash}`;
   }
-
 }

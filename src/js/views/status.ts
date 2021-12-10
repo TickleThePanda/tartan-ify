@@ -1,7 +1,7 @@
 export type StatusValues = {
   stage?: string;
   percentage?: number;
-}
+};
 
 export class Status implements StatusValues {
   stage?: string = undefined;
@@ -9,13 +9,7 @@ export class Status implements StatusValues {
 
   constructor() {}
 
-  update({
-    stage,
-    percentage
-  }: {
-    stage: string,
-    percentage: number
-  }) {
+  update({ stage, percentage }: { stage: string; percentage: number }) {
     this.stage = stage;
     this.percentage = percentage;
   }
@@ -26,16 +20,16 @@ export interface TaskWithStatus {
 }
 
 export type CurrentStatus = {
-  status?: string,
-  type?: StatusType,
-  task?: string,
-  context?: string
-} & StatusValues
+  status?: string;
+  type?: StatusType;
+  task?: string;
+  context?: string;
+} & StatusValues;
 
 type StageUpdateArgs = {
-  status: string,
-  task?: TaskWithStatus
-}
+  status: string;
+  task?: TaskWithStatus;
+};
 
 export class MutableStatus {
   status: string | undefined = undefined;
@@ -49,10 +43,7 @@ export class MutableStatus {
     this.context = context;
   }
 
-  update({
-    status,
-    task
-  }: StageUpdateArgs) {
+  update({ status, task }: StageUpdateArgs) {
     this.status = status;
     this.task = task;
     this.error = undefined;
@@ -69,21 +60,21 @@ export class MutableStatus {
       return {
         context: this.context,
         status: this.error,
-        type: StatusType.ERROR
+        type: StatusType.ERROR,
       };
     }
 
     if (this.status === undefined) {
       return {
         context: this.context,
-        status: 'Loading...'
+        status: "Loading...",
       };
     }
 
     if (this.task === undefined || this.task.status === undefined) {
       return {
         context: this.context,
-        status: this.status
+        status: this.status,
       };
     }
 
@@ -91,27 +82,24 @@ export class MutableStatus {
       context: this.context,
       status: this.status,
       task: this.task.status.stage,
-      percentage: this.task.status.percentage
-    }
+      percentage: this.task.status.percentage,
+    };
   }
 }
 
-
-
 type StatusManagerElementsArgs = {
-  wrapper: HTMLElement,
-  status: HTMLElement,
-  task: HTMLElement,
-  percentage: HTMLElement,
-  context: HTMLElement
-}
+  wrapper: HTMLElement;
+  status: HTMLElement;
+  task: HTMLElement;
+  percentage: HTMLElement;
+  context: HTMLElement;
+};
 
 export enum StatusType {
-  "ERROR"
+  "ERROR",
 }
 
 export class StatusView {
-
   #wrapper;
   #statusElement;
   #taskElement;
@@ -122,13 +110,7 @@ export class StatusView {
   #shouldContinue = false;
 
   constructor(
-    {
-      wrapper,
-      status,
-      context,
-      task,
-      percentage
-    }: StatusManagerElementsArgs,
+    { wrapper, status, context, task, percentage }: StatusManagerElementsArgs,
     statusManager: MutableStatus
   ) {
     this.#wrapper = wrapper;
@@ -140,14 +122,14 @@ export class StatusView {
   }
 
   get visible() {
-    return !this.#wrapper.classList.contains('hidden');
+    return !this.#wrapper.classList.contains("hidden");
   }
 
   set visible(isVisible) {
     if (isVisible) {
-      this.#wrapper.classList.remove('hidden');
+      this.#wrapper.classList.remove("hidden");
     } else {
-      this.#wrapper.classList.add('hidden');
+      this.#wrapper.classList.add("hidden");
     }
   }
 
@@ -155,7 +137,8 @@ export class StatusView {
     this.#shouldContinue = true;
 
     const updateStatus = () => {
-      const { type, context, status, task, percentage } = this.#statusManager.get();
+      const { type, context, status, task, percentage } =
+        this.#statusManager.get();
       if (status !== undefined) {
         this.#statusElement.innerHTML = status;
       } else {
@@ -179,7 +162,7 @@ export class StatusView {
       }
 
       if (type === StatusType.ERROR) {
-        this.#wrapper.classList.add('error');
+        this.#wrapper.classList.add("error");
       }
 
       if (this.#shouldContinue) {
@@ -193,5 +176,4 @@ export class StatusView {
   stop() {
     this.#shouldContinue = false;
   }
-
 }

@@ -1,23 +1,21 @@
-import { BatchVisualisationPainter } from '../views/vis-batch';
-import { MutableStatus } from '../views/status';
-import { AnalysisStore } from '../stores/analyis';
-import { PageManager } from '../views/page-handler';
+import { BatchVisualisationPainter } from "../views/vis-batch";
+import { MutableStatus } from "../views/status";
+import { AnalysisStore } from "../stores/analyis";
+import { PageManager } from "../views/page-handler";
 
 export class HistoryHandler {
-
   constructor(
     private pages: PageManager,
     private visPainter: BatchVisualisationPainter,
     private stage: MutableStatus,
     private cache: AnalysisStore
-  ) { }
+  ) {}
 
-  async handleHistory({ }): Promise<void> {
-
+  async handleHistory({}): Promise<void> {
     this.pages.showLoading();
 
     this.stage.update({
-      status: `Loading history`
+      status: `Loading history`,
     });
 
     const cached = await this.cache.getAllByCreationDate();
@@ -27,17 +25,17 @@ export class HistoryHandler {
         title: {
           header: i.trackName,
           context: {
-            "Scale": i.scale,
-            "Max": `${i.minThreshold}`,
-            "Min": `${i.maxThreshold}`,
-            "BPM": !i.bpmOptions.autodetect
+            Scale: i.scale,
+            Max: `${i.minThreshold}`,
+            Min: `${i.maxThreshold}`,
+            BPM: !i.bpmOptions.autodetect
               ? `${i.bpmOptions.value}`
               : i.bpmOptions.autodetectMultiplier !== undefined
-                ? `auto ${i.bpmOptions.autodetectMultiplier}`
-                : `auto`,
-          }
+              ? `auto ${i.bpmOptions.autodetectMultiplier}`
+              : `auto`,
+          },
         },
-        imageData: new Uint8ClampedArray(await i.image.arrayBuffer())
+        imageData: new Uint8ClampedArray(await i.image.arrayBuffer()),
       }))
     );
 

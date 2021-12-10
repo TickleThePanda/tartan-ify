@@ -5,13 +5,12 @@ function resizeCanvas(canvas: HTMLCanvasElement) {
 
 class CanvasSizeManager {
   canvases: {
-    canvas: HTMLCanvasElement,
-    callback?: () => any
-  }[] = []
+    canvas: HTMLCanvasElement;
+    callback?: () => any;
+  }[] = [];
   constructor() {
-
-    window.addEventListener('resize', () => {
-      this.canvases.forEach(c => {
+    window.addEventListener("resize", () => {
+      this.canvases.forEach((c) => {
         resizeCanvas(c.canvas);
         if (c.callback) {
           c.callback();
@@ -23,14 +22,13 @@ class CanvasSizeManager {
   add(canvas: HTMLCanvasElement, callback?: () => any) {
     this.canvases.push({
       canvas: canvas,
-      callback: callback
+      callback: callback,
     });
     resizeCanvas(canvas);
   }
 
   triggerResize() {
-    this.canvases.map(c => c.canvas)
-      .forEach(resizeCanvas);
+    this.canvases.map((c) => c.canvas).forEach(resizeCanvas);
   }
 }
 

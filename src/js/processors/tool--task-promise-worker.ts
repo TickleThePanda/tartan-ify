@@ -12,11 +12,11 @@ export class TaskPromiseWorker implements TaskWithStatus {
   async run(message: any, transfer?: Transferable[]): Promise<any> {
     return new Promise((resolve, reject) => {
       const worker = new Worker(this.stringUrl);
-      worker.onmessage = m => {
-        if (m.data instanceof Object && m.data.type === 'status') {
+      worker.onmessage = (m) => {
+        if (m.data instanceof Object && m.data.type === "status") {
           this.#status.update({
             stage: m.data.stage,
-            percentage: m.data.percentage
+            percentage: m.data.percentage,
           });
         } else {
           resolve(m.data);
