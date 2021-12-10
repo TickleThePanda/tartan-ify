@@ -1,7 +1,7 @@
-export function handleMultiSelectElements() {
+export function handleMultiSelectElements(): void {
   const watchers = document.querySelectorAll(".js-last-selected-value");
 
-  for (let watcher of <HTMLElement[]>Array.from(watchers)) {
+  for (const watcher of <HTMLElement[]>Array.from(watchers)) {
     const form = <HTMLFormElement>watcher.closest("form");
 
     if (form === undefined) {
@@ -28,14 +28,14 @@ export function handleMultiSelectElements() {
     const setWatcherValue = (v: string | null) =>
       v !== null ? (watcher.innerHTML = v) : null;
 
-    for (let input of inputs) {
+    for (const input of inputs) {
       const handler = getInputHandler(form, input);
 
       const handleChange = () => {
         if (handler.isSelected()) {
           setWatcherValue(handler.getNiceValue());
 
-          for (let inputToReset of inputs.filter((e) => e !== input)) {
+          for (const inputToReset of inputs.filter((e) => e !== input)) {
             const inputToResetHandler = getInputHandler(form, inputToReset);
 
             inputToResetHandler.reset();
@@ -92,6 +92,6 @@ type InputHandlerCreator = (
 
 type InputHandler = {
   isSelected: () => boolean;
-  reset: () => any;
+  reset: () => void;
   getNiceValue: () => string | null;
 };

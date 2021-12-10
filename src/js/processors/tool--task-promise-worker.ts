@@ -9,7 +9,7 @@ export class TaskPromiseWorker implements TaskWithStatus {
     this.stringUrl = stringUrl;
   }
 
-  async run(message: any, transfer?: Transferable[]): Promise<any> {
+  async run(message: unknown, transfer?: Transferable[]): Promise<unknown> {
     return new Promise((resolve, reject) => {
       const worker = new Worker(this.stringUrl);
       worker.onmessage = (m) => {
@@ -31,7 +31,7 @@ export class TaskPromiseWorker implements TaskWithStatus {
     });
   }
 
-  get status() {
+  get status(): Status {
     return this.#status;
   }
 }

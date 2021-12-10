@@ -7,9 +7,7 @@ export class Status implements StatusValues {
   stage?: string = undefined;
   percentage?: number = undefined;
 
-  constructor() {}
-
-  update({ stage, percentage }: { stage: string; percentage: number }) {
+  update({ stage, percentage }: { stage: string; percentage: number }): void {
     this.stage = stage;
     this.percentage = percentage;
   }
@@ -37,19 +35,17 @@ export class MutableStatus {
   task: TaskWithStatus | undefined = undefined;
   error: string | undefined = undefined;
 
-  constructor() {}
-
-  updateContext(context?: string) {
+  updateContext(context?: string): void {
     this.context = context;
   }
 
-  update({ status, task }: StageUpdateArgs) {
+  update({ status, task }: StageUpdateArgs): void {
     this.status = status;
     this.task = task;
     this.error = undefined;
   }
 
-  updateError(error: string) {
+  updateError(error: string): void {
     this.status = undefined;
     this.task = undefined;
     this.error = error;
@@ -121,11 +117,11 @@ export class StatusView {
     this.#statusManager = statusManager;
   }
 
-  get visible() {
+  get visible(): boolean {
     return !this.#wrapper.classList.contains("hidden");
   }
 
-  set visible(isVisible) {
+  set visible(isVisible: boolean) {
     if (isVisible) {
       this.#wrapper.classList.remove("hidden");
     } else {
@@ -133,7 +129,7 @@ export class StatusView {
     }
   }
 
-  start() {
+  start(): void {
     this.#shouldContinue = true;
 
     const updateStatus = () => {
@@ -173,7 +169,7 @@ export class StatusView {
     requestAnimationFrame(updateStatus);
   }
 
-  stop() {
+  stop(): void {
     this.#shouldContinue = false;
   }
 }

@@ -77,6 +77,7 @@ const db = openDB<AnalysisDatabaseSchema>(STORE_NAME, 5, {
   upgrade(db, ov, _nv, transaction) {
     const oldVersion = ov === undefined ? 0 : ov;
 
+    /* eslint-disable no-fallthrough, no-case-declarations */
     switch (oldVersion) {
       case 0:
         db.createObjectStore(STORE_NAME);
@@ -95,6 +96,7 @@ const db = openDB<AnalysisDatabaseSchema>(STORE_NAME, 5, {
       case 4:
         transaction.objectStore(STORE_NAME).clear();
     }
+    /* eslint-enable no-fallthrough, no-case-declarations */
   },
 });
 
@@ -144,7 +146,7 @@ export class AnalysisStore {
     );
   }
 
-  async clear() {
+  async clear(): Promise<void> {
     return (await db).clear(STORE_NAME);
   }
 }

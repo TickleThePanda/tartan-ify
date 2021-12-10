@@ -1,7 +1,7 @@
 export async function convertImage(
   context: CanvasRenderingContext2D,
   array: Uint8ClampedArray
-) {
+): Promise<ImageBitmap> {
   const widthFromRender = Math.sqrt(array.length / 4);
 
   const image = context.createImageData(widthFromRender, widthFromRender);

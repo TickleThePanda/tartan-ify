@@ -52,7 +52,7 @@ class MusicAnalyser {
     return diffs;
   }
 
-  async calculateFftDiffMatrix(ffts: Float32Array[]) {
+  async calculateFftDiffMatrix(ffts: Float32Array[]): Promise<Float32Array> {
     const task = new TaskPromiseWorker("/js/workers/w--diff-analysis.js");
 
     this.#status.update({
@@ -62,7 +62,7 @@ class MusicAnalyser {
 
     const buffers = ffts.map((f) => f.buffer);
 
-    const data = await task.run(buffers, buffers);
+    const data = <ArrayBuffer>await task.run(buffers, buffers);
 
     return new Float32Array(data);
   }
@@ -79,7 +79,7 @@ class MusicAnalyser {
       task,
     });
 
-    const data: ArrayBuffer[] = await task.run({
+    const data = <ArrayBuffer[]>await task.run({
       sampleRate,
       interval,
       pcm,
@@ -114,7 +114,8 @@ class MusicAnalyser {
     });
 
     try {
-      const { tempo }: { tempo: number } = await task.run(pcm);
+      type BpmResult = { tempo: number };
+      const { tempo } = <BpmResult>await task.run(pcm);
 
       this.#bpmCache.set(hash, tempo);
       return tempo * bpm.autodetectMultiplier;

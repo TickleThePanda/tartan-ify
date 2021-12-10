@@ -11,7 +11,7 @@ export class HistoryHandler {
     private cache: AnalysisStore
   ) {}
 
-  async handleHistory({}): Promise<void> {
+  async handleHistory(): Promise<void> {
     this.pages.showLoading();
 
     this.stage.update({

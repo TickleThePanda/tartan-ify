@@ -11,10 +11,10 @@ export class AnalysisFormManager {
   formErrors: HTMLInputElement;
   submitButton: HTMLInputElement;
 
-  singleListeners: ((event: SingleAnalysisOptions) => any)[] = [];
-  batchParamListeners: ((event: BatchParamAnalysisOptions) => any)[] = [];
-  batchFileListeners: ((event: BatchFileAnalysisOptions) => any)[] = [];
-  historyListeners: ((event: HistoryOptions) => any)[] = [];
+  singleListeners: ((event: SingleAnalysisOptions) => void)[] = [];
+  batchParamListeners: ((event: BatchParamAnalysisOptions) => void)[] = [];
+  batchFileListeners: ((event: BatchFileAnalysisOptions) => void)[] = [];
+  historyListeners: ((event: void) => void)[] = [];
 
   constructor(
     formElement: HTMLElement,
@@ -34,7 +34,7 @@ export class AnalysisFormManager {
     );
 
     let examplesHtml = "";
-    for (let example of audioSelection) {
+    for (const example of audioSelection) {
       examplesHtml += `
         <div class="form__radio-item">
           <input type="radio" id="example-options_${example.slug}" name="example-options" value="${example.url}">
@@ -55,7 +55,7 @@ export class AnalysisFormManager {
 
     handleMultiSelectElements();
 
-    this.filesInput.addEventListener("change", (e) => {
+    this.filesInput.addEventListener("change", () => {
       const files = this.filesInput.files;
 
       if (files === null) {
@@ -71,20 +71,21 @@ export class AnalysisFormManager {
     const formErrors = this.formErrors;
     const bpmInput = this.bpmInput;
 
-    //@ts-ignore
-    this.formElement.addEventListener("submit", async (e: SubmitEvent) => {
-      e.preventDefault();
+    this.formElement.addEventListener("submit", async (actualEvent: Event) => {
+      const event = <SubmitEvent>actualEvent;
 
-      const submitType = e.submitter.value || null;
+      event.preventDefault();
+
+      const submitType = event.submitter.value || null;
 
       if (submitType === "history") {
-        this.historyListeners.forEach((l) => l({}));
+        this.historyListeners.forEach((l) => l());
         return;
       }
 
       console.log("app--analysis-form-manager.mjs - submit event");
 
-      const formData = new FormData(<HTMLFormElement>e.target);
+      const formData = new FormData(<HTMLFormElement>event.target);
 
       const selectedFiles = <File[]>formData.getAll("music-files");
       const exampleAudio = <string>formData.get("example-options");
@@ -187,26 +188,26 @@ export class AnalysisFormManager {
     });
   }
 
-  hide() {
+  hide(): void {
     this.formElement.classList.add("hidden");
   }
 
   registerSingleSubmitListener(
-    listener: (event: SingleAnalysisOptions) => any
-  ) {
+    listener: (event: SingleAnalysisOptions) => void
+  ): void {
     this.singleListeners.push(listener);
   }
   registerBatchFileSubmitListener(
-    listener: (event: BatchFileAnalysisOptions) => any
-  ) {
+    listener: (event: BatchFileAnalysisOptions) => void
+  ): void {
     this.batchFileListeners.push(listener);
   }
   registerBatchParamSubmitListener(
-    listener: (event: BatchParamAnalysisOptions) => any
-  ) {
+    listener: (event: BatchParamAnalysisOptions) => void
+  ): void {
     this.batchParamListeners.push(listener);
   }
-  registerHistoryListener(listener: (event: HistoryOptions) => any) {
+  registerHistoryListener(listener: (v: void) => void): void {
     this.historyListeners.push(listener);
   }
 }
@@ -292,8 +293,6 @@ export type BatchParamAnalysisOptions = {
   bpm: BpmOptions;
   fileLoader: FileDataLoader;
 } & BaseOptions;
-
-export type HistoryOptions = {};
 
 export type ScaleOptions =
   | "log"

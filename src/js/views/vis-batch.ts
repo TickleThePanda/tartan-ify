@@ -17,7 +17,7 @@ export class BatchVisualisationPainter implements VisView {
     this.element = element;
   }
 
-  async start(images: BatchImage[], heading: string) {
+  async start(images: BatchImage[], heading: string): Promise<void> {
     const headingElement =
       document.getElementById("batch-page-header") ??
       (() => {
@@ -25,7 +25,7 @@ export class BatchVisualisationPainter implements VisView {
       })();
     headingElement.innerHTML = heading;
 
-    for (let { title, imageData: image } of images) {
+    for (const { title, imageData: image } of images) {
       const canvas = document.createElement("canvas");
       const context =
         canvas.getContext("2d") ??
@@ -79,7 +79,7 @@ export class BatchVisualisationPainter implements VisView {
     }
   }
 
-  show() {
+  show(): void {
     this.element.classList.remove("hidden");
   }
 }

@@ -18,7 +18,7 @@ export class BpmCache {
     }
   }
 
-  set(hash: string, bpm: number) {
+  set(hash: string, bpm: number): void {
     localStorage.setItem(this.toKey(hash), bpm.toString());
   }
 

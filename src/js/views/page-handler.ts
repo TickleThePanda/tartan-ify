@@ -8,13 +8,13 @@ export class PageManager {
     private statusManager: StatusView
   ) {}
 
-  showLoading() {
+  showLoading(): void {
     this.formManager.hide();
     this.statusManager.start();
     this.statusManager.visible = true;
   }
 
-  showVisualisation(vis: VisView) {
+  showVisualisation(vis: VisView): void {
     this.statusManager.stop();
     this.statusManager.visible = false;
     vis.show();

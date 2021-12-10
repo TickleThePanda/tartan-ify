@@ -36,12 +36,16 @@ export class SingleVisualisationPainter implements VisView {
     this.canvasSizeManager = canvasSizeManager;
   }
 
-  show() {
+  show(): void {
     this.wrapper.classList.remove("hidden");
     this.canvasSizeManager.triggerResize();
   }
 
-  async start({ image: imageData, bpm, colors }: SingleVisualisationStartArgs) {
+  async start({
+    image: imageData,
+    bpm,
+    colors,
+  }: SingleVisualisationStartArgs): Promise<void> {
     const image = await convertImage(this.context, imageData);
 
     this.wrapper.style.setProperty("--color-similar", colors.similar);

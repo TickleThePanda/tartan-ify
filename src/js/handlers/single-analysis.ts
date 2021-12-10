@@ -25,7 +25,7 @@ export class SingleAnalysisHandler {
     thresholds,
     fileLoader,
     colors,
-  }: SingleAnalysisOptions) {
+  }: SingleAnalysisOptions): Promise<void> {
     this.pages.showLoading();
 
     this.stage.update({
@@ -86,7 +86,7 @@ export class SingleAnalysisHandler {
   }
 }
 
-export function playAudio(audio: AudioBuffer) {
+export function playAudio(audio: AudioBuffer): void {
   const ctx = new AudioContext();
   const bufferSrc = new AudioBufferSourceNode(ctx, {
     buffer: audio,

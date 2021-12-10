@@ -6,7 +6,7 @@ function resizeCanvas(canvas: HTMLCanvasElement) {
 class CanvasSizeManager {
   canvases: {
     canvas: HTMLCanvasElement;
-    callback?: () => any;
+    callback?: () => void;
   }[] = [];
   constructor() {
     window.addEventListener("resize", () => {
@@ -19,7 +19,7 @@ class CanvasSizeManager {
     });
   }
 
-  add(canvas: HTMLCanvasElement, callback?: () => any) {
+  add(canvas: HTMLCanvasElement, callback?: () => void): void {
     this.canvases.push({
       canvas: canvas,
       callback: callback,
@@ -27,7 +27,7 @@ class CanvasSizeManager {
     resizeCanvas(canvas);
   }
 
-  triggerResize() {
+  triggerResize(): void {
     this.canvases.map((c) => c.canvas).forEach(resizeCanvas);
   }
 }

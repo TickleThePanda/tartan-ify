@@ -106,12 +106,19 @@ window.addEventListener("load", async () => {
     cache
   );
 
-  function logErrors<A>(f: (v: A) => any): (v: A) => Promise<any> {
-    return async (...v) => {
+  function logErrors<Type, Return>(
+    f: (v: Type) => Return | undefined
+  ): (v: Type) => Return | undefined {
+    return (...v) => {
       try {
-        return await f(...v);
-      } catch (e: any) {
-        console.log(e, e.stack ?? "No stack trace");
+        return f(...v);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          console.log(e, e.stack ?? "No stack trace");
+        } else {
+          console.log(e);
+        }
+        return undefined;
       }
     };
   }
@@ -126,7 +133,7 @@ window.addEventListener("load", async () => {
     logErrors((args) => batchParamsAnalysisHandler.analyse(args))
   );
   formManager.registerHistoryListener(
-    logErrors((args) => historyHandler.handleHistory(args))
+    logErrors(() => historyHandler.handleHistory())
   );
 
   async function loadAudioSelection() {

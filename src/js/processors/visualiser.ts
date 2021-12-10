@@ -56,7 +56,7 @@ export class DiffVisualiser {
       task,
     });
 
-    const data = await task.run({
+    const data = <ArrayBuffer>await task.run({
       diffs: diffs.buffer,
       colors: colors,
       thresholds,
@@ -78,10 +78,12 @@ export class DiffVisualiser {
       task,
     });
 
-    const results: {
+    type VisualiserResults = {
       data: ArrayBuffer;
       context: MatrixParam;
-    }[] = await task.run({
+    }[];
+
+    const results = <VisualiserResults>await task.run({
       diffs: diffs.buffer,
       colors: colors,
       matrixParams,

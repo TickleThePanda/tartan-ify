@@ -28,7 +28,7 @@ export class BatchFileAnalysisHandler {
   }: BatchFileAnalysisOptions): Promise<void> {
     this.pages.showLoading();
 
-    let images: BatchImage[] = [];
+    const images: BatchImage[] = [];
 
     let currentTrack = 1;
 
