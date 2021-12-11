@@ -73,134 +73,122 @@ export class AnalysisFormManager {
     this.formElement.addEventListener("submit", (event: SubmitEvent) => {
       event.preventDefault();
       const formData = new FormData(this.formElement);
-      formData.append(
-        "submit-type",
-        (<HTMLInputElement>event?.submitter)?.value
-      );
-    });
+      const submitter = <HTMLInputElement>event?.submitter;
 
-    this.formElement.addEventListener(
-      "formdata",
-      async (event: FormDataEvent) => {
-        event.preventDefault();
+      const submitType = submitter?.value;
 
-        const formData = event.formData;
-
-        const submitType = formData.get("submit-type") || null;
-
-        if (submitType === "history") {
-          this.historyListeners.forEach((l) => l());
-          return;
-        }
-
-        console.log("app--analysis-form-manager.mjs - submit event");
-
-        const selectedFiles = <File[]>formData.getAll("music-files");
-        const exampleAudio = <string>formData.get("example-options");
-        const detectBpm = formData.get("detect-bpm");
-        const autodetectMultiplier = <string>(
-          formData.get("detect-bpm-multiplier")
-        );
-        const bpmText = <string>formData.get("analysis-bpm");
-        const dataScaleText = <string>formData.get("scale");
-        const minThresholdValue = <string>formData.get("min-percentile");
-        const maxThresholdValue = <string>formData.get("max-percentile");
-        const minColor = <string>formData.get("min-color");
-        const maxColor = <string>formData.get("max-color");
-
-        if (parseFloat(minThresholdValue) > parseFloat(maxThresholdValue)) {
-          formErrors.innerHTML =
-            "Max percentile must be grester than min percentile";
-          return;
-        }
-
-        if (detectBpm !== "detect-bpm" && isNaN(parseInt(bpmText))) {
-          formErrors.innerHTML =
-            "Please select autodetect or specify a valid whole number for BPM";
-          return;
-        }
-
-        const filesWereUploaded =
-          selectedFiles.length !== 0 && allHaveContent(selectedFiles);
-        const exampleAudioSelected = exampleAudio !== null;
-
-        if (!filesWereUploaded && !exampleAudioSelected) {
-          formErrors.innerHTML = "Please select an audio file.";
-          return;
-        }
-        if (filesWereUploaded && !containsOnlyAudioFiles(selectedFiles)) {
-          formErrors.innerHTML = "Please select an audio file.";
-          return;
-        }
-
-        const multiFileLoad: FileDataLoaders = filesWereUploaded
-          ? loadFiles(selectedFiles)
-          : [loadFileFromUrl(exampleAudio)];
-
-        const singleFileLoad: FileDataLoader = filesWereUploaded
-          ? () =>
-              loadFileData(
-                selectedFiles[0] ??
-                  (() => {
-                    throw new Error("Unable to get selected file");
-                  })()
-              )
-          : loadFileFromUrl(exampleAudio);
-
-        const bpm = {
-          autodetect: detectBpm === "detect-bpm",
-          autodetectMultiplier: parseFloat(autodetectMultiplier),
-          value: parseFloat(bpmInput.value),
-        };
-
-        const colors = {
-          similar: minColor,
-          diff: maxColor,
-        };
-
-        const thresholds = {
-          min: parseFloat(minThresholdValue) / 100,
-          max: parseFloat(maxThresholdValue) / 100,
-        };
-
-        const scale = <ScaleOptions>dataScaleText;
-
-        if (submitType === "batch") {
-          if (selectedFiles.length > 1) {
-            formErrors.innerHTML = "Batch param mode only supports one file.";
-            return;
-          }
-
-          this.batchParamListeners.forEach((l) =>
-            l({
-              bpm,
-              colors,
-              fileLoader: singleFileLoad,
-            })
-          );
-        } else if (selectedFiles.length > 1) {
-          this.batchFileListeners.forEach((l) =>
-            l({
-              bpm,
-              colors,
-              thresholds,
-              scale,
-              fileLoaders: multiFileLoad,
-            })
-          );
-        } else {
-          this.singleListeners.forEach((l) =>
-            l({
-              bpm,
-              colors,
-              thresholds,
-              scale,
-              fileLoader: singleFileLoad,
-            })
-          );
-        }
+      if (submitType === "history") {
+        this.historyListeners.forEach((l) => l());
+        return;
       }
-    );
+
+      console.log("app--analysis-form-manager.mjs - submit event");
+
+      const selectedFiles = <File[]>formData.getAll("music-files");
+      const exampleAudio = <string>formData.get("example-options");
+      const detectBpm = formData.get("detect-bpm");
+      const autodetectMultiplier = <string>(
+        formData.get("detect-bpm-multiplier")
+      );
+      const bpmText = <string>formData.get("analysis-bpm");
+      const dataScaleText = <string>formData.get("scale");
+      const minThresholdValue = <string>formData.get("min-percentile");
+      const maxThresholdValue = <string>formData.get("max-percentile");
+      const minColor = <string>formData.get("min-color");
+      const maxColor = <string>formData.get("max-color");
+
+      if (parseFloat(minThresholdValue) > parseFloat(maxThresholdValue)) {
+        formErrors.innerHTML =
+          "Max percentile must be grester than min percentile";
+        return;
+      }
+
+      if (detectBpm !== "detect-bpm" && isNaN(parseInt(bpmText))) {
+        formErrors.innerHTML =
+          "Please select autodetect or specify a valid whole number for BPM";
+        return;
+      }
+
+      const filesWereUploaded =
+        selectedFiles.length !== 0 && allHaveContent(selectedFiles);
+      const exampleAudioSelected = exampleAudio !== null;
+
+      if (!filesWereUploaded && !exampleAudioSelected) {
+        formErrors.innerHTML = "Please select an audio file.";
+        return;
+      }
+      if (filesWereUploaded && !containsOnlyAudioFiles(selectedFiles)) {
+        formErrors.innerHTML = "Please select an audio file.";
+        return;
+      }
+
+      const multiFileLoad: FileDataLoaders = filesWereUploaded
+        ? loadFiles(selectedFiles)
+        : [loadFileFromUrl(exampleAudio)];
+
+      const singleFileLoad: FileDataLoader = filesWereUploaded
+        ? () =>
+            loadFileData(
+              selectedFiles[0] ??
+                (() => {
+                  throw new Error("Unable to get selected file");
+                })()
+            )
+        : loadFileFromUrl(exampleAudio);
+
+      const bpm = {
+        autodetect: detectBpm === "detect-bpm",
+        autodetectMultiplier: parseFloat(autodetectMultiplier),
+        value: parseFloat(bpmInput.value),
+      };
+
+      const colors = {
+        similar: minColor,
+        diff: maxColor,
+      };
+
+      const thresholds = {
+        min: parseFloat(minThresholdValue) / 100,
+        max: parseFloat(maxThresholdValue) / 100,
+      };
+
+      const scale = <ScaleOptions>dataScaleText;
+
+      if (submitType === "batch") {
+        if (selectedFiles.length > 1) {
+          formErrors.innerHTML = "Batch param mode only supports one file.";
+          return;
+        }
+
+        this.batchParamListeners.forEach((l) =>
+          l({
+            bpm,
+            colors,
+            fileLoader: singleFileLoad,
+          })
+        );
+      } else if (selectedFiles.length > 1) {
+        this.batchFileListeners.forEach((l) =>
+          l({
+            bpm,
+            colors,
+            thresholds,
+            scale,
+            fileLoaders: multiFileLoad,
+          })
+        );
+      } else {
+        this.singleListeners.forEach((l) =>
+          l({
+            bpm,
+            colors,
+            thresholds,
+            scale,
+            fileLoader: singleFileLoad,
+          })
+        );
+      }
+    });
   }
 
   hide(): void {
