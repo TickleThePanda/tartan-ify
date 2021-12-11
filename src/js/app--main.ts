@@ -13,13 +13,23 @@ import {
   HistoryHandler,
 } from "./handlers";
 
-function requiredElementById(element: string): HTMLElement {
-  return (
-    document.getElementById(element) ??
-    (() => {
-      throw new Error("Required element " + element);
-    })()
-  );
+function requiredElementById<Type extends HTMLElement>(
+  id: string,
+  c: { new (): Type }
+): Type;
+function requiredElementById(id: string): HTMLElement;
+function requiredElementById(id: string, type = HTMLElement) {
+  const element = document.getElementById(id);
+
+  if (element === null) {
+    throw new Error("Required element " + element);
+  }
+
+  if (!(element instanceof type)) {
+    throw new Error("Element " + element + " was not of type " + type);
+  }
+
+  return element;
 }
 
 window.addEventListener("load", async () => {
@@ -38,7 +48,7 @@ window.addEventListener("load", async () => {
 
   const visualiser = requiredElementById("visualiser");
   const batchElement = requiredElementById("batch");
-  const canvas = <HTMLCanvasElement>requiredElementById("similarity-graph");
+  const canvas = requiredElementById("similarity-graph", HTMLCanvasElement);
   const context =
     canvas.getContext("2d") ??
     (() => {
@@ -46,7 +56,8 @@ window.addEventListener("load", async () => {
     })();
 
   const formManager = new AnalysisFormManager(
-    requiredElementById("music-form"),
+    requiredElementById("form-wrapper"),
+    requiredElementById("music-form", HTMLFormElement),
     await loadAudioSelection()
   );
 

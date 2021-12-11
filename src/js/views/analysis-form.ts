@@ -1,10 +1,7 @@
 import { handleMultiSelectElements } from "./multi-select-manager";
 
-interface SubmitEvent extends Event {
-  submitter: HTMLInputElement;
-}
-
 export class AnalysisFormManager {
+  wrapperElement;
   formElement;
   filesInput: HTMLInputElement;
   bpmInput: HTMLInputElement;
@@ -17,7 +14,8 @@ export class AnalysisFormManager {
   historyListeners: ((event: void) => void)[] = [];
 
   constructor(
-    formElement: HTMLElement,
+    wrapperElement: HTMLElement,
+    formElement: HTMLFormElement,
     audioSelection: {
       slug: string;
       url: string;
@@ -25,6 +23,7 @@ export class AnalysisFormManager {
     }[]
   ) {
     this.formElement = formElement;
+    this.wrapperElement = wrapperElement;
 
     this.filesInput = <HTMLInputElement>document.getElementById("music-files");
     this.bpmInput = <HTMLInputElement>document.getElementById("analysis-bpm");
@@ -71,131 +70,141 @@ export class AnalysisFormManager {
     const formErrors = this.formErrors;
     const bpmInput = this.bpmInput;
 
-    this.formElement.addEventListener("submit", async (actualEvent: Event) => {
-      const event = <SubmitEvent>actualEvent;
-
+    this.formElement.addEventListener("submit", (event: SubmitEvent) => {
       event.preventDefault();
-
-      const submitType = event.submitter.value || null;
-
-      if (submitType === "history") {
-        this.historyListeners.forEach((l) => l());
-        return;
-      }
-
-      console.log("app--analysis-form-manager.mjs - submit event");
-
-      const formData = new FormData(<HTMLFormElement>event.target);
-
-      const selectedFiles = <File[]>formData.getAll("music-files");
-      const exampleAudio = <string>formData.get("example-options");
-      const detectBpm = formData.get("detect-bpm");
-      const autodetectMultiplier = <string>(
-        formData.get("detect-bpm-multiplier")
+      const formData = new FormData(this.formElement);
+      formData.append(
+        "submit-type",
+        (<HTMLInputElement>event?.submitter)?.value
       );
-      const bpmText = <string>formData.get("analysis-bpm");
-      const dataScaleText = <string>formData.get("scale");
-      const minThresholdValue = <string>formData.get("min-percentile");
-      const maxThresholdValue = <string>formData.get("max-percentile");
-      const minColor = <string>formData.get("min-color");
-      const maxColor = <string>formData.get("max-color");
+    });
 
-      if (parseFloat(minThresholdValue) > parseFloat(maxThresholdValue)) {
-        formErrors.innerHTML =
-          "Max percentile must be grester than min percentile";
-        return;
-      }
+    this.formElement.addEventListener(
+      "formdata",
+      async (event: FormDataEvent) => {
+        event.preventDefault();
 
-      if (detectBpm !== "detect-bpm" && isNaN(parseInt(bpmText))) {
-        formErrors.innerHTML =
-          "Please select autodetect or specify a valid whole number for BPM";
-        return;
-      }
+        const formData = event.formData;
 
-      const filesWereUploaded =
-        selectedFiles.length !== 0 && allHaveContent(selectedFiles);
-      const exampleAudioSelected = exampleAudio !== null;
+        const submitType = formData.get("submit-type") || null;
 
-      if (!filesWereUploaded && !exampleAudioSelected) {
-        formErrors.innerHTML = "Please select an audio file.";
-        return;
-      }
-      if (filesWereUploaded && !containsOnlyAudioFiles(selectedFiles)) {
-        formErrors.innerHTML = "Please select an audio file.";
-        return;
-      }
-
-      const multiFileLoad: FileDataLoaders = filesWereUploaded
-        ? loadFiles(selectedFiles)
-        : [loadFileFromUrl(exampleAudio)];
-
-      const singleFileLoad: FileDataLoader = filesWereUploaded
-        ? () =>
-            loadFileData(
-              selectedFiles[0] ??
-                (() => {
-                  throw new Error("Unable to get selected file");
-                })()
-            )
-        : loadFileFromUrl(exampleAudio);
-
-      const bpm = {
-        autodetect: detectBpm === "detect-bpm",
-        autodetectMultiplier: parseFloat(autodetectMultiplier),
-        value: parseFloat(bpmInput.value),
-      };
-
-      const colors = {
-        similar: minColor,
-        diff: maxColor,
-      };
-
-      const thresholds = {
-        min: parseFloat(minThresholdValue) / 100,
-        max: parseFloat(maxThresholdValue) / 100,
-      };
-
-      const scale = <ScaleOptions>dataScaleText;
-
-      if (submitType === "batch") {
-        if (selectedFiles.length > 1) {
-          formErrors.innerHTML = "Batch param mode only supports one file.";
+        if (submitType === "history") {
+          this.historyListeners.forEach((l) => l());
           return;
         }
 
-        this.batchParamListeners.forEach((l) =>
-          l({
-            bpm,
-            colors,
-            fileLoader: singleFileLoad,
-          })
+        console.log("app--analysis-form-manager.mjs - submit event");
+
+        const selectedFiles = <File[]>formData.getAll("music-files");
+        const exampleAudio = <string>formData.get("example-options");
+        const detectBpm = formData.get("detect-bpm");
+        const autodetectMultiplier = <string>(
+          formData.get("detect-bpm-multiplier")
         );
-      } else if (selectedFiles.length > 1) {
-        this.batchFileListeners.forEach((l) =>
-          l({
-            bpm,
-            colors,
-            thresholds,
-            scale,
-            fileLoaders: multiFileLoad,
-          })
-        );
-      } else {
-        this.singleListeners.forEach((l) =>
-          l({
-            bpm,
-            colors,
-            thresholds,
-            scale,
-            fileLoader: singleFileLoad,
-          })
-        );
+        const bpmText = <string>formData.get("analysis-bpm");
+        const dataScaleText = <string>formData.get("scale");
+        const minThresholdValue = <string>formData.get("min-percentile");
+        const maxThresholdValue = <string>formData.get("max-percentile");
+        const minColor = <string>formData.get("min-color");
+        const maxColor = <string>formData.get("max-color");
+
+        if (parseFloat(minThresholdValue) > parseFloat(maxThresholdValue)) {
+          formErrors.innerHTML =
+            "Max percentile must be grester than min percentile";
+          return;
+        }
+
+        if (detectBpm !== "detect-bpm" && isNaN(parseInt(bpmText))) {
+          formErrors.innerHTML =
+            "Please select autodetect or specify a valid whole number for BPM";
+          return;
+        }
+
+        const filesWereUploaded =
+          selectedFiles.length !== 0 && allHaveContent(selectedFiles);
+        const exampleAudioSelected = exampleAudio !== null;
+
+        if (!filesWereUploaded && !exampleAudioSelected) {
+          formErrors.innerHTML = "Please select an audio file.";
+          return;
+        }
+        if (filesWereUploaded && !containsOnlyAudioFiles(selectedFiles)) {
+          formErrors.innerHTML = "Please select an audio file.";
+          return;
+        }
+
+        const multiFileLoad: FileDataLoaders = filesWereUploaded
+          ? loadFiles(selectedFiles)
+          : [loadFileFromUrl(exampleAudio)];
+
+        const singleFileLoad: FileDataLoader = filesWereUploaded
+          ? () =>
+              loadFileData(
+                selectedFiles[0] ??
+                  (() => {
+                    throw new Error("Unable to get selected file");
+                  })()
+              )
+          : loadFileFromUrl(exampleAudio);
+
+        const bpm = {
+          autodetect: detectBpm === "detect-bpm",
+          autodetectMultiplier: parseFloat(autodetectMultiplier),
+          value: parseFloat(bpmInput.value),
+        };
+
+        const colors = {
+          similar: minColor,
+          diff: maxColor,
+        };
+
+        const thresholds = {
+          min: parseFloat(minThresholdValue) / 100,
+          max: parseFloat(maxThresholdValue) / 100,
+        };
+
+        const scale = <ScaleOptions>dataScaleText;
+
+        if (submitType === "batch") {
+          if (selectedFiles.length > 1) {
+            formErrors.innerHTML = "Batch param mode only supports one file.";
+            return;
+          }
+
+          this.batchParamListeners.forEach((l) =>
+            l({
+              bpm,
+              colors,
+              fileLoader: singleFileLoad,
+            })
+          );
+        } else if (selectedFiles.length > 1) {
+          this.batchFileListeners.forEach((l) =>
+            l({
+              bpm,
+              colors,
+              thresholds,
+              scale,
+              fileLoaders: multiFileLoad,
+            })
+          );
+        } else {
+          this.singleListeners.forEach((l) =>
+            l({
+              bpm,
+              colors,
+              thresholds,
+              scale,
+              fileLoader: singleFileLoad,
+            })
+          );
+        }
       }
-    });
+    );
   }
 
   hide(): void {
-    this.formElement.classList.add("hidden");
+    this.wrapperElement.classList.add("hidden");
   }
 
   registerSingleSubmitListener(
