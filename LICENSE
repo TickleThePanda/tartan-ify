@@ -3,7 +3,7 @@ Tartan-ify is licensed under the below MIT license apart from:
    the file header for full license text.
  - src/js/lib--bpm.js - Copyright (c) 2017 killercrush (MIT License). See the
    the file header for full license text.
- - src/audio/ - Audio files are public domain.
+ - src/audio/ - Audio files are attributed as shown in src/audio/audio.json.
 
 ---
 
