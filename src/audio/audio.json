@@ -8,5 +8,11 @@
     "slug": "johann-pachelbel_canon-in-d-major",
     "name": "Johann Pachelbel - Canon in D Major",
     "url": "/audio/canon-in-d-major.mp3"
+  },
+  {
+    "slug": "moonlight-sonata-3rd-movement",
+    "name": "Beethoven - Moonlight Sonata 3rd Movement",
+    "attribution": "<a href=\"https://commons.wikimedia.org/wiki/File:Beethoven_Moonlight_3rd_movement.ogg\">Ludwig van Beethoven</a>, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/de/deed.en\">CC BY-SA 2.0 DE</a>, via Wikimedia Commons",
+    "url": "/audio/moonlight-sonata-3rd-movement.mp3"
   }
 ]

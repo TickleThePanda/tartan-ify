@@ -20,6 +20,7 @@ export class AnalysisFormManager {
       slug: string;
       url: string;
       name: string;
+      attribution?: string;
     }[]
   ) {
     this.formElement = formElement;
@@ -34,10 +35,16 @@ export class AnalysisFormManager {
 
     let examplesHtml = "";
     for (const example of audioSelection) {
+      let attributionHtml =
+        example.attribution !== undefined
+          ? `<div class=\"attribution form__label-details-low">${example.attribution}</div>`
+          : "";
+
       examplesHtml += `
         <div class="form__radio-item">
           <input type="radio" id="example-options_${example.slug}" name="example-options" value="${example.url}">
           <label class="form__label form__label--checkbox" for="example-options_${example.slug}">${example.name}</label>
+          ${attributionHtml}
         </div>
         `;
     }

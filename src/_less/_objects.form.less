@@ -1,4 +1,3 @@
-
 @border: 0.15rem var(--palette-primary-stroke) solid;
 
 .form {
@@ -21,7 +20,6 @@
   display: block;
 }
 
-
 .form__label {
   display: block;
   margin-top: 0.5rem;
@@ -29,6 +27,12 @@
   &--checkbox {
     display: inline;
   }
+}
+
+.form__label-details-low {
+  margin-left: 1.6rem;
+  margin-top: 0.3em;
+  font-size: 0.8em;
 }
 
 .form__range-output {
@@ -74,7 +78,6 @@
   background-color: var(--palette-primary-background);
   color: var(--palette-primary-stroke);
 }
-
 
 .form__button--submit {
   font-weight: 700;
@@ -150,7 +153,8 @@
   align-items: center;
   text-align: center;
   font-weight: 700;
-  &::before, &&::after {
+  &::before,
+  &&::after {
     content: "";
     display: block;
     height: 1px;
