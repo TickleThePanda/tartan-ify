@@ -58,10 +58,15 @@ export class SingleVisualisationPainter implements VisView {
     const startTime = Date.now();
 
     let elapsedIntervals = 0;
+    let position: { x: number; y: number; px: number; py: number } | undefined =
+      undefined;
 
     (function loop() {
       window.requestAnimationFrame(function () {
-        elapsedIntervals = Math.floor((Date.now() - startTime) / interval);
+        elapsedIntervals = Math.min(
+          image.width,
+          Math.floor((Date.now() - startTime) / interval)
+        );
 
         draw();
 
@@ -75,6 +80,18 @@ export class SingleVisualisationPainter implements VisView {
       window.requestAnimationFrame(function () {
         draw();
       });
+    });
+
+    canvas.addEventListener("mousemove", function (evt: MouseEvent) {
+      position = {
+        x: evt.clientX - canvas.offsetLeft,
+        y: evt.clientY - canvas.offsetTop,
+        px: (evt.clientX - canvas.offsetLeft) / canvas.width,
+        py: (evt.clientY - canvas.offsetTop) / canvas.height,
+      };
+    });
+    canvas.addEventListener("mouseleave", function () {
+      position = undefined;
     });
 
     function draw() {
@@ -110,9 +127,41 @@ export class SingleVisualisationPainter implements VisView {
           path.moveTo(0, progressOnCanvas);
           path.lineTo(progressOnCanvas, progressOnCanvas);
           path.lineTo(progressOnCanvas, 0);
-          context.lineWidth = pixelSize;
+          context.lineWidth = Math.max(pixelSize, 1);
           context.strokeStyle = "black";
           context.stroke(path);
+        }
+
+        console.log(
+          JSON.stringify(position) + " " + image.width + " " + canvas.width
+        );
+
+        const zoom = 4;
+        if (position !== undefined && image.width * zoom > canvas.width) {
+          console.log("Drawing zoomed in");
+          const zoomBoxSize = canvas.width / 4;
+          const zoomBoxOffset = zoomBoxSize / 2;
+
+          const proportionalSize = image.width / canvas.width / zoom;
+          const proportionalOffset = proportionalSize * zoomBoxOffset;
+
+          const imageX = position.px * image.width - proportionalOffset;
+          const imageY = position.py * image.height - proportionalOffset;
+          const imageSize = proportionalOffset * 2;
+
+          console.log(`${imageX} ${imageY} ${imageSize}`);
+
+          context.drawImage(
+            image,
+            imageX,
+            imageY,
+            imageSize,
+            imageSize,
+            position.x - zoomBoxOffset,
+            position.y - zoomBoxOffset,
+            zoomBoxSize,
+            zoomBoxSize
+          );
         }
       } else {
         context.drawImage(
