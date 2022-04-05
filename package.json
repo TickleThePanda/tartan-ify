@@ -43,6 +43,6 @@
     "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
-    "idb": "^7.0.0"
+    "idb": "^7.0.1"
   }
 }
