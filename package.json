@@ -28,7 +28,7 @@
     "chai-almost": "^1.0.1",
     "concurrently": "^4.1.2",
     "eslint": "^8.4.1",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "gulp": "^4.0.2",
     "gulp-less": "^4.0.1",
     "gulp-mocha": "^7.0.2",
